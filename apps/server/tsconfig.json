@@ -1,0 +1,56 @@
+{
+  "compilerOptions": {
+    // Environment setup & latest features
+    "lib": [
+      "ESNext"
+    ],
+    "target": "ESNext",
+    "module": "Preserve",
+    "moduleDetection": "force",
+    "jsx": "react-jsx",
+    "allowJs": true,
+    // Bundler mode
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "noEmit": true,
+    // Best practices
+    "strict": true,
+    "skipLibCheck": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    // Some stricter flags (disabled by default)
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noPropertyAccessFromIndexSignature": false,
+    "paths": {
+      "@/api/*": [
+        "./src/*"
+      ],
+      "@/api/packages/schema/*": [
+        "../../packages/services/schema/*"
+      ],
+      "@/api/packages/types/*": [
+        "../../packages/services/types/*"
+      ],
+      "@/api/packages/utils/*": [
+        "../../packages/services/utils/*"
+      ],
+      "@/api/packages/validations/*": [
+        "../../packages/services/validations/*"
+      ],
+      "@/api/packages/fonts/*": [
+        "../../packages/services/fonts/*"
+      ]
+    },
+  },
+  "include": [
+    "./src",
+    "../../packages/services/schema",
+    "../../packages/services/types",
+    "../../packages/services/utils",
+    "../../packages/services/validations",
+    "../../packages/services/fonts",
+  ],
+}

@@ -1,0 +1,45 @@
+{
+  "language": "Language",
+  "languages": {
+    "en": "English",
+    "lo": "ລາວ (Lao)",
+    "th": "ไทย (Thai)"
+  },
+  "actions": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "confirm": "Confirm",
+    "submit": "Submit",
+    "reset": "Reset",
+    "search": "Search",
+    "clear": "Clear",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "continue": "Continue",
+    "loading": "Loading...",
+    "view": "View",
+    "download": "Download",
+    "upload": "Upload"
+  },
+  "messages": {
+    "success": "Success!",
+    "error": "Error occurred",
+    "warning": "Warning",
+    "info": "Information",
+    "confirmDelete": "Are you sure you want to delete this?",
+    "noData": "No data available",
+    "serverError": "Server error. Please try again later"
+  },
+  "time": {
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "tomorrow": "Tomorrow",
+    "now": "Now",
+    "date": "Date",
+    "time": "Time"
+  }
+}

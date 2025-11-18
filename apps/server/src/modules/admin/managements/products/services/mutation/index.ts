@@ -1,0 +1,84 @@
+import db from "@/api/config/db";
+import type { ZodValidateAddNewProduct, ZodValidateAddNewProductData, ZodValidateUpdatedProduct, ZodValidateUpdatedProductData } from "@/api/packages/validations/product";
+import { products } from "../../entities";
+import { SecureFileUploadServices } from "@/api/utils/secureFileUpload";
+import { HandlerSuccess } from "@/api/utils/handleSuccess";
+import { ManageProductUtils } from "../../utils/product";
+import { eq } from "drizzle-orm";
+import { getHTTPError, HTTPErrorMessage } from "@/api/packages/utils/HttpJsError";
+
+export class ProductManageMutationServices {
+    public static async addOne(input: ZodValidateAddNewProduct) {
+        try {
+            const { imageFiles, translations, ...data } = input;
+            await db.transaction(async tx => {
+                const productId = await ManageProductUtils.addNewProduct({ tx, data, translations });
+                if (!productId || productId === undefined) throw new HTTPErrorMessage("ProductId is required", "403");
+                await ManageProductUtils.productUploadFiles({ files: imageFiles, productId, tx });
+            });
+            return HandlerSuccess.success("Add new product successfully");
+        } catch (error) {
+            throw getHTTPError(error);
+        }
+    }
+
+    public static async addDataOne(input: ZodValidateAddNewProductData) {
+        try {
+            const { translations, ...data } = input;
+            await db.transaction(async tx => {
+                await ManageProductUtils.addNewProduct({
+                    tx, data, translations
+                });
+            });
+            return HandlerSuccess.success("Add new product data successfully");
+        } catch (error) {
+            throw getHTTPError(error);
+        }
+    }
+
+    public static async editById(input: ZodValidateUpdatedProduct) {
+        try {
+            const { imageFiles, targetProductId } = input;
+            await db.transaction(async tx => {
+                await ManageProductUtils.updatedProductDataById(input);
+                await ManageProductUtils.productUploadFiles({ files: imageFiles, productId: targetProductId, tx });
+            });
+            return HandlerSuccess.success("Update product by id successfully");
+        } catch (error) {
+            throw getHTTPError(error);
+        }
+    }
+
+    public static async editDataById(input: ZodValidateUpdatedProductData) {
+        try {
+            await ManageProductUtils.updatedProductDataById(input);
+            return HandlerSuccess.success("Update product data by id successfully");
+        } catch (error) {
+            throw getHTTPError(error);
+        }
+    }
+
+    public static async editImageById() {
+        try {
+
+        } catch (error) {
+            throw getHTTPError(error);
+        }
+    }
+
+    public static async removeOneById(targetProductId: string, cloudId: string) {
+        try {
+            const findProduct = await db.query.products.findFirst({
+                where: eq(products.id, targetProductId)
+            });
+            if (!findProduct) throw new HTTPErrorMessage("Find product not found", "404");
+            await db.transaction(async tx => {
+                await tx.delete(products).where(eq(products.id, targetProductId));
+                await SecureFileUploadServices.destoryCloudinaryImage(cloudId);
+            });
+            return HandlerSuccess.success("Removed product by id successfully");
+        } catch (error) {
+            throw getHTTPError(error);
+        }
+    }
+}
