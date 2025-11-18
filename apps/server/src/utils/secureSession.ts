@@ -21,7 +21,7 @@ export class SecureSessionManagerServices {
         return secureToken;
     }
 
-    public static async verifySession(token: string, ctx: MyContext) {
+    public static async verifySession(token: string, ctx: MyContext['honoContext']) {
         const [sessionToken, signature] = token.split('.');
 
         if (!sessionToken || !signature) return null;

@@ -1,6 +1,6 @@
 import { authTRPCRouter } from "@/api/modules/admin/auth/routes/trpc";
-import { StaffManageTRPCRouter } from "@/api/modules/admin/managements/staff/routes/trpc";
-import { ProductManageTRPCRouter } from "@/api/modules/admin/managements/products/routes/trpc";
+import { ManageStaffTRPCRouter } from "@/api/modules/admin/managements/staff/routes/trpc";
+import { ManageProductTRPCRouter } from "@/api/modules/admin/managements/products/routes/trpc";
 import { router } from "./procedures";
 
 export const appRouter = router({
@@ -9,9 +9,9 @@ export const appRouter = router({
 
         }),
         admin: router({
-            auth: authTRPCRouter,
-            staff: StaffManageTRPCRouter,
-            product: ProductManageTRPCRouter,
+            auth: authTRPCRouter as typeof authTRPCRouter,
+            staff: ManageStaffTRPCRouter as typeof ManageStaffTRPCRouter,
+            product: ManageProductTRPCRouter as typeof ManageProductTRPCRouter,
         })
     })
 });

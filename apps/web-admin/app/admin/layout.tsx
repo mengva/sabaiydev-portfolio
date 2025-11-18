@@ -30,7 +30,6 @@ export default function DashboardLayout({
     return <div></div>
   }
   const data: StaffSessionDto = response?.data ?? null;
-  console.log("data", data);
   return (
     <StaffSessionContext.Provider value={{ refetch, isLoading, isRefetching, data }}>
       <SidebarProvider>

@@ -8,22 +8,22 @@ import { ValidateStaffRoleAndPerUtils } from "../utils/validateRoleAndPer";
 import { HandlerTRPCError } from "@/api/utils/handleTRPCError";
 import { HTTPErrorMessage } from "@/api/packages/utils/HttpJsError";
 
-export const StaffManageTRPCRouter = router({
+export const ManageStaffTRPCRouter = router({
     list: publicProcedure.input(zodValidateTRPCFilter).use(AuthTRPCMiddleware.authSanitizedBody).query(async ({ ctx }) => {
-        const filter: ZodValidateTRPCFilter = ctx.get("body");
+        const filter: ZodValidateTRPCFilter = ctx.honoContext.get("body");
         return await StaffManageQueriesServices.list(filter);
     }),
     getOne: publicProcedure.input(zodValidateGetStaffById).use(AuthTRPCMiddleware.authSanitizedBody).query(async ({ ctx }) => {
-        const param: ZodValidateGetStaffById = ctx.get("body");
+        const param: ZodValidateGetStaffById = ctx.honoContext.get("body");
         return await StaffManageQueriesServices.getOne(param.staffId);
     }),
     getBySessionToken: publicProcedure.use(AuthTRPCMiddleware.authSession).query(async ({ ctx }) => {
-        const staffId = ctx.get("session").staffId;
+        const staffId = ctx.honoContext.get("session").staffId;
         return await StaffManageQueriesServices.getOne(staffId);
     }),
     addOne: publicProcedure.input(zodValidateAddNewStaff).use(AuthTRPCMiddleware.authSanitizedBody).mutation(async ({ ctx }) => {
         try {
-            const body: ZodValidateAddNewStaff = ctx.get("body");
+            const body: ZodValidateAddNewStaff = ctx.honoContext.get("body");
             const isAdd = await ValidateStaffRoleAndPerUtils.addOneUser(body);
             if (!isAdd) {
                 throw new HTTPErrorMessage("You have no an permissions to add user", "403");
@@ -36,7 +36,7 @@ export const StaffManageTRPCRouter = router({
     }),
     editById: publicProcedure.input(zodValidateUpdatedStaff).use(AuthTRPCMiddleware.authSanitizedBody).mutation(async ({ ctx }) => {
         try {
-            const body: ZodValidateUpdatedStaff = ctx.get("body");
+            const body: ZodValidateUpdatedStaff = ctx.honoContext.get("body");
             const isCanEdit = await ValidateStaffRoleAndPerUtils.editOneUserById(body);
             if (!isCanEdit) {
                 throw new HTTPErrorMessage("You have no an permissions to edit user", "403")
@@ -49,7 +49,7 @@ export const StaffManageTRPCRouter = router({
     }),
     editMyData: publicProcedure.input(zodValidateUpdatedMyData).use(AuthTRPCMiddleware.authSanitizedBody).mutation(async ({ ctx }) => {
         try {
-            const body: ZodValidateUpdatedMyData = ctx.get("body");
+            const body: ZodValidateUpdatedMyData = ctx.honoContext.get("body");
             const { targetStaffId, updatedByStaffId } = body;
             const isEdit = await ValidateStaffRoleAndPerUtils.editMyData({
                 targetStaffId,
@@ -65,7 +65,7 @@ export const StaffManageTRPCRouter = router({
         }
     }),
     removeById: publicProcedure.input(zodValidateRemoveStaffById).use(AuthTRPCMiddleware.authSanitizedBody).mutation(async ({ ctx }) => {
-        const params: ZodValidateRemoveStaffById = ctx.get("body");
+        const params: ZodValidateRemoveStaffById = ctx.honoContext.get("body");
         const valid = await ValidateStaffRoleAndPerUtils.removeOneById(params);
         if (!valid) {
             throw new HTTPErrorMessage("You have no an permission to remove this staff", "403");
@@ -74,7 +74,7 @@ export const StaffManageTRPCRouter = router({
         return response;
     }),
     searchQuery: publicProcedure.input(zodValidateSearchStaffData).use(AuthTRPCMiddleware.authSanitizedBody).mutation(async ({ ctx }) => {
-        const search: ZodValidateSearchStaffData = ctx.get("body");
+        const search: ZodValidateSearchStaffData = ctx.honoContext.get("body");
         const response = await StaffManageMutationServices.searchQuery(search);
         return response;
     })

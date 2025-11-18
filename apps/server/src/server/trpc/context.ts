@@ -59,7 +59,9 @@ export const handleSetKeyInHono = async (c: HonoContext) => {
 // Update your context creation
 export const createdTRPCContext = async (c: HonoContext) => {
   const honoContext: HonoContext = await handleSetKeyInHono(c);
-  return honoContext;
+  return {
+    honoContext
+  };
 };
 
 export type MyContext = inferAsyncReturnType<typeof createdTRPCContext>;

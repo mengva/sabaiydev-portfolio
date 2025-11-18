@@ -28,7 +28,10 @@ header.setupSecurityHeaders(app);
 
 app.use('/trpc/*', trpcServer({
     router: appRouter,
-    createContext: async (req, c) => await createdTRPCContext(c),
+    createContext: async (req, c) => {
+        const context = await createdTRPCContext(c);
+        return typeof context === 'object' ? context : {};
+    },
 }));
 
 app.onError(HandlerHonoError.onError);

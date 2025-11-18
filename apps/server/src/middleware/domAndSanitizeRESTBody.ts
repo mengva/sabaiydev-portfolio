@@ -17,22 +17,22 @@ export class DomAndSanitizeRESTBodyMiddleware {
     }
 
     public static async validateQueries(ctx: MyContext) {
-        const queries: any = ctx.req.query();
+        const queries: any = ctx.honoContext.req.query();
         const bodyQueries: any = {};
         if (queries && typeof queries === "object") {
             this.setData(bodyQueries, queries);
         }
         const sanitizeQueries = DOMAndSanitizeService.domAndSanitizeObject(bodyQueries);
         if (sanitizeQueries) {
-            ctx.set("body", sanitizeQueries);
+            ctx.honoContext.set("body", sanitizeQueries);
             return ctx;
         }
-        throw HandlerTRPCError.TRPCErrorMessage("Sanitize body queries is required", "FORBIDDEN");
+        throw HandlerTRPCError.TRPCErrorMessage("Sanitized body queries is required", "FORBIDDEN");
     }
 
     public static async validateParamAndBody(ctx: MyContext) {
-        const body = await ctx.req.json();
-        const params: any = ctx.req.param();
+        const body = await ctx.honoContext.req.json();
+        const params: any = ctx.honoContext.req.param();
         const bodyData: any = {};
         if (params && typeof params === "object") {
             this.setData(bodyData, params);
@@ -42,14 +42,14 @@ export class DomAndSanitizeRESTBodyMiddleware {
         }
         const sanitizeBody = DOMAndSanitizeService.domAndSanitizeObject(bodyData);
         if (sanitizeBody) {
-            ctx.set("body", sanitizeBody);
+            ctx.honoContext.set("body", sanitizeBody);
             return ctx;
         }
-        throw HandlerTRPCError.TRPCErrorMessage("Sanitize param and body data is required", "FORBIDDEN");
+        throw HandlerTRPCError.TRPCErrorMessage("Sanitized param and body data is required", "FORBIDDEN");
     }
 
     public static async validateBody(ctx: MyContext) {
-        const body = await ctx.req.json();
+        const body = await ctx.honoContext.req.json();
         const bodyData: any = {};
         if (body && typeof body === "object") {
             this.setData(bodyData, body);
@@ -57,13 +57,13 @@ export class DomAndSanitizeRESTBodyMiddleware {
         if (!bodyData) throw HandlerTRPCError.TRPCErrorMessage("BodyData is required", "FORBIDDEN");
         const sanitizeBody = DOMAndSanitizeService.domAndSanitizeObject(bodyData);
         if (sanitizeBody) {
-            ctx.set("body", sanitizeBody);
+            ctx.honoContext.set("body", sanitizeBody);
             return ctx;
         }
-        throw HandlerTRPCError.TRPCErrorMessage("Sanitize body data is required", "FORBIDDEN");
+        throw HandlerTRPCError.TRPCErrorMessage("Sanitized body data is required", "FORBIDDEN");
     }
 
-    public static async validateFile(ctx: MyContext){
-        
+    public static async validateFile(ctx: MyContext) {
+
     }
 }

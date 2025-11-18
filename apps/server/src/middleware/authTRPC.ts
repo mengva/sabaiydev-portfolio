@@ -11,26 +11,27 @@ import { DOMAndSanitizeService } from "@/api/packages/utils/DOMAndSanitize";
 export class AuthTRPCMiddleware {
 
     public static async authSessionFunc(ctx: MyContext) {
-        const error = await RateLimiterMiddleware.rateLimitAPI(ctx);
+        const c = ctx.honoContext;
+        const error = await RateLimiterMiddleware.rateLimitAPI(c);
         if (error.error && error.message) {
             throw HandlerTRPCError.TRPCErrorMessage(error.message, "TOO_MANY_REQUESTS");
         }
-        const authHeader = ctx.req.header("authorization");
-        const sessionToken = ctx.get("getCookie").get(adminSessionTokenName) || authHeader?.replace("Bearer ", "");
+        const authHeader = c.req.header("authorization");
+        const sessionToken = c.get("getCookie").get(adminSessionTokenName) || authHeader?.replace("Bearer ", "");
         if (!sessionToken || sessionToken === undefined) throw HandlerTRPCError.TRPCErrorMessage(AuthEnumMessage.unauthorized, "UNAUTHORIZED");
-        const sessionInfo = await SecureSessionManagerServices.verifySession(sessionToken, ctx);
+        const sessionInfo = await SecureSessionManagerServices.verifySession(sessionToken, c);
         if (!sessionInfo) throw HandlerTRPCError.TRPCErrorMessage(AuthEnumMessage.notFound, "UNAUTHORIZED");
         if (sessionInfo.expired < Helper.currentDate()) throw HandlerTRPCError.TRPCErrorMessage(AuthEnumMessage.expiredSessionToken, "UNAUTHORIZED");
         if (sessionInfo.staff && sessionInfo.staff.status !== "ACTIVE") {
-            ctx.get("deleteCookie").del(adminSessionTokenName);
+            c.get("deleteCookie").del(adminSessionTokenName);
             throw HandlerTRPCError.TRPCErrorMessage(AuthEnumMessage.disabledAccount, "UNAUTHORIZED");
         }
-        ctx.set("session", {
+        c.set("session", {
             sessionId: sessionInfo.id,
             sessionToken: sessionInfo.sessionToken,
             staffId: sessionInfo.staffId
         });
-        return ctx;
+        return c;
     }
 
     // trpc auth
@@ -41,20 +42,21 @@ export class AuthTRPCMiddleware {
     });
 
     public static alreadySignIn = t.middleware(async ({ ctx, next }) => {
-        const error = await RateLimiterMiddleware.rateLimitAuth(ctx);
+        const c = ctx.honoContext;
+        const error = await RateLimiterMiddleware.rateLimitAuth(c);
         if (error.error && error.message) {
             throw HandlerTRPCError.TRPCErrorMessage(error.message, "TOO_MANY_REQUESTS");
         }
-        const authHeader = ctx?.req?.header("authorization");
-        const sessionToken = ctx.get("getCookie").get(adminSessionTokenName) || authHeader?.replace("Bearer ", "");
+        const authHeader = c?.req?.header("authorization");
+        const sessionToken = c.get("getCookie").get(adminSessionTokenName) || authHeader?.replace("Bearer ", "");
         if (sessionToken) {
-            const sessionInfo = await SecureSessionManagerServices.verifySession(sessionToken, ctx);
+            const sessionInfo = await SecureSessionManagerServices.verifySession(sessionToken, c);
             const hasSessionAndValid = sessionInfo && sessionInfo.updatedAt as Date > Helper.currentDate();
             const hasSessionTokenAndInfo = sessionToken && sessionInfo;
             if (hasSessionAndValid || hasSessionTokenAndInfo) {
                 throw HandlerTRPCError.TRPCErrorMessage(AuthEnumMessage.alreadySignIn, "FORBIDDEN");
             }
-            ctx.get("deleteCookie").del(adminSessionTokenName);
+            c.get("deleteCookie").del(adminSessionTokenName);
         }
         return next();
     });
@@ -64,7 +66,7 @@ export class AuthTRPCMiddleware {
         if (!result) throw HandlerTRPCError.TRPCErrorMessage("Unauthorized", "UNAUTHORIZED");
         const sanitizeBody = DOMAndSanitizeService.domAndSanitizeObject(input);
         if (sanitizeBody) {
-            ctx.set("body", sanitizeBody);
+            ctx.honoContext.set("body", sanitizeBody);
             return next();
         }
         throw HandlerTRPCError.TRPCErrorMessage("Sanitize body data is required", "FORBIDDEN");
