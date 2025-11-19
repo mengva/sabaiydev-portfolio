@@ -196,7 +196,7 @@ export default function SignInWithOTPFormPage() {
                   Resend Code
                 </div>
               </div>
-              <Link href="/admin/auth/signin" className="text-blue-600 hover:underline">
+              <Link href="/auth/signin" className="text-blue-600 hover:underline">
                 Sign in with password
               </Link>
             </div>

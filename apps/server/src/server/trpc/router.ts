@@ -10,8 +10,10 @@ export const appRouter = router({
         }),
         admin: router({
             auth: authTRPCRouter as typeof authTRPCRouter,
-            staff: ManageStaffTRPCRouter as typeof ManageStaffTRPCRouter,
-            product: ManageProductTRPCRouter as typeof ManageProductTRPCRouter,
+            manage: router({
+                staff: ManageStaffTRPCRouter as typeof ManageStaffTRPCRouter,
+                product: ManageProductTRPCRouter as typeof ManageProductTRPCRouter,
+            })
         })
     })
 });

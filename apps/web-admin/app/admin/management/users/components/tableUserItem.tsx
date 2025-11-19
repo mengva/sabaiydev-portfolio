@@ -37,9 +37,10 @@ interface ItemDto {
     filter: FilterDto;
     data: StaffSessionDto;
     refetch: () => void;
+    setOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-function TableUserItemComponent({ user, index, filter, data, refetch }: ItemDto) {
+function TableUserItemComponent({ user, index, filter, data, refetch, setOpen }: ItemDto) {
     const staffSessionContext = useContext(StaffSessionContext);
     if (!staffSessionContext) return <div></div>;
     const myData = staffSessionContext.data;
@@ -57,7 +58,7 @@ function TableUserItemComponent({ user, index, filter, data, refetch }: ItemDto)
         toast.error(error.message);
     }
 
-    const removeStaffByIdMutation = trpc.app.admin.staff.removeStaffById.useMutation({ onSuccess, onError });
+    const removeStaffByIdMutation = trpc.app.admin.manage.staff.removeStaffById.useMutation({ onSuccess, onError });
 
     const handleDelete = async () => {
         removeStaffByIdMutation.mutate({ targetStaffId: user.id, removeByStaffId: myData.id });
@@ -103,6 +104,8 @@ function TableUserItemComponent({ user, index, filter, data, refetch }: ItemDto)
         }
         return true;
     }
+
+    const isDeletedAndEdited = isDeleted() || isEdited();
 
     return (
         <>
@@ -174,36 +177,39 @@ function TableUserItemComponent({ user, index, filter, data, refetch }: ItemDto)
                 <TableCell className="text-muted-foreground">
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-8 w-8 p-0 cursor-pointer">
+                            <Button variant="ghost" className={`h-8 w-8 p-0 ${isDeletedAndEdited ? 'cursor-pointer' : 'cursor-not-allowed'}`}>
                                 <MoreHorizontal className="h-4 w-4" />
                             </Button>
                         </DropdownMenuTrigger>
 
-                        <DropdownMenuContent align="end">
-                            {/* ---------- DELETE ---------- */}
-                            {
-                                isDeleted() &&
-                                <DropdownMenuItem
-                                    className="text-red-500 hover:!text-red-600 cursor-pointer"
-                                    onSelect={(e) => {
-                                        e.preventDefault(); // prevent menu from closing
-                                        setOpenDelete(true);
-                                    }}
-                                >
-                                    <Trash2 className="mr-2 h-4 w-4 text-red-600" />
-                                    Delete
-                                </DropdownMenuItem>
-                            }
+                        {
+                            isDeletedAndEdited &&
+                            <DropdownMenuContent align="end">
+                                {/* ---------- DELETE ---------- */}
+                                {
+                                    isDeleted() &&
+                                    <DropdownMenuItem
+                                        className="text-red-500 hover:!text-red-600 cursor-pointer"
+                                        onSelect={(e) => {
+                                            e.preventDefault(); // prevent menu from closing
+                                            setOpenDelete(true);
+                                        }}
+                                    >
+                                        <Trash2 className="mr-2 h-4 w-4 text-red-600" />
+                                        Delete
+                                    </DropdownMenuItem>
+                                }
 
-                            {/* ---------- EDIT ---------- */}
-                            {
-                                isEdited() &&
-                                <DropdownMenuItem className="text-sky-500 hover:!text-sky-600 cursor-pointer">
-                                    <Edit className="mr-2 h-4 w-4 text-sky-500" />
-                                    Edit
-                                </DropdownMenuItem>
-                            }
-                        </DropdownMenuContent>
+                                {/* ---------- EDIT ---------- */}
+                                {
+                                    isEdited() &&
+                                    <DropdownMenuItem onClick={() => setOpen(true)} className="text-sky-500 hover:!text-sky-600 cursor-pointer">
+                                        <Edit className="mr-2 h-4 w-4 text-sky-500" />
+                                        Edit
+                                    </DropdownMenuItem>
+                                }
+                            </DropdownMenuContent>
+                        }
                     </DropdownMenu>
                 </TableCell>
             </TableRow>

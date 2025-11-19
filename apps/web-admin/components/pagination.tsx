@@ -25,7 +25,7 @@ export function PaginationComponent({ data, filter, setFilter, pagination, handl
                 data.length > 0 &&
                 <div className="grid lg:grid-cols-2 gap-4 mt-4 w-full">
                     <div className="text-sm text-nowrap my-auto max-lg:text-center">
-                        Page {filter.page} Of {pagination.totalPage} Page Total ${pagination.total} Item
+                        Page {filter.page} Of {pagination.totalPage} Page Total {pagination.total} Item
                     </div>
                     <Pagination className="flex lg:justify-end justify-center">
                         <PaginationContent>

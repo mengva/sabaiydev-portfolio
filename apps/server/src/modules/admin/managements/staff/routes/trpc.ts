@@ -73,9 +73,8 @@ export const ManageStaffTRPCRouter = router({
         const response = await StaffManageMutationServices.removeById(params.targetStaffId);
         return response;
     }),
-    searchQuery: publicProcedure.input(zodValidateSearchStaffData).use(AuthTRPCMiddleware.authSanitizedBody).mutation(async ({ ctx }) => {
-        const search: ZodValidateSearchStaffData = ctx.honoContext.get("body");
-        const response = await StaffManageMutationServices.searchQuery(search);
+    searchQuery: publicProcedure.input(zodValidateSearchStaffData).use(AuthTRPCMiddleware.authSession).mutation(async ({ ctx, input }) => {
+        const response = await StaffManageMutationServices.searchQuery(input);
         return response;
     })
 });

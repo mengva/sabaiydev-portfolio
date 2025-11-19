@@ -112,7 +112,7 @@ export class AuthFuncUtils {
 
     public static resetPasswordFunc = async (input: AuthResetPasswordDto, ctx: MyContext) => {
         try {
-            const { ipAddress, userAgent } = AuthFuncHelperServices.getIpAddressAndUserAgent(ctx);
+            const { ipAddress, userAgent } = AuthFuncHelperServices.getIpAddressAndUserAgent(ctx['honoContext']);
             const staff = await AuthFuncFindStaffUtils.findStaffResetPassword(input.email) as StaffSchema;
             await AuthFuncHelperServices.resetPassword({ staff, ...input, userAgent, ipAddress });
             if (ipAddress) {

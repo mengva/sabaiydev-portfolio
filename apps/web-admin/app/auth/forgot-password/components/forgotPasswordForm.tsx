@@ -39,7 +39,7 @@ function ForgotPasswordFormComponent() {
             if (data && data.success) {
                 toast.success(data.message);
                 CookieHelper.setCookieByKey("email", form.getValues("email"), 1);
-                return router.push('/admin/auth/verify-otp');
+                return router.push('/auth/verify-otp');
             }
         },
         onError: (error: Error) => {
@@ -124,7 +124,7 @@ function ForgotPasswordFormComponent() {
                             </form>
                         </Form>
                         <div className="mt-4 text-center text-sm">
-                            <Link href="/admin/auth/signin" className="text-blue-600 hover:underline">
+                            <Link href="/auth/signin" className="text-blue-600 hover:underline">
                                 Back to Sign In
                             </Link>
                         </div>

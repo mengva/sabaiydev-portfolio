@@ -200,7 +200,7 @@ export function Topbar() {
         onSuccess: (data: ServerResponseDto) => {
             if (data?.success) {
                 toast.success(data.message);
-                return router.push("/admin/auth/signin");
+                return router.push("/auth/signin");
             }
         },
         onError: (error: Error) => {

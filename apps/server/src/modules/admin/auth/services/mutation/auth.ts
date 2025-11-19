@@ -9,7 +9,7 @@ import { AuthFuncHelperServices } from "../../utils/authFuncHelperUtils";
 export class AuthServices {
     public static async signIn({ input, ctx }: AuthTRPCSignInDto) {
         try {
-            return await AuthFuncUtils.signInFunc(input, ctx);
+            return await AuthFuncUtils.signInFunc(input, ctx['honoContext']);
         } catch (error: ServerErrorDto) {
             throw HandlerTRPCError.TRPCError(error);
         }
@@ -17,7 +17,7 @@ export class AuthServices {
 
     public static async signInWithOTPAndEmail({ input, ctx }: AuthTRPCSignInWithOTPAndEmailDto) {
         try {
-            return await AuthFuncUtils.signInWithOTPAndEmailFunc(input, ctx);
+            return await AuthFuncUtils.signInWithOTPAndEmailFunc(input, ctx['honoContext']);
         } catch (error: ServerErrorDto) {
             throw HandlerTRPCError.TRPCError(error);
         }
@@ -25,7 +25,7 @@ export class AuthServices {
 
     public static async signOut({ ctx }: { ctx: MyContext }) {
         try {
-            return await AuthFuncUtils.signOutFunc(ctx);
+            return await AuthFuncUtils.signOutFunc(ctx['honoContext']);
         } catch (error: ServerErrorDto) {
             throw HandlerTRPCError.TRPCError(error);
         }
@@ -40,12 +40,12 @@ export class AuthServices {
     }
 
     public static async verifiedEmail(email: string, ctx: MyContext) {
-        const { ipAddress, userAgent } = AuthFuncHelperServices.getIpAddressAndUserAgent(ctx);
+        const { ipAddress, userAgent } = AuthFuncHelperServices.getIpAddressAndUserAgent(ctx['honoContext']);
         return await AuthFuncUtils.verifiedEmailFunc(email, userAgent, ipAddress);
     }
 
     public static async verifiedOTPCode(input: AuthVerifiedOTPCodeDto, ctx: MyContext) {
-        const { ipAddress, userAgent } = AuthFuncHelperServices.getIpAddressAndUserAgent(ctx);
+        const { ipAddress, userAgent } = AuthFuncHelperServices.getIpAddressAndUserAgent(ctx['honoContext']);
         return await AuthFuncUtils.verifiedOTPCodeFunc({ ...input, userAgent, ipAddress });
     }
 

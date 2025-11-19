@@ -7,7 +7,7 @@ import { ProductManageMutationServices } from "../services/mutation";
 export const ManageProductTRPCRouter = router({
     addOne: publicProcedure.input(zodValidateAddNewProduct).use(AuthTRPCMiddleware.authSanitizedBody).mutation(async ({ ctx }) => {
         try {
-            const body: ZodValidateAddNewProduct = ctx.get("body");
+            const body: ZodValidateAddNewProduct = ctx.honoContext.get("body");
             return await ProductManageMutationServices.addOne(body);
         } catch (error) {
             throw HandlerTRPCError.TRPCError(error);
@@ -15,7 +15,7 @@ export const ManageProductTRPCRouter = router({
     }),
     addDataOne: publicProcedure.input(zodValidateAddNewProductData).use(AuthTRPCMiddleware.authSanitizedBody).mutation(async ({ ctx }) => {
         try {
-            const body: ZodValidateAddNewProductData = ctx.get("body")
+            const body: ZodValidateAddNewProductData = ctx.honoContext.get("body")
             return await ProductManageMutationServices.addDataOne(body);
         } catch (error) {
             throw HandlerTRPCError.TRPCError(error);
@@ -23,7 +23,7 @@ export const ManageProductTRPCRouter = router({
     }),
     editById: publicProcedure.input(zodValidateUpdatedProduct).use(AuthTRPCMiddleware.authSanitizedBody).mutation(async ({ ctx }) => {
         try {
-            const body: ZodValidateUpdatedProduct = ctx.get("body")
+            const body: ZodValidateUpdatedProduct = ctx.honoContext.get("body")
             return await ProductManageMutationServices.editById(body);
         } catch (error) {
             throw HandlerTRPCError.TRPCError(error);
@@ -31,7 +31,7 @@ export const ManageProductTRPCRouter = router({
     }),
     editDataById: publicProcedure.input(zodValidateUpdatedProductData).use(AuthTRPCMiddleware.authSanitizedBody).mutation(async ({ ctx }) => {
         try {
-            const body: ZodValidateUpdatedProductData = ctx.get("body")
+            const body: ZodValidateUpdatedProductData = ctx.honoContext.get("body")
             return await ProductManageMutationServices.editDataById(body);
         } catch (error) {
             throw HandlerTRPCError.TRPCError(error);
@@ -39,7 +39,7 @@ export const ManageProductTRPCRouter = router({
     }),
     removeOneById: publicProcedure.input(zodValidateRemoveProductById).use(AuthTRPCMiddleware.authSession).mutation(async ({ ctx }) => {
         try {
-            const body: ZodValidateRemoveProductById = ctx.get("body")
+            const body: ZodValidateRemoveProductById = ctx.honoContext.get("body")
             return await ProductManageMutationServices.removeOneById(body.targetProductId, body.cloudId);
         } catch (error) {
             throw HandlerTRPCError.TRPCError(error);

@@ -41,7 +41,7 @@ export default function ResetPasswordFormPage() {
             if (data && data.success) {
                 toast.success(data.message);
                 CookieHelper.removeCookieByKey("email");
-                return router.push('/admin/auth/signin');
+                return router.push('/auth/signin');
             }
         },
         onError: (error: Error) => {
@@ -117,7 +117,7 @@ export default function ResetPasswordFormPage() {
                             </form>
                         </Form>
                         <div className="mt-4 text-center text-sm">
-                            <Link href="/admin/auth/signin" className="text-blue-600 hover:underline">
+                            <Link href="/auth/signin" className="text-blue-600 hover:underline">
                                 Back to Sign In
                             </Link>
                         </div>

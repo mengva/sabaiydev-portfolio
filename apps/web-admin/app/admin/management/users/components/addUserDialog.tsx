@@ -1,6 +1,8 @@
-import { ServerResponseDto } from '@/admin/packages/types/constants';
-import { StaffPermissionArray, StaffRoleArray, StaffStatusArray } from '@/admin/packages/utils/constants/auth';
+import { ServerResponseDto, StaffPermissionDto, StaffRoleDto } from '@/admin/packages/types/constants';
+import { RolePermissions } from '@/admin/packages/utils/constants';
+import { StaffRoleArray, StaffStatusArray } from '@/admin/packages/utils/constants/auth';
 import { zodValidateAddNewStaff, ZodValidateAddNewStaff } from '@/admin/packages/validations/staff';
+import LoadingComponent from '@/app/admin/dashboard/components/loading';
 import { StaffSessionContext } from '@/app/admin/layout';
 import trpc from '@/app/trpc/client';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -10,7 +12,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@workspace/ui/components/input';
 import { Label } from '@workspace/ui/components/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@workspace/ui/components/select';
-import { useContext } from 'react';
+import { AlertCircle } from 'lucide-react';
+import { useContext, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
@@ -24,8 +27,11 @@ function AddUserDialogComponent({
     open, setOpen, refetch
 }: AddUserDialogDto) {
     const staffSessionContext = useContext(StaffSessionContext);
-    if (!staffSessionContext) return <div></div>;
+    if (!staffSessionContext) return <LoadingComponent />
+    const [permissions, setPermissions] = useState(['READ'] as StaffPermissionDto[]);
+    const [showConfirmClose, setShowConfirmClose] = useState(false);
     const isNotViewer = staffSessionContext.data && staffSessionContext.data.role !== "VIEWER";
+
     const form = useForm<ZodValidateAddNewStaff>({
         resolver: zodResolver(zodValidateAddNewStaff),
         defaultValues: {
@@ -38,7 +44,61 @@ function AddUserDialogComponent({
         },
     });
 
-    const addUserMutation = trpc.app.admin.staff.addNewStaff.useMutation({
+    const formValueKeys = ['fullName', 'email', 'password'] as const;
+
+    const hasUnsavedChanges = () => {
+        return formValueKeys.some(key => {
+            const value = form.getValues(key);
+            return value !== "";
+        });
+    };
+
+    // Handle dialog close attempt
+    const handleClose = () => {
+        if (hasUnsavedChanges()) {
+            setShowConfirmClose(true);
+        } else {
+            setOpen(false);
+            form.reset();
+        }
+    };
+
+    // Confirm close (user clicks "Yes, discard")
+    const confirmClose = () => {
+        setShowConfirmClose(false);
+        setOpen(false);
+        form.reset();
+    };
+
+    // Cancel close (stay in dialog)
+    const cancelClose = () => {
+        setShowConfirmClose(false);
+    };
+
+    const onChangeRole = (value: StaffRoleDto) => {
+        form.setValue("role", value as StaffRoleDto);
+        if (value === "SUPER_ADMIN") {
+            setPermissions(RolePermissions.SUPER_ADMIN)
+        } else if (value === "ADMIN") {
+            setPermissions(RolePermissions.ADMIN);
+        } else if (value === "EDITOR") {
+            setPermissions(RolePermissions.EDITOR);
+        } else setPermissions(RolePermissions.VIEWER);
+    }
+
+    // const getOneQuery = trpc.app.admin.manage.staff.getOne.useQuery({
+    //     onSuccess: (data: ServerResponseDto) => {
+
+    //     },
+    //     onError: (error: Error) => {
+    //         toast.error(error.message);
+    //     }
+    // }, {
+    //     refetchOnWindowFocus: false,
+    //     keepPreviousData: true, // smooth page transition
+    // });
+
+    const addOneUserMutation = trpc.app.admin.manage.staff.addOne.useMutation({
         onSuccess: (data: ServerResponseDto) => {
             toast.success(data.message);
             setOpen(false);
@@ -52,12 +112,12 @@ function AddUserDialogComponent({
 
     const onSubmit = (data: ZodValidateAddNewStaff) => {
         if (data) {
-            addUserMutation.mutate(data);
+            addOneUserMutation.mutate(data);
         }
     };
     return <>
         {/* === Add User Dialog === */}
-        <Dialog open={open} onOpenChange={setOpen} >
+        <Dialog open={open} onOpenChange={(isOpen) => !isOpen && handleClose()}>
             {
                 isNotViewer &&
                 <DialogTrigger asChild>
@@ -125,7 +185,7 @@ function AddUserDialogComponent({
                     <div>
                         <Label htmlFor="role" className='mb-2'>Role</Label>
                         <Select
-                            onValueChange={(value) => form.setValue("role", value as any)}
+                            onValueChange={onChangeRole}
                             defaultValue={form.getValues("role")}
                         >
                             <SelectTrigger className='w-full'>
@@ -165,10 +225,10 @@ function AddUserDialogComponent({
                     <div>
                         <Label className='mb-2'>Permissions</Label>
                         <div className="grid grid-cols-2 gap-3 mt-2">
-                            {(StaffPermissionArray).map((perm) => (
+                            {(permissions).map((perm) => (
                                 <div key={perm} className="flex items-center space-x-2">
                                     <Checkbox
-                                        id={perm}
+                                        id={perm.toLowerCase()}
                                         checked={form.watch("permissions").includes(perm as any)}
                                         onCheckedChange={(checked) => {
                                             const current = form.getValues("permissions");
@@ -179,7 +239,7 @@ function AddUserDialogComponent({
                                             }
                                         }}
                                     />
-                                    <label htmlFor={perm} className="text-sm font-medium capitalize cursor-pointer">
+                                    <label htmlFor={perm.toLowerCase()} className="text-sm font-medium capitalize cursor-pointer">
                                         {perm}
                                     </label>
                                 </div>
@@ -191,16 +251,39 @@ function AddUserDialogComponent({
                     </div>
 
                     <DialogFooter>
-                        <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={addUserMutation.isPending} className='cursor-pointer'>
+                        <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={addOneUserMutation.isPending} className='cursor-pointer'>
                             Cancel
                         </Button>
-                        <Button type="submit" disabled={addUserMutation.isPending} className='cursor-pointer'>
-                            {addUserMutation.isPending ? "Adding..." : "Add User"}
+                        <Button type="submit" disabled={addOneUserMutation.isPending} className='cursor-pointer'>
+                            {addOneUserMutation.isPending ? "Adding..." : "Add User"}
                         </Button>
                     </DialogFooter>
                 </form>
             </DialogContent>
         </Dialog >
+
+        {/* Confirmation Dialog when trying to close with unsaved changes */}
+        <Dialog open={showConfirmClose} onOpenChange={setShowConfirmClose}>
+            <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2">
+                        <AlertCircle className="h-5 w-5 text-destructive" />
+                        Discard changes?
+                    </DialogTitle>
+                    <DialogDescription>
+                        You have unsaved changes. If you close this dialog, your changes will be lost.
+                    </DialogDescription>
+                </DialogHeader>
+                <DialogFooter className="gap-2">
+                    <Button variant="outline" onClick={cancelClose} className='cursor-pointer'>
+                        No, keep editing
+                    </Button>
+                    <Button variant="destructive" onClick={confirmClose} className='cursor-pointer'>
+                        Yes, discard
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     </>
 }
 

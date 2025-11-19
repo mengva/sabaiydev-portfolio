@@ -45,7 +45,7 @@ export default function VerifyOtpFormPage() {
     onSuccess: (data: ServerResponseDto) => {
       if (data && data.success) {
         toast.success(data.message);
-        return router.push('/admin/auth/reset-password');
+        return router.push('/auth/reset-password');
       }
     }, onError
   });
@@ -154,7 +154,7 @@ export default function VerifyOtpFormPage() {
                     }
                   </div>
                 </div>
-                <Link href={'/admin/auth/signin'} className='text-blue-500 hover:underline'>
+                <Link href={'/auth/signin'} className='text-blue-500 hover:underline'>
                   Back to sign in
                 </Link>
               </div>

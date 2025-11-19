@@ -105,10 +105,10 @@ export default function SignInPage() {
                             </form>
                         </Form>
                         <div className="mt-4 flex justify-between items-center text-sm">
-                            <Link href="/admin/auth/forgot-password" className="text-blue-600 hover:underline">
+                            <Link href="/auth/forgot-password" className="text-blue-600 hover:underline">
                                 Forgot Password?
                             </Link>
-                            <Link href="/admin/auth/signin-otp" className="text-blue-600 hover:underline">
+                            <Link href="/auth/signin-otp" className="text-blue-600 hover:underline">
                                 SignIn With OTP?
                             </Link>
                         </div>

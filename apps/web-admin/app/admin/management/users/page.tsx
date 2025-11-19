@@ -47,10 +47,21 @@ import { StaffSessionContext } from "../../layout";
 import toast from "react-hot-toast";
 import { ErrorHandler } from "@/admin/packages/utils/HandleError";
 import GlobalHelper from "@/admin/packages/utils/GlobalHelper";
+import { PaginationComponent } from "@/components/pagination";
+import LoadingComponent from "../../dashboard/components/loading";
+
+interface SearchSelectDto {
+    query: string;
+    role: SearchQueryStaffRoleDto,
+    status: SearchQueryStaffStatusDto,
+    permissions: SearchQueryStaffPermissionDto[];
+    startDate: Date | undefined;
+    endDate: Date | undefined;
+}
 
 export default function UserManagementPage() {
     const staffSessionContext = useContext(StaffSessionContext);
-    if (!staffSessionContext) return <div></div>;
+    if (!staffSessionContext) return <LoadingComponent />
     // === Filters State ===
     const [open, setOpen] = useState(false);
     const [filter, setFilter] = useState({
@@ -77,24 +88,31 @@ export default function UserManagementPage() {
         isLoading,
         refetch,
         isRefetching,
-    } = trpc.app.admin.staff.list.useQuery(filter, {
+    } = trpc.app.admin.manage.staff.list.useQuery(filter, {
         refetchOnWindowFocus: false,
         keepPreviousData: true, // smooth page transition
     });
 
     useEffect(() => {
         if (response) {
-            const staffs: StaffSchema[] = response?.data?.data ?? []; // the array
-            const pagination: PaginationFilterDto = response?.pagination; // pagination info
+            const result = response?.data;
+            const staffs: StaffSchema[] = result?.data ?? []; // the array
+            const pagination: PaginationFilterDto = result?.pagination; // pagination info
             setUsers(staffs);
             setPaginationFilter(pagination);
         }
     }, [response]);
 
-    const searchStaffMutation = trpc.app.admin.staff.searchStaff.useMutation({
+    const searchQueryMutation = trpc.app.admin.manage.staff.searchQuery.useMutation({
         onSuccess: (data: ServerResponseDto) => {
             if (data && data.success) {
-                toast.success(data.message);
+                const result = data?.data;
+                const searchQueryPagination = result?.pagination;
+                const searchQueryData = result?.data;
+                if (searchQueryData && searchQueryPagination) {
+                    setUsers([...searchQueryData]);
+                    setPaginationFilter(searchQueryPagination);
+                }
             }
         },
         onError: (error: Error) => {
@@ -106,7 +124,7 @@ export default function UserManagementPage() {
         try {
             const start = startDate ? GlobalHelper.formatDate(startDate) : '';
             const end = endDate ? GlobalHelper.formatDate(endDate) : '';
-            searchStaffMutation.mutate({
+            searchQueryMutation.mutate({
                 ...filter,
                 query: search.trim() ?? '',
                 role: role ?? "DEFAULT",
@@ -115,10 +133,31 @@ export default function UserManagementPage() {
                 startDate: start,
                 endDate: end,
             });
-            const searchData = searchStaffMutation?.data?.data?.data;
-            if (searchData) {
-                setUsers([...searchData]);
-            }
+        } catch (error) {
+            ErrorHandler.handleClientError(error);
+        }
+    }
+
+    const onSearchSelected = ({
+        query,
+        role,
+        status,
+        permissions,
+        startDate,
+        endDate
+    }: SearchSelectDto) => {
+        try {
+            const start = startDate ? GlobalHelper.formatDate(startDate) : '';
+            const end = endDate ? GlobalHelper.formatDate(endDate) : '';
+            searchQueryMutation.mutate({
+                ...filter,
+                query,
+                role: role ?? "DEFAULT",
+                status: status ?? "DEFAULT",
+                permissions: permissions ?? ["DEFAULT"],
+                startDate: start,
+                endDate: end,
+            });
         } catch (error) {
             ErrorHandler.handleClientError(error);
         }
@@ -126,6 +165,7 @@ export default function UserManagementPage() {
 
     // === Reset Filters ===
     const resetFilters = () => {
+        refetch();
         setSearch("");
         setRole("DEFAULT");
         setStatus("DEFAULT");
@@ -167,9 +207,7 @@ export default function UserManagementPage() {
                             <Input
                                 placeholder="Search by fullName or email..."
                                 value={search}
-                                onChange={(e) => {
-                                    setSearch(e.target.value.trim())
-                                }}
+                                onChange={(e) => setSearch(e.target.value.trim())}
                                 onInput={e => {
                                     const value = (e.target as HTMLInputElement).value.toLowerCase()
                                     if (!value) {
@@ -179,15 +217,23 @@ export default function UserManagementPage() {
                                 }}
                                 className="pl-10"
                                 onKeyDown={(e) => {
-                                    if (e.key === "Enter") {
-                                        onSearch();
-                                    }
+                                    if (e.key === "Enter") onSearch();
                                 }}
                             />
                         </div>
 
                         {/* Role */}
-                        <Select value={role} onValueChange={(v) => setRole(v as SearchQueryStaffRoleDto)}>
+                        <Select value={role} onValueChange={r => {
+                            setRole(r as SearchQueryStaffRoleDto);
+                            onSearchSelected({
+                                query: search ?? '',
+                                role: r as SearchQueryStaffRoleDto,
+                                status: status ?? "DEFAULT",
+                                permissions: permissions ?? ["DEFAULT"],
+                                startDate,
+                                endDate
+                            });
+                        }}>
                             <SelectTrigger className="w-full">
                                 <SelectValue placeholder="Select role" />
                             </SelectTrigger>
@@ -201,7 +247,17 @@ export default function UserManagementPage() {
                         </Select>
 
                         {/* Status */}
-                        <Select value={status} onValueChange={(v) => setStatus(v as SearchQueryStaffStatusDto)}>
+                        <Select value={status} onValueChange={(s) => {
+                            setStatus(s as SearchQueryStaffStatusDto);
+                            onSearchSelected({
+                                query: search ?? '',
+                                role: role ?? "DEFAULT",
+                                status: s as SearchQueryStaffStatusDto,
+                                permissions: permissions ?? ["DEFAULT"],
+                                startDate,
+                                endDate
+                            });
+                        }}>
                             <SelectTrigger className="w-full">
                                 <SelectValue placeholder="Select status" />
                             </SelectTrigger>
@@ -221,14 +277,24 @@ export default function UserManagementPage() {
                                     )}
                                 >
                                     <CalendarIcon className="mr-2 h-4 w-4" />
-                                    {startDate ? format(startDate, "PPP") : "Start Date"}
+                                    {startDate ? GlobalHelper.formatDate(startDate) : "Start Date"}
                                 </Button>
                             </PopoverTrigger>
                             <PopoverContent className="w-auto p-0">
                                 <Calendar
                                     mode="single"
                                     selected={startDate}
-                                    onSelect={setStartDate}
+                                    onSelect={start => {
+                                        setStartDate(start);
+                                        onSearchSelected({
+                                            query: search ?? '',
+                                            role: role ?? "DEFAULT",
+                                            status: status ?? "DEFAULT",
+                                            permissions: permissions ?? ["DEFAULT"],
+                                            startDate: start,
+                                            endDate
+                                        });
+                                    }}
                                     initialFocus
                                 />
                             </PopoverContent>
@@ -244,14 +310,24 @@ export default function UserManagementPage() {
                                     )}
                                 >
                                     <CalendarIcon className="mr-2 h-4 w-4" />
-                                    {endDate ? format(endDate, "PPP") : "End Date"}
+                                    {endDate ? GlobalHelper.formatDate(endDate) : "End Date"}
                                 </Button>
                             </PopoverTrigger>
                             <PopoverContent className="w-auto p-0">
                                 <Calendar
                                     mode="single"
                                     selected={endDate}
-                                    onSelect={setEndDate}
+                                    onSelect={end => {
+                                        setEndDate(end);
+                                        onSearchSelected({
+                                            query: search ?? '',
+                                            role: role ?? "DEFAULT",
+                                            status: status ?? "DEFAULT",
+                                            permissions: permissions ?? ["DEFAULT"],
+                                            startDate,
+                                            endDate: end
+                                        });
+                                    }}
                                     initialFocus
                                 />
                             </PopoverContent>
@@ -294,45 +370,47 @@ export default function UserManagementPage() {
 
             {/* === Users Table === */}
             <Card>
-                <CardHeader>
-                    <CardTitle>Users</CardTitle>
-                    <CardDescription>
-                        {isLoading ? "Loading..." : `${users.length} users found`}
-                    </CardDescription>
-                </CardHeader>
                 <CardContent>
-                    {isLoading ? (
-                        <LoadingUserComponent />
-                    ) : (
-                        <div className="rounded-md border">
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Id</TableHead>
-                                        <TableHead>FullName</TableHead>
-                                        <TableHead>Role</TableHead>
-                                        <TableHead>Status</TableHead>
-                                        <TableHead>Permissions</TableHead>
-                                        <TableHead>CreatedAt</TableHead>
-                                        <TableHead>Options</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {users?.length === 0 ? (
-                                        <TableRow>
-                                            <TableCell colSpan={8} className="text-center text-muted-foreground">
-                                                No users found
-                                            </TableCell>
-                                        </TableRow>
-                                    ) : (
-                                        users && users.map((user, index) => {
-                                            return <TableUserItemComponent key={index} user={user} index={index} filter={filter} refetch={refetch} data={staffSessionContext.data} />
-                                        })
-                                    )}
-                                </TableBody>
-                            </Table>
-                        </div>
-                    )}
+                    {
+                        (isLoading || searchQueryMutation.isLoading) ? (
+                            <LoadingUserComponent />
+                        ) :
+                            <>
+                                <div className="rounded-md border">
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead>Id</TableHead>
+                                                <TableHead>FullName</TableHead>
+                                                <TableHead>Role</TableHead>
+                                                <TableHead>Status</TableHead>
+                                                <TableHead>Permissions</TableHead>
+                                                <TableHead>CreatedAt</TableHead>
+                                                <TableHead>Options</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {
+                                                users?.length === 0 ? (
+                                                    <TableRow>
+                                                        <TableCell colSpan={8} className="text-center text-muted-foreground">
+                                                            No users found
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ) : (
+                                                    users && users.map((user, index) => {
+                                                        return <TableUserItemComponent key={index} user={user} index={index} filter={filter} refetch={refetch} data={staffSessionContext.data} setOpen={setOpen} />
+                                                    })
+                                                )
+                                            }
+                                        </TableBody>
+                                    </Table>
+                                </div>
+                                {
+                                    users.length > 0 && paginationFilter.totalPage > 1 && <PaginationComponent data={users} filter={filter} setFilter={setFilter} pagination={paginationFilter} handleFetchData={refetch} />
+                                }
+                            </>
+                    }
                 </CardContent>
             </Card>
         </div>
