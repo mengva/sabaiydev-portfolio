@@ -8,7 +8,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@work
 import { Input } from '@workspace/ui/components/input';
 import { Button } from '@workspace/ui/components/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@workspace/ui/components/form';
-import { zodValidateSignInWithOTPAndEmail, ZodValidateSignInWithOTPAndEmail } from '@/admin/packages/validations/auth';
 import { zodValidateEmail } from '@/admin/packages/validations/constants';
 import Link from 'next/link';
 import trpc from '@/app/trpc/client';
@@ -16,6 +15,7 @@ import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import { Clock } from 'lucide-react';
 import { ServerResponseDto } from '@/admin/packages/types/constants';
+import { zodValidateSignInOTP, ZodValidateSignInOTP } from '@/admin/packages/validations/auth';
 
 export default function SignInWithOTPFormPage() {
   const [step, setStep] = useState<"email" | "otp">("email");
@@ -29,8 +29,8 @@ export default function SignInWithOTPFormPage() {
     defaultValues: { email: "" },
   });
 
-  const signInWithOTPMutation = useForm<ZodValidateSignInWithOTPAndEmail>({
-    resolver: zodResolver(zodValidateSignInWithOTPAndEmail),
+  const signInWithOTPMutation = useForm<ZodValidateSignInOTP>({
+    resolver: zodResolver(zodValidateSignInOTP),
     defaultValues: { email: "", code: "" },
   });
 
@@ -49,7 +49,7 @@ export default function SignInWithOTPFormPage() {
     }
   });
 
-  const signInWithOTPAndEmailMutation = trpc.app.admin.auth.signInWithOTPAndEmail.useMutation({
+  const signInOTPMutation = trpc.app.admin.auth.signInOTP.useMutation({
     onSuccess: (data: ServerResponseDto) => {
       if (data && data.success) {
         toast.success(data.message);
@@ -68,9 +68,9 @@ export default function SignInWithOTPFormPage() {
     } else toast.error("Request failed, Please try again later");
   };
 
-  const verifyOTP = (values: ZodValidateSignInWithOTPAndEmail) => {
+  const verifyOTP = (values: ZodValidateSignInOTP) => {
     if (values) {
-      signInWithOTPAndEmailMutation.mutate(values);
+      signInOTPMutation.mutate(values);
     }
   };
 
@@ -182,8 +182,8 @@ export default function SignInWithOTPFormPage() {
                     <Button type="button" variant="outline" onClick={() => setStep("email")} className="flex-1 cursor-pointer">
                       Back
                     </Button>
-                    <Button type="submit" className="flex-1 cursor-pointer" disabled={signInWithOTPAndEmailMutation.isPending || isExpired}>
-                      {signInWithOTPAndEmailMutation.isPending ? "Verifying..." : "Verify OTP"}
+                    <Button type="submit" className="flex-1 cursor-pointer" disabled={signInOTPMutation.isPending || isExpired}>
+                      {signInOTPMutation.isPending ? "Verifying..." : "Verify OTP"}
                     </Button>
                   </div>
                 </form>

@@ -132,6 +132,9 @@ export class AuthFuncHelperServices {
                 });
                 const transporter = Helper.transporter();
                 await transporter.sendMail(mailOption);
+                if (ipAddress) {
+                    RateLimiterMiddleware.authLimiter.delete(ipAddress);
+                }
             });
         } catch (error: ServerErrorDto) {
             throw getHTTPError(error);
@@ -173,6 +176,9 @@ export class AuthFuncHelperServices {
                     )
                 )
             ).returning();
+            if (ipAddress) {
+                RateLimiterMiddleware.authLimiter.delete(ipAddress);
+            }
             return updateVerification[0];
         } catch (error: ServerErrorDto) {
             throw getHTTPError(error);
@@ -222,6 +228,9 @@ export class AuthFuncHelperServices {
                     )
                 )
             );
+            if (ipAddress) {
+                RateLimiterMiddleware.authLimiter.delete(ipAddress);
+            }
         } catch (error: ServerErrorDto) {
             throw getHTTPError(error);
         }

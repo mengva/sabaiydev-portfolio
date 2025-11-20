@@ -28,29 +28,13 @@
       "@/api/*": [
         "./src/*"
       ],
-      "@/api/packages/schema/*": [
-        "../../packages/services/schema/*"
+      "@/api/packages/*": [
+        "../../packages/services/*"
       ],
-      "@/api/packages/types/*": [
-        "../../packages/services/types/*"
-      ],
-      "@/api/packages/utils/*": [
-        "../../packages/services/utils/*"
-      ],
-      "@/api/packages/validations/*": [
-        "../../packages/services/validations/*"
-      ],
-      "@/api/packages/fonts/*": [
-        "../../packages/services/fonts/*"
-      ]
     },
   },
   "include": [
     "./src",
-    "../../packages/services/schema",
-    "../../packages/services/types",
-    "../../packages/services/utils",
-    "../../packages/services/validations",
-    "../../packages/services/fonts",
+    "../../packages/services",
   ],
 }

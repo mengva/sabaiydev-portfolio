@@ -30,7 +30,7 @@ export class ValidateStaffRoleAndPerUtils {
         return validLength && validPermission;
     };
 
-    public static async roleAndPer(role: StaffRoleDto, permissions: StaffPermissionDto[]) {
+    public static async roleAndPermissions(role: StaffRoleDto, permissions: StaffPermissionDto[]) {
         // check user role and permissions
         const superAdmin = role === "SUPER_ADMIN" && !this.permissions(permissions, RolePermissions.SUPER_ADMIN);
         const admin = role === "ADMIN" && !this.permissions(permissions, RolePermissions.ADMIN);
@@ -44,7 +44,7 @@ export class ValidateStaffRoleAndPerUtils {
 
     public static async addOneUser({ addByStaffId, ...data }: ZodValidateAddNewStaff) {
         try {
-            const valid = await this.roleAndPer(data.role, data.permissions);
+            const valid = await this.roleAndPermissions(data.role, data.permissions);
             if (!valid) return;
 
             // check email existing in the database
@@ -53,17 +53,17 @@ export class ValidateStaffRoleAndPerUtils {
             });
             if (emailExisting) throw new HTTPErrorMessage("Email already existing", "403");
 
-            const findOwnerAddData = await db.query.staffs.findFirst({
+            const findMyAddData = await db.query.staffs.findFirst({
                 where: eq(staffs.id, addByStaffId),
                 with: {
                     sessions: true
                 }
             });
-            if (!findOwnerAddData) throw new HTTPErrorMessage("Find not found", "404");
+            if (!findMyAddData) throw new HTTPErrorMessage("Find not found", "404");
 
-            const ownerRole = findOwnerAddData.role;
+            const myRole = findMyAddData.role;
             // check if role is VIEWER can't add user
-            if (ownerRole === "VIEWER") {
+            if (myRole === "VIEWER") {
                 throw new HTTPErrorMessage("VIEWER have no an permissions to add user", "403")
             }
 
@@ -76,11 +76,11 @@ export class ValidateStaffRoleAndPerUtils {
 
     public static async editOneUserById(data: ZodValidateUpdatedStaff) {
         try {
-            const valid = await this.roleAndPer(data.role, data.permissions);
+            const valid = await this.roleAndPermissions(data.role, data.permissions);
             if (!valid) return;
 
             const { targetStaffId, updatedByStaffId } = data;
-            const findOwnerEditData = await db.query.staffs.findFirst({
+            const findMyEditData = await db.query.staffs.findFirst({
                 where: eq(staffs.id, updatedByStaffId),
             });
 
@@ -88,20 +88,20 @@ export class ValidateStaffRoleAndPerUtils {
                 where: eq(staffs.id, targetStaffId),
             });
 
-            const isEmpty = !findOwnerEditData || !targetData;
-            if (isEmpty) throw new HTTPErrorMessage("Find not found", "404");
+            const isEmptyData = !findMyEditData || !targetData;
+            if (isEmptyData) throw new HTTPErrorMessage("Find not found", "404");
 
             const isEditMyData = targetStaffId === updatedByStaffId;
             if (isEditMyData) throw new HTTPErrorMessage("Invalid edit my data", "403");
 
-            const ownerRole = findOwnerEditData.role;
+            const myRole = findMyEditData.role;
             const targetRole = targetData.role;
 
             // user can be edit other user by condition here
             const isCanEdit = Boolean(
-                ownerRole === "SUPER_ADMIN" && ["ADMIN", "VIEWER", "EDITOR"].includes(targetRole) ||
-                ownerRole === "ADMIN" && ["VIEWER", "EDITOR"].includes(targetRole) ||
-                ownerRole === "EDITOR" && ["VIEWER"].includes(targetRole) || false
+                myRole === "SUPER_ADMIN" && ["ADMIN", "VIEWER", "EDITOR"].includes(targetRole) ||
+                myRole === "ADMIN" && ["VIEWER", "EDITOR"].includes(targetRole) ||
+                myRole === "EDITOR" && ["VIEWER"].includes(targetRole) || false
             );
             if (!isCanEdit) throw new HTTPErrorMessage("You have no an permission to edit user data", "403");
             return isCanEdit;
@@ -118,15 +118,15 @@ export class ValidateStaffRoleAndPerUtils {
         targetStaffId: string;
     }) {
         try {
-            // find owner data need to remove other user data
-            const findOwnerRemoveData = await db.query.staffs.findFirst({
+            // find my data need to remove other user data
+            const findMyRemoveData = await db.query.staffs.findFirst({
                 where: eq(staffs.id, removeByStaffId),
                 with: {
                     sessions: true
                 }
             });
-            // check owner empty data 
-            if (!findOwnerRemoveData) throw new HTTPErrorMessage("Find not found", "404");
+            // check my empty data 
+            if (!findMyRemoveData) throw new HTTPErrorMessage("Find not found", "404");
 
             // find target data need to remove
             const targetStaffInfo = await db.query.staffs.findFirst({
@@ -136,16 +136,16 @@ export class ValidateStaffRoleAndPerUtils {
             if (!targetStaffInfo) throw new HTTPErrorMessage("Find target user not found", "404");
 
             // check can't remove my account
-            const isMe = findOwnerRemoveData.id === targetStaffInfo.id;
+            const isMe = findMyRemoveData.id === targetStaffInfo.id;
             if (isMe) return false;
 
-            const ownerRole = findOwnerRemoveData.role;
+            const myRole = findMyRemoveData.role;
             const targetRole = targetStaffInfo.role;
 
             // admin can be remove user by condition here
             const isCanRemove = Boolean(
-                ownerRole === "SUPER_ADMIN" && ["ADMIN", "VIEWER", "EDITOR"].includes(targetRole) ||
-                ownerRole === "ADMIN" && ["VIEWER", "EDITOR"].includes(targetRole) || false
+                myRole === "SUPER_ADMIN" && ["ADMIN", "VIEWER", "EDITOR"].includes(targetRole) ||
+                myRole === "ADMIN" && ["VIEWER", "EDITOR"].includes(targetRole) || false
             )
             // if isCanRemove is true can be remove but isCanRemove is false can't be to remove
             return isCanRemove;
@@ -168,7 +168,7 @@ export class ValidateStaffRoleAndPerUtils {
                 where: eq(staffs.id, updatedByStaffId),
             });
             if (!findEditMyData) throw new HTTPErrorMessage("Find not found", "404");
-            return true;
+            return findEditMyData;
         } catch (error) {
             throw getHTTPError(error);
         }

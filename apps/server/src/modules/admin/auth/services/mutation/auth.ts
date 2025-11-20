@@ -15,9 +15,9 @@ export class AuthServices {
         }
     }
 
-    public static async signInWithOTPAndEmail({ input, ctx }: AuthTRPCSignInWithOTPAndEmailDto) {
+    public static async signInOTP({ input, ctx }: AuthTRPCSignInWithOTPAndEmailDto) {
         try {
-            return await AuthFuncUtils.signInWithOTPAndEmailFunc(input, ctx['honoContext']);
+            return await AuthFuncUtils.signInOTPFunc(input, ctx['honoContext']);
         } catch (error: ServerErrorDto) {
             throw HandlerTRPCError.TRPCError(error);
         }
@@ -49,7 +49,7 @@ export class AuthServices {
         return await AuthFuncUtils.verifiedOTPCodeFunc({ ...input, userAgent, ipAddress });
     }
 
-    public static async resetPassword(input: AuthResetPasswordDto, ctx: MyContext) {
+    public static async resetPassword(input: AuthResetPasswordDto, ctx: MyContext['honoContext']) {
         return await AuthFuncUtils.resetPasswordFunc(input, ctx);
     }
 }

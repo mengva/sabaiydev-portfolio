@@ -4,7 +4,7 @@ import { publicProcedure, router } from "@/api/server/trpc/procedures";
 import { HandlerTRPCError } from "@/api/utils/handleTRPCError";
 import { ProductManageMutationServices } from "../services/mutation";
 
-export const ManageProductTRPCRouter = router({
+export const ProductManageTRPCRouter = router({
     addOne: publicProcedure.input(zodValidateAddNewProduct).use(AuthTRPCMiddleware.authSanitizedBody).mutation(async ({ ctx }) => {
         try {
             const body: ZodValidateAddNewProduct = ctx.honoContext.get("body");

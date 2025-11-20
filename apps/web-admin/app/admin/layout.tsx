@@ -37,7 +37,7 @@ export default function AdminLayout({
     <StaffSessionContext.Provider value={{ refetch, isLoading, isRefetching, data }}>
       <SidebarProvider>
         <AppSidebar />
-        <main className="w-full">
+        <main className="md:min-w-[calc(100%-16rem)] w-full">
           <Topbar />
           <div className="p-6">
             <SidebarTrigger className="mb-4 md:hidden" />

@@ -119,7 +119,7 @@ export class StaffManageMutationServices {
         }
     }
 
-    public static removeById = async (targetStaffId: string) => {
+    public static removeOneById = async (targetStaffId: string) => {
         try {
             await db.delete(staffs).where(eq(staffs.id, targetStaffId));
             return HandlerSuccess.success("Remove staff by id successfully");

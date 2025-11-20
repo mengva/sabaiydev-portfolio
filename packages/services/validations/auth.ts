@@ -6,7 +6,7 @@ export const zodValidateSignIn = z.object({
     password: zodValidatePassword,
 });
 
-export const zodValidateSignInWithOTPAndEmail = z.object({
+export const zodValidateSignInOTP = z.object({
     email: zodValidateEmail,
     code: zodValidateOTPCode
 });
@@ -48,7 +48,7 @@ export const zodValidateListAndQueryStaff = zodValidateTRPCFilter.extend({
 })
 
 export type ZodValidateSignIn = z.infer<typeof zodValidateSignIn>;
-export type ZodValidateSignInWithOTPAndEmail = z.infer<typeof zodValidateSignInWithOTPAndEmail>;
+export type ZodValidateSignInOTP = z.infer<typeof zodValidateSignInOTP>;
 export type ZodValidateSignUp = z.infer<typeof zodValidateSignUp>;
 export type ZodValidateVerifiedEmail = z.infer<typeof zodValidateVerifiedEmail>;
 export type ZodValidateVerifiedPhoneNumber = z.infer<typeof zodValidateVerifiedPhoneNumber>;

@@ -61,7 +61,7 @@ interface SearchSelectDto {
 
 export default function UserManagementPage() {
     const staffSessionContext = useContext(StaffSessionContext);
-    if (!staffSessionContext) return <LoadingComponent />
+    if (!staffSessionContext) return <LoadingUserComponent />
     // === Filters State ===
     const [open, setOpen] = useState(false);
     const [filter, setFilter] = useState({
@@ -81,6 +81,7 @@ export default function UserManagementPage() {
     const [startDate, setStartDate] = useState<Date | undefined>();
     const [endDate, setEndDate] = useState<Date | undefined>();
     const [users, setUsers] = useState([] as StaffSchema[]);
+    const [editById, setEditById] = useState('');
 
     // === tRPC Query ===
     const {
@@ -189,7 +190,7 @@ export default function UserManagementPage() {
                     <p className="text-muted-foreground">Manage users, roles, and permissions</p>
                 </div>
                 <div>
-                    <AddUserDialogComponent open={open} setOpen={setOpen} refetch={refetch} />
+                    <AddUserDialogComponent open={open} setOpen={setOpen} refetch={refetch} setEditById={setEditById} editById={editById} />
                 </div>
             </div>
 
@@ -399,7 +400,7 @@ export default function UserManagementPage() {
                                                     </TableRow>
                                                 ) : (
                                                     users && users.map((user, index) => {
-                                                        return <TableUserItemComponent key={index} user={user} index={index} filter={filter} refetch={refetch} data={staffSessionContext.data} setOpen={setOpen} />
+                                                        return <TableUserItemComponent key={index} user={user} index={index} filter={filter} refetch={refetch} data={staffSessionContext.data} setOpen={setOpen} setEditById={setEditById} />
                                                     })
                                                 )
                                             }

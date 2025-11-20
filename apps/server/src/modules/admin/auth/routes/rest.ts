@@ -1,12 +1,12 @@
 import { Hono } from 'hono';
-import { zodValidateResetPassword, zodValidateSignIn, zodValidateVerifiedOTPCode, zodValidateVerifiedEmail, zodValidateSignUp, type ZodValidateVerifiedOTPCode, type ZodValidateSignIn, type ZodValidateSignUp, type ZodValidateVerifiedEmail, type ZodValidateResetPassword, zodValidateSignInWithOTPAndEmail, type ZodValidateSignInWithOTPAndEmail } from '@/api/packages/validations/auth';
+import { zodValidateResetPassword, zodValidateSignIn, zodValidateVerifiedOTPCode, zodValidateVerifiedEmail, zodValidateSignUp, type ZodValidateVerifiedOTPCode, type ZodValidateSignIn, type ZodValidateSignUp, type ZodValidateVerifiedEmail, type ZodValidateResetPassword, zodValidateSignInOTP, type ZodValidateSignInOTP } from '@/api/packages/validations/auth';
 import { ZodValidateRestApi } from '@/api/utils/zodValidateRestApi';
 import { AuthRestMiddleware } from '@/api/middleware/authREST';
 import type { ServerErrorDto } from '@/api/packages/types/constants';
 import { HandlerTRPCError } from '@/api/utils/handleTRPCError';
 import { DOMAndSanitizeService } from '@/api/packages/utils/DOMAndSanitize';
-import { AuthFuncUtils } from '../utils/AuthFuncUtils';
 import { AuthFuncHelperServices } from '../utils/authFuncHelperUtils';
+import { AuthFuncUtils } from '../utils/AuthFuncUtils';
 
 const authRestRouter = new Hono();
 
@@ -23,11 +23,11 @@ authRestRouter.post("/sign-in", ZodValidateRestApi.validate("json", zodValidateS
     }
 });
 
-authRestRouter.post("/sign-in/OTP", ZodValidateRestApi.validate("json", zodValidateSignInWithOTPAndEmail), AuthRestMiddleware.alreadySignIn, async (c) => {
+authRestRouter.post("/sign-in/OTP", ZodValidateRestApi.validate("json", zodValidateSignInOTP), AuthRestMiddleware.alreadySignIn, async (c) => {
     try {
-        const body: ZodValidateSignInWithOTPAndEmail = c.req.valid("json");
-        const sanitizeBody = DOMAndSanitizeService.domAndSanitizeObject(body) as ZodValidateSignInWithOTPAndEmail;
-        const response = await AuthFuncUtils.signInWithOTPAndEmailFunc(body, c);
+        const body: ZodValidateSignInOTP = c.req.valid("json");
+        const sanitizeBody = DOMAndSanitizeService.domAndSanitizeObject(body) as ZodValidateSignInOTP;
+        const response = await AuthFuncUtils.signInOTPFunc(sanitizeBody, c);
         if (response) {
             return c.json(response, 201);
         }

@@ -8,7 +8,7 @@ import { ValidateStaffRoleAndPerUtils } from "../utils/validateRoleAndPer";
 import { HandlerTRPCError } from "@/api/utils/handleTRPCError";
 import { HTTPErrorMessage } from "@/api/packages/utils/HttpJsError";
 
-export const ManageStaffTRPCRouter = router({
+export const StaffManageTRPCRouter = router({
     list: publicProcedure.input(zodValidateTRPCFilter).use(AuthTRPCMiddleware.authSanitizedBody).query(async ({ ctx }) => {
         const filter: ZodValidateTRPCFilter = ctx.honoContext.get("body");
         return await StaffManageQueriesServices.list(filter);
@@ -56,7 +56,7 @@ export const ManageStaffTRPCRouter = router({
                 updatedByStaffId
             });
             if (!isEdit) {
-                throw new HTTPErrorMessage("Failed somthing to edit user data", "403")
+                throw new HTTPErrorMessage("Failed something to edit user data", "403")
             }
             const response = await StaffManageMutationServices.editMyDataById(body);
             return response;
@@ -64,13 +64,13 @@ export const ManageStaffTRPCRouter = router({
             throw HandlerTRPCError.TRPCError(error);
         }
     }),
-    removeById: publicProcedure.input(zodValidateRemoveStaffById).use(AuthTRPCMiddleware.authSanitizedBody).mutation(async ({ ctx }) => {
+    removeOneById: publicProcedure.input(zodValidateRemoveStaffById).use(AuthTRPCMiddleware.authSanitizedBody).mutation(async ({ ctx }) => {
         const params: ZodValidateRemoveStaffById = ctx.honoContext.get("body");
         const valid = await ValidateStaffRoleAndPerUtils.removeOneById(params);
         if (!valid) {
             throw new HTTPErrorMessage("You have no an permission to remove this staff", "403");
         }
-        const response = await StaffManageMutationServices.removeById(params.targetStaffId);
+        const response = await StaffManageMutationServices.removeOneById(params.targetStaffId);
         return response;
     }),
     searchQuery: publicProcedure.input(zodValidateSearchStaffData).use(AuthTRPCMiddleware.authSession).mutation(async ({ ctx, input }) => {

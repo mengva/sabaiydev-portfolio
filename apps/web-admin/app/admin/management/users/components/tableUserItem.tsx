@@ -38,11 +38,12 @@ interface ItemDto {
     data: StaffSessionDto;
     refetch: () => void;
     setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+    setEditById:React.Dispatch<React.SetStateAction<string>>;
 }
 
-function TableUserItemComponent({ user, index, filter, data, refetch, setOpen }: ItemDto) {
+function TableUserItemComponent({ user, index, filter, data, refetch, setOpen, setEditById }: ItemDto) {
     const staffSessionContext = useContext(StaffSessionContext);
-    if (!staffSessionContext) return <div></div>;
+    if (!staffSessionContext) return null;
     const myData = staffSessionContext.data;
     const [openDelete, setOpenDelete] = useState(false);
 
@@ -58,7 +59,7 @@ function TableUserItemComponent({ user, index, filter, data, refetch, setOpen }:
         toast.error(error.message);
     }
 
-    const removeStaffByIdMutation = trpc.app.admin.manage.staff.removeStaffById.useMutation({ onSuccess, onError });
+    const removeStaffByIdMutation = trpc.app.admin.manage.staff.removeOneById.useMutation({ onSuccess, onError });
 
     const handleDelete = async () => {
         removeStaffByIdMutation.mutate({ targetStaffId: user.id, removeByStaffId: myData.id });
@@ -203,7 +204,10 @@ function TableUserItemComponent({ user, index, filter, data, refetch, setOpen }:
                                 {/* ---------- EDIT ---------- */}
                                 {
                                     isEdited() &&
-                                    <DropdownMenuItem onClick={() => setOpen(true)} className="text-sky-500 hover:!text-sky-600 cursor-pointer">
+                                    <DropdownMenuItem onClick={() => {
+                                        setOpen(true);
+                                        setEditById(user.id);
+                                    }} className="text-sky-500 hover:!text-sky-600 cursor-pointer">
                                         <Edit className="mr-2 h-4 w-4 text-sky-500" />
                                         Edit
                                     </DropdownMenuItem>

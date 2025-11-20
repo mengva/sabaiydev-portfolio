@@ -8,9 +8,9 @@ import type { FileDto } from '@/api/packages/types/constants';
 import type { ZodValidateAddNewProduct } from '@/api/packages/validations/product';
 import { DomAndSanitizeRESTBodyMiddleware } from '@/api/middleware/domAndSanitizeRESTBody';
 
-const manageProductRestRouter = new Hono();
+const productManageRestRouter = new Hono();
 
-manageProductRestRouter.post("/product/add-product/staff/:addByStaffId", AuthRestMiddleware.authSession, async (c) => {
+productManageRestRouter.post("/product/add-product/staff/:addByStaffId", AuthRestMiddleware.authSession, async (c) => {
     try {
         // parse multipart form data
         const formData = await c.req.formData();
@@ -59,4 +59,4 @@ manageProductRestRouter.post("/product/add-product/staff/:addByStaffId", AuthRes
     }
 });
 
-export default manageProductRestRouter;
+export default productManageRestRouter;

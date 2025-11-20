@@ -8,10 +8,10 @@ import { StaffManageMutationServices } from '../services/mutation/staff';
 import { ValidateStaffRoleAndPerUtils } from '@/api/modules/admin/managements/staff/utils/validateRoleAndPer';
 import { HandlerHonoError } from '@/api/utils/handlerHonoError';
 
-const manageStaffRestRouter = new Hono();
+const staffManageRestRouter = new Hono();
 
 // get staff all by page and limit
-manageStaffRestRouter.get("/staffs", AuthRestMiddleware.authSanitizedQueries, async (c) => {
+staffManageRestRouter.get("/staffs", AuthRestMiddleware.authSanitizedQueries, async (c) => {
     try {
         const { page, limit } = c.get("body");
         const filter = zodValidateTRPCFilter.safeParse({
@@ -27,7 +27,7 @@ manageStaffRestRouter.get("/staffs", AuthRestMiddleware.authSanitizedQueries, as
 });
 
 // get staff by id
-manageStaffRestRouter.get("/staffs/:staffId", ZodValidateRestApi.validate("param", zodValidateGetStaffById), AuthRestMiddleware.authSession, async (c) => {
+staffManageRestRouter.get("/staffs/:staffId", ZodValidateRestApi.validate("param", zodValidateGetStaffById), AuthRestMiddleware.authSession, async (c) => {
     try {
         const param: ZodValidateGetStaffById = c.req.valid("param");
         const response = await StaffManageQueriesServices.getOne(param.staffId);
@@ -38,7 +38,7 @@ manageStaffRestRouter.get("/staffs/:staffId", ZodValidateRestApi.validate("param
 });
 
 // search staff by condition
-manageStaffRestRouter.get("/staffs", ZodValidateRestApi.validate("query", zodValidateSearchStaffData), AuthRestMiddleware.authSanitizedQueries, async (c) => {
+staffManageRestRouter.get("/staffs", ZodValidateRestApi.validate("query", zodValidateSearchStaffData), AuthRestMiddleware.authSanitizedQueries, async (c) => {
     try {
         const body: ZodValidateSearchStaffData = c.get("body");
         const response = await StaffManageMutationServices.searchQuery(body);
@@ -49,7 +49,7 @@ manageStaffRestRouter.get("/staffs", ZodValidateRestApi.validate("query", zodVal
 });
 
 // add new staff
-manageStaffRestRouter.post("/staffs/:addByStaffId/add-staff", ZodValidateRestApi.validate("param", zodValidateRestApiAddNewStaffParam), AuthRestMiddleware.authSanitizedParamAndBody, async (c) => {
+staffManageRestRouter.post("/staffs/:addByStaffId/add-staff", ZodValidateRestApi.validate("param", zodValidateRestApiAddNewStaffParam), AuthRestMiddleware.authSanitizedParamAndBody, async (c) => {
     try {
         const body: ZodValidateAddNewStaff = c.get("body");
         await ValidateStaffRoleAndPerUtils.addOneUser(body);
@@ -61,7 +61,7 @@ manageStaffRestRouter.post("/staffs/:addByStaffId/add-staff", ZodValidateRestApi
 });
 
 // update staff by id
-manageStaffRestRouter.put("/staffs/:targetStaffId/edit-staff/:updatedByStaffId", ZodValidateRestApi.validate("param", zodValidateRestApiUpdatedStaffParam), AuthRestMiddleware.authSanitizedParamAndBody, async (c) => {
+staffManageRestRouter.put("/staffs/:targetStaffId/edit-staff/:updatedByStaffId", ZodValidateRestApi.validate("param", zodValidateRestApiUpdatedStaffParam), AuthRestMiddleware.authSanitizedParamAndBody, async (c) => {
     try {
         const body: ZodValidateUpdatedStaff = c.get("body");
         await ValidateStaffRoleAndPerUtils.editOneUserById(body);
@@ -73,7 +73,7 @@ manageStaffRestRouter.put("/staffs/:targetStaffId/edit-staff/:updatedByStaffId",
 });
 
 // update my data by id
-manageStaffRestRouter.put("/staffs/:targetStaffId/edit-my-data/:updatedByStaffId", ZodValidateRestApi.validate("param", zodValidateRestApiUpdatedMyDataParam), AuthRestMiddleware.authSanitizedParamAndBody, async (c) => {
+staffManageRestRouter.put("/staffs/:targetStaffId/edit-my-data/:updatedByStaffId", ZodValidateRestApi.validate("param", zodValidateRestApiUpdatedMyDataParam), AuthRestMiddleware.authSanitizedParamAndBody, async (c) => {
     try {
         const body: ZodValidateUpdatedMyData = c.get("body");
         const { targetStaffId, updatedByStaffId } = body;
@@ -88,4 +88,4 @@ manageStaffRestRouter.put("/staffs/:targetStaffId/edit-my-data/:updatedByStaffId
     }
 });
 
-export default manageStaffRestRouter;
+export default staffManageRestRouter;

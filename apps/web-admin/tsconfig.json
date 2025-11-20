@@ -8,20 +8,8 @@
     "paths": {
       "@/*": ["./*"],
       "@workspace/ui/*": ["../../packages/ui/src/*"],
-      "@/admin/packages/schema/*": [
-        "../../packages/services/schema/*"
-      ],
-      "@/admin/packages/types/*": [
-        "../../packages/services/types/*"
-      ],
-      "@/admin/packages/utils/*": [
-        "../../packages/services/utils/*"
-      ],
-      "@/admin/packages/validations/*": [
-        "../../packages/services/validations/*"
-      ],
-      "@/admin/packages/fonts/*": [
-        "../../packages/services/fonts/*"
+      "@/admin/packages/*": [
+        "../../packages/services/*"
       ],
     },
     "plugins": [
@@ -36,11 +24,7 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "../../packages/services/schema",
-    "../../packages/services/types",
-    "../../packages/services/utils",
-    "../../packages/services/validations",
-    "../../packages/services/fonts",
+    "../../packages/services",
   ],
   "exclude": ["node_modules"]
 }

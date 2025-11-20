@@ -30,7 +30,6 @@ export class SecureSessionManagerServices {
 
         if (signature !== expectedSignature) return null;
 
-        const ipAddress = ctx.get("ip") ?? '';
         const userAgent = ctx.get("userAgent") ?? '';
 
         const findSession = await db.query.sessions.findFirst({

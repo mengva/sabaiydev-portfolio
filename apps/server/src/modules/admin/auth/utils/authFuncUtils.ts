@@ -29,14 +29,11 @@ export class AuthFuncUtils {
         }
     }
 
-    public static async signInWithOTPAndEmailFunc(input: AuthSignInWithOTPAndEmailDto, ctx: HonoContext) {
+    public static async signInOTPFunc(input: AuthSignInWithOTPAndEmailDto, ctx: HonoContext) {
         try {
             const { userAgent, ipAddress } = AuthFuncHelperServices.getIpAddressAndUserAgent(ctx);
             const staff = await AuthFuncFindStaffUtils.findStaffSignInWithOTPCodeAndEmail({ ...input, userAgent, ipAddress }) as StaffSchema;
             await AuthFuncHelperServices.signIn(staff, ctx);
-            if (ipAddress) {
-                RateLimiterMiddleware.authLimiter.delete(ipAddress);
-            }
             return HandlerSuccess.success(AuthEnumMessage.successSignin);
         } catch (error) {
             throw getHTTPError(error);
@@ -86,9 +83,6 @@ export class AuthFuncUtils {
         try {
             const staff = await AuthFuncFindStaffUtils.findStaffVerifiedEmail(email) as StaffSchema;
             await AuthFuncHelperServices.verifiedEmail({ staff, email, userAgent, ipAddress });
-            if (ipAddress) {
-                RateLimiterMiddleware.authLimiter.delete(ipAddress);
-            }
             return HandlerSuccess.success(AuthEnumMessage.successSendOTP);
         } catch (error: ServerErrorDto) {
             throw getHTTPError(error);
@@ -101,23 +95,17 @@ export class AuthFuncUtils {
         try {
             const staff = await AuthFuncFindStaffUtils.findStaffVerifiedOTPCode(email) as StaffSchema;
             await AuthFuncHelperServices.verifiedOTPCode({ staff, clientOTP: code, userAgent, ipAddress });
-            if (ipAddress) {
-                RateLimiterMiddleware.authLimiter.delete(ipAddress);
-            }
             return HandlerSuccess.success(AuthEnumMessage.successVerifiedOTP);
         } catch (error: ServerErrorDto) {
             throw getHTTPError(error);
         }
     }
 
-    public static resetPasswordFunc = async (input: AuthResetPasswordDto, ctx: MyContext) => {
+    public static resetPasswordFunc = async (input: AuthResetPasswordDto, ctx: MyContext['honoContext']) => {
         try {
-            const { ipAddress, userAgent } = AuthFuncHelperServices.getIpAddressAndUserAgent(ctx['honoContext']);
+            const { ipAddress, userAgent } = AuthFuncHelperServices.getIpAddressAndUserAgent(ctx);
             const staff = await AuthFuncFindStaffUtils.findStaffResetPassword(input.email) as StaffSchema;
             await AuthFuncHelperServices.resetPassword({ staff, ...input, userAgent, ipAddress });
-            if (ipAddress) {
-                RateLimiterMiddleware.authLimiter.delete(ipAddress);
-            }
             return HandlerSuccess.success("Reset password successfully");
         } catch (error: ServerErrorDto) {
             throw getHTTPError(error);
