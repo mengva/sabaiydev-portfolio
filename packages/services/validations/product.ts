@@ -1,8 +1,7 @@
 import z from "zod";
-import { zodValidateFiles, zodValidateUuid } from "./constants";
-import { ProductCategoryArray, ProductStatusArray } from "../utils/constants/product";
+import { zodValidationFiles, zodValidationUuid } from "./constants";
 
-export const zodValidateTranslationProduct = z.array(z.object({
+export const zodValidationTranslationProduct = z.array(z.object({
     name: z.string().max(100),
     description: z.string().max(500),
     longDescription: z.string().max(1000),
@@ -10,44 +9,44 @@ export const zodValidateTranslationProduct = z.array(z.object({
     features: z.array(z.string().max(500)),
 }));
 
-export const zodValidateGetProductById = z.object({
-    productId: zodValidateUuid
+export const zodValidationGetOneProductById = z.object({
+    productId: zodValidationUuid
 });
 
-export const zodValidateAddNewProductData = z.object({
-    addByStaffId: zodValidateUuid,
-    translations: zodValidateTranslationProduct,
+export const zodValidationAddOneProductData = z.object({
+    addByStaffId: zodValidationUuid,
+    translations: zodValidationTranslationProduct,
     technologies: z.array(z.string().max(500)),
     category: z.enum(["COLLABORATION", "MEDIA", "ANALYTICS", "SECURITY", "DEVELOPMENT"] as const),
     status: z.enum(["ACTIVE", "INACTIVE", "DEVELOPMENT", "DEPRECATED"] as const),
 });
 
-export const zodValidateAddNewProduct = zodValidateAddNewProductData.extend({
-    imageFiles: zodValidateFiles
+export const zodValidationAddOneProduct = zodValidationAddOneProductData.extend({
+    imageFiles: zodValidationFiles
 });
 
-export const zodValidateUpdatedProductData = z.object({
-    updatedByStaffId: zodValidateUuid,
-    targetProductId: zodValidateUuid,
-    translations: zodValidateTranslationProduct,
+export const zodValidationEditOneProductData = z.object({
+    updatedByStaffId: zodValidationUuid,
+    targetProductId: zodValidationUuid,
+    translations: zodValidationTranslationProduct,
     technologies: z.array(z.string().max(500)),
     category: z.enum(["COLLABORATION", "MEDIA", "ANALYTICS", "SECURITY", "DEVELOPMENT"] as const),
     status: z.enum(["ACTIVE", "INACTIVE", "DEVELOPMENT", "DEPRECATED"] as const)
 });
 
-export const zodValidateRemoveProductById = z.object({
-    targetProductId: zodValidateUuid,
+export const zodValidationRemoveOneProductById = z.object({
+    targetProductId: zodValidationUuid,
     cloudId: z.string().nonempty("Invalid cloudId")
 });
 
-export const zodValidateUpdatedProduct = zodValidateUpdatedProductData.extend({
-    imageFiles: zodValidateFiles
+export const zodValidationEditOneProduct = zodValidationEditOneProductData.extend({
+    imageFiles: zodValidationFiles
 });
 
-export type ZodValidateGetProductById = z.infer<typeof zodValidateGetProductById>;
-export type ZodValidateTranslationProduct = z.infer<typeof zodValidateTranslationProduct>;
-export type ZodValidateAddNewProduct = z.infer<typeof zodValidateAddNewProduct>;
-export type ZodValidateAddNewProductData = z.infer<typeof zodValidateAddNewProductData>;
-export type ZodValidateUpdatedProductData = z.infer<typeof zodValidateUpdatedProductData>;
-export type ZodValidateUpdatedProduct = z.infer<typeof zodValidateUpdatedProduct>;
-export type ZodValidateRemoveProductById = z.infer<typeof zodValidateRemoveProductById>;
+export type ZodValidationGetOneProductById = z.infer<typeof zodValidationGetOneProductById>;
+export type ZodValidationTranslationProduct = z.infer<typeof zodValidationTranslationProduct>;
+export type ZodValidationAddOneProduct = z.infer<typeof zodValidationAddOneProduct>;
+export type ZodValidationAddOneProductData = z.infer<typeof zodValidationAddOneProductData>;
+export type ZodValidationEditOneProductData = z.infer<typeof zodValidationEditOneProductData>;
+export type ZodValidationEditOneProduct = z.infer<typeof zodValidationEditOneProduct>;
+export type ZodValidationRemoveOneProductById = z.infer<typeof zodValidationRemoveOneProductById>;

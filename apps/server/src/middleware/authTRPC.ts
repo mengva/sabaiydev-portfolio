@@ -6,7 +6,7 @@ import { RateLimiterMiddleware } from "./rateLimiterMiddleware";
 import { adminSessionTokenName } from "@/api/packages/utils/constants/auth";
 import { HandlerTRPCError } from "@/api/utils/handleTRPCError";
 import type { MyContext } from "../server/trpc/context";
-import { DOMAndSanitizeService } from "@/api/packages/utils/DOMAndSanitize";
+import { DOMAndSanitizedServices } from "@/api/packages/utils/DOMAndSanitize";
 
 export class AuthTRPCMiddleware {
 
@@ -73,7 +73,7 @@ export class AuthTRPCMiddleware {
     public static authSanitizedBody = t.middleware(async ({ ctx, input, next }) => {
         const result = await this.authSessionFunc(ctx);
         if (!result) throw HandlerTRPCError.TRPCErrorMessage("Unauthorized", "UNAUTHORIZED");
-        const sanitizeBody = DOMAndSanitizeService.domAndSanitizeObject(input);
+        const sanitizeBody = DOMAndSanitizedServices.domAndSanitizeObject(input);
         if (sanitizeBody) {
             ctx.honoContext.set("body", sanitizeBody);
             return next();

@@ -3,7 +3,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { zodValidateSignIn, ZodValidateSignIn } from "@/admin/packages/validations/auth";
+import { zodValidationSignIn, ZodValidationSignIn } from "@/admin/packages/validations/auth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
 import { Button } from "@workspace/ui/components/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@workspace/ui/components/form";
@@ -16,8 +16,8 @@ import { ServerResponseDto } from "@/admin/packages/types/constants";
 export default function SignInPage() {
     const router = useRouter();
 
-    const form = useForm<ZodValidateSignIn>({
-        resolver: zodResolver(zodValidateSignIn),
+    const form = useForm<ZodValidationSignIn>({
+        resolver: zodResolver(zodValidationSignIn),
         defaultValues: { email: "", password: "" },
     });
 
@@ -33,7 +33,7 @@ export default function SignInPage() {
         }
     });
 
-    function onSubmit({ email, password }: ZodValidateSignIn) {
+    function onSubmit({ email, password }: ZodValidationSignIn) {
         if (email && password) {
             signInMutation.mutate({ email, password });
         }

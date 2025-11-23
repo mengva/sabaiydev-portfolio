@@ -2,14 +2,14 @@ import db from "@/api/config/db";
 import { ManageStaffUtils } from "../../utils/staff";
 import { staffs } from "@/api/db";
 import { count, desc, eq } from "drizzle-orm";
-import type { ZodValidateTRPCFilter } from "@/api/packages/validations/constants";
+import type { ZodValidationTRPCFilter } from "@/api/packages/validations/constants";
 import { HandlerTRPCError } from "@/api/utils/handleTRPCError";
 import { HandlerSuccess } from "@/api/utils/handleSuccess";
 import { getHTTPError } from "@/api/packages/utils/HttpJsError";
 
 export class StaffManageQueriesServices {
 
-    public static list = async (input: ZodValidateTRPCFilter) => {
+    public static list = async (input: ZodValidationTRPCFilter) => {
         try {
             const { limit, page } = input;
             const offset = (page - 1) * limit;

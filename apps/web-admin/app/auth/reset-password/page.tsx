@@ -2,7 +2,7 @@
 
 import { ServerResponseDto } from "@/admin/packages/types/constants";
 import CookieHelper from "@/admin/packages/utils/Cookie";
-import { zodValidateEmail, zodValidatePassword } from "@/admin/packages/validations/constants";
+import { zodValidationEmail, zodValidationPassword } from "@/admin/packages/validations/constants";
 import trpc from "@/app/trpc/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@workspace/ui/components/button";
@@ -16,23 +16,23 @@ import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import z from "zod";
 
-const zodValidateResetPassword = z.object({
-    email: zodValidateEmail,
-    newPassword: zodValidatePassword,
-    confirmPassword: zodValidatePassword,
+const zodValidationResetPassword = z.object({
+    email: zodValidationEmail,
+    newPassword: zodValidationPassword,
+    confirmPassword: zodValidationPassword,
 }).refine((data) => data.newPassword === data.confirmPassword, {
     message: "Passwords do not match",
     path: ["confirmPassword"],
 });
 
-type ZodValidateResetPassword = z.infer<typeof zodValidateResetPassword>;
+type ZodValidationResetPassword = z.infer<typeof zodValidationResetPassword>;
 
 export default function ResetPasswordFormPage() {
     const router = useRouter();
     const email = CookieHelper.getCookieByKey("email") || "";
-    const [isValidateEmail, setIsValidateEmail] = useState(false);
-    const form = useForm<ZodValidateResetPassword>({
-        resolver: zodResolver(zodValidateResetPassword),
+    const [isValidationEmail, setIsValidationEmail] = useState(false);
+    const form = useForm<ZodValidationResetPassword>({
+        resolver: zodResolver(zodValidationResetPassword),
         defaultValues: { email, newPassword: "", confirmPassword: "" },
     });
 
@@ -49,20 +49,20 @@ export default function ResetPasswordFormPage() {
         }
     });
 
-    function onSubmit(values: ZodValidateResetPassword) {
+    function onSubmit(values: ZodValidationResetPassword) {
         if (values) {
             resetPasswordMutation.mutate({ email: email, newPassword: values.newPassword });
         }
     }
 
     useEffect(() => {
-        if (!isValidateEmail && email) {
-            const validateEmail = zodValidateEmail.safeParse(email);
-            if (validateEmail?.success) {
-                setIsValidateEmail(true);
+        if (!isValidationEmail && email) {
+            const ValidationEmail = zodValidationEmail.safeParse(email);
+            if (ValidationEmail?.success) {
+                setIsValidationEmail(true);
             }
         } else {
-            setIsValidateEmail(false);
+            setIsValidationEmail(false);
             toast.error("Email is required, Please try again later.")
         }
     }, [email]);

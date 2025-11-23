@@ -3,11 +3,11 @@ import { staffs } from "@/api/db";
 import type { StaffPermissionDto, StaffRoleDto } from "@/api/packages/types/constants";
 import { eq } from "drizzle-orm";
 import { CheckedRolePermissions, UserValidRolePermissions } from "@/api/packages/utils/constants";
-import type { ZodValidateAddNewStaff, ZodValidateUpdatedMyData, ZodValidateUpdatedStaff } from "@/api/packages/validations/staff";
+import type { ZodValidationAddOneStaff, ZodValidationEditMyData, ZodValidationEditStaff } from "@/api/packages/validations/staff";
 import { getHTTPError, HTTPErrorMessage } from "@/api/packages/utils/HttpJsError";
 import type { StatusCodeErrorDto } from "@/api/utils/constants";
 
-export class ValidateStaffRoleAndPerUtils {
+export class ValidationStaffRoleAndPerUtils {
 
     public static permissions = (
         userPermissions: StaffPermissionDto[],
@@ -50,7 +50,7 @@ export class ValidateStaffRoleAndPerUtils {
         }
     }
 
-    public static async addOneUser({ addByStaffId, ...data }: ZodValidateAddNewStaff) {
+    public static async addOneUser({ addByStaffId, ...data }: ZodValidationAddOneStaff) {
         try {
             const valid = await this.roleAndPermissions(data.role, data.permissions);
             if (valid.code !== "200") {
@@ -76,12 +76,13 @@ export class ValidateStaffRoleAndPerUtils {
             if (myRole === "VIEWER") {
                 throw new HTTPErrorMessage("VIEWER have no an permissions to add user", "403")
             }
+            return true;
         } catch (error) {
             throw getHTTPError(error);
         }
     }
 
-    public static async editOneUserById(data: ZodValidateUpdatedStaff) {
+    public static async editOneUserById(data: ZodValidationEditStaff) {
         try {
 
             const { targetStaffId, updatedByStaffId } = data;
@@ -110,6 +111,7 @@ export class ValidateStaffRoleAndPerUtils {
             // user can be edit other user by condition here
             const isCanEdit = Boolean(CheckedRolePermissions[myRole]?.includes(targetRole));
             if (!isCanEdit) throw new HTTPErrorMessage("You have no an permission to edit user data", "403");
+            return isCanEdit;
         } catch (error) {
             throw getHTTPError(error);
         }
@@ -152,12 +154,16 @@ export class ValidateStaffRoleAndPerUtils {
                 myRole === "SUPER_ADMIN" && ["ADMIN", "VIEWER", "EDITOR"].includes(targetRole) ||
                 myRole === "ADMIN" && ["VIEWER", "EDITOR"].includes(targetRole) || false
             )
+            if(!isCanRemove){
+                throw new HTTPErrorMessage("You have no an permissions to remove this user", "403");
+            }
+            return isCanRemove;
         } catch (error) {
             throw getHTTPError(error);
         }
     }
 
-    public static async editMyData(input: ZodValidateUpdatedMyData) {
+    public static async editMyData(input: ZodValidationEditMyData) {
         try {
             const { targetStaffId, updatedByStaffId, role, permissions } = input;
             const valid = await this.roleAndPermissions(role, permissions);
@@ -172,12 +178,12 @@ export class ValidateStaffRoleAndPerUtils {
             });
             if (!myData) throw new HTTPErrorMessage("Find not found", "403");
             const myRole = myData.role;
-            const isValidateRoleAndPer = Boolean(
+            const isValidationRoleAndPer = Boolean(
                 (myRole === "ADMIN" && !["ADMIN", "EDITOR", "VIEWER"].includes(role)) ||
                 (myRole === "EDITOR" && !["EDITOR", "VIEWER"].includes(role)) ||
                 (myRole === "VIEWER" && !["VIEWER"].includes(role)) || false
             )
-            if (isValidateRoleAndPer) {
+            if (isValidationRoleAndPer) {
                 throw new HTTPErrorMessage("Invalid edit my role and permissions", "403");
             }
             return myData;

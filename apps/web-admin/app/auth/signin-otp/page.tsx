@@ -8,14 +8,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@work
 import { Input } from '@workspace/ui/components/input';
 import { Button } from '@workspace/ui/components/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@workspace/ui/components/form';
-import { zodValidateEmail } from '@/admin/packages/validations/constants';
+import { zodValidationEmail } from '@/admin/packages/validations/constants';
 import Link from 'next/link';
 import trpc from '@/app/trpc/client';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import { Clock } from 'lucide-react';
 import { ServerResponseDto } from '@/admin/packages/types/constants';
-import { zodValidateSignInOTP, ZodValidateSignInOTP } from '@/admin/packages/validations/auth';
+import { zodValidationSignInOTP, ZodValidationSignInOTP } from '@/admin/packages/validations/auth';
 
 export default function SignInWithOTPFormPage() {
   const [step, setStep] = useState<"email" | "otp">("email");
@@ -25,12 +25,12 @@ export default function SignInWithOTPFormPage() {
   const [isExpired, setIsExpired] = useState(false);
 
   const emailForm = useForm<{ email: string }>({
-    resolver: zodResolver(z.object({ email: zodValidateEmail })),
+    resolver: zodResolver(z.object({ email: zodValidationEmail })),
     defaultValues: { email: "" },
   });
 
-  const signInWithOTPMutation = useForm<ZodValidateSignInOTP>({
-    resolver: zodResolver(zodValidateSignInOTP),
+  const signInWithOTPMutation = useForm<ZodValidationSignInOTP>({
+    resolver: zodResolver(zodValidationSignInOTP),
     defaultValues: { email: "", code: "" },
   });
 
@@ -68,7 +68,7 @@ export default function SignInWithOTPFormPage() {
     } else toast.error("Request failed, Please try again later");
   };
 
-  const verifyOTP = (values: ZodValidateSignInOTP) => {
+  const verifyOTP = (values: ZodValidationSignInOTP) => {
     if (values) {
       signInOTPMutation.mutate(values);
     }

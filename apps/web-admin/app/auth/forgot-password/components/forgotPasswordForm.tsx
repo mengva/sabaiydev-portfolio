@@ -10,7 +10,7 @@ import { Input } from "@workspace/ui/components/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@workspace/ui/components/tabs";
 import React, { useEffect } from "react";
 import z from "zod";
-import { zodValidateEmail, zodValidatePhoneNumber } from "@/admin/packages/validations/constants";
+import { zodValidationEmail, zodValidationPhoneNumber } from "@/admin/packages/validations/constants";
 import trpc from "@/app/trpc/client";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
@@ -20,8 +20,8 @@ import { ServerResponseDto } from "@/admin/packages/types/constants";
 type VerifiedEmailDto = "EMAIL" | "PHONE_NUMBER";
 
 const zodValidateForgotPasswordForm = z.object({
-    email: zodValidateEmail,
-    phoneNumber: zodValidatePhoneNumber
+    email: zodValidationEmail,
+    phoneNumber: zodValidationPhoneNumber
 });
 
 type ZodValidateForgotPasswordForm = z.infer<typeof zodValidateForgotPasswordForm>;

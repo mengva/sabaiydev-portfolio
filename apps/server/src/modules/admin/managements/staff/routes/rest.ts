@@ -2,11 +2,11 @@ import { AuthRestMiddleware } from '@/api/middleware/authREST';
 import { Hono } from 'hono';
 import { StaffManageQueriesServices } from '../services/queries/staff';
 import { ZodValidateRestApi } from '@/api/utils/zodValidateRestApi';
-import { zodValidateGetStaffById, zodValidateRestApiAddNewStaffParam, type ZodValidateGetStaffById, zodValidateRestApiUpdatedStaffParam, type ZodValidateAddNewStaff, type ZodValidateUpdatedStaff, zodValidateSearchStaffData, type ZodValidateSearchStaffData, type ZodValidateUpdatedMyData, zodValidateRestApiUpdatedMyData, zodValidateRestApiUpdatedMyDataParam, type ZodValidateRestApiUpdatedMyDataParam } from '@/api/packages/validations/staff';
-import { zodValidateTRPCFilter } from '@/api/packages/validations/constants';
+import { zodValidationGetOneStaffById, zodValidationRestApiAddOneStaffParam, type ZodValidationGetOneStaffById, zodValidationRestApiEditStaffParam, type ZodValidationAddOneStaff, type ZodValidationEditStaff, zodValidationSearchStaffData, type ZodValidationSearchStaffData, type ZodValidationEditMyData, zodValidationRestApiEditMyData, zodValidationRestApiEditMyDataParam, type ZodValidationRestApiEditMyDataParam } from '@/api/packages/validations/staff';
+import { zodValidationTRPCFilter } from '@/api/packages/validations/constants';
 import { StaffManageMutationServices } from '../services/mutation/staff';
-import { ValidateStaffRoleAndPerUtils } from '@/api/modules/admin/managements/staff/utils/validateRoleAndPer';
 import { HandlerHonoError } from '@/api/utils/handlerHonoError';
+import { ValidationStaffRoleAndPerUtils } from '../utils/validateRoleAndPer';
 
 const staffManageRestRouter = new Hono();
 
@@ -14,7 +14,7 @@ const staffManageRestRouter = new Hono();
 staffManageRestRouter.get("/staffs", AuthRestMiddleware.authSanitizedQueries, async (c) => {
     try {
         const { page, limit } = c.get("body");
-        const filter = zodValidateTRPCFilter.safeParse({
+        const filter = zodValidationTRPCFilter.safeParse({
             page: Number(page),
             limit: Number(limit)
         })
@@ -27,9 +27,9 @@ staffManageRestRouter.get("/staffs", AuthRestMiddleware.authSanitizedQueries, as
 });
 
 // get staff by id
-staffManageRestRouter.get("/staffs/:staffId", ZodValidateRestApi.validate("param", zodValidateGetStaffById), AuthRestMiddleware.authSession, async (c) => {
+staffManageRestRouter.get("/staffs/:staffId", ZodValidateRestApi.validate("param", zodValidationGetOneStaffById), AuthRestMiddleware.authSession, async (c) => {
     try {
-        const param: ZodValidateGetStaffById = c.req.valid("param");
+        const param: ZodValidationGetOneStaffById = c.req.valid("param");
         const response = await StaffManageQueriesServices.getOne(param.staffId);
         return c.json(response, 200);
     } catch (error) {
@@ -38,9 +38,9 @@ staffManageRestRouter.get("/staffs/:staffId", ZodValidateRestApi.validate("param
 });
 
 // search staff by condition
-staffManageRestRouter.get("/staffs", ZodValidateRestApi.validate("query", zodValidateSearchStaffData), AuthRestMiddleware.authSanitizedQueries, async (c) => {
+staffManageRestRouter.get("/staffs", ZodValidateRestApi.validate("query", zodValidationSearchStaffData), AuthRestMiddleware.authSanitizedQueries, async (c) => {
     try {
-        const body: ZodValidateSearchStaffData = c.get("body");
+        const body: ZodValidationSearchStaffData = c.get("body");
         const response = await StaffManageMutationServices.searchQuery(body);
         return c.json(response, 200);
     } catch (error) {
@@ -49,10 +49,10 @@ staffManageRestRouter.get("/staffs", ZodValidateRestApi.validate("query", zodVal
 });
 
 // add new staff
-staffManageRestRouter.post("/staffs/:addByStaffId/add-staff", ZodValidateRestApi.validate("param", zodValidateRestApiAddNewStaffParam), AuthRestMiddleware.authSanitizedParamAndBody, async (c) => {
+staffManageRestRouter.post("/staffs/:addByStaffId/add-staff", ZodValidateRestApi.validate("param", zodValidationRestApiAddOneStaffParam), AuthRestMiddleware.authSanitizedParamAndBody, async (c) => {
     try {
-        const body: ZodValidateAddNewStaff = c.get("body");
-        await ValidateStaffRoleAndPerUtils.addOneUser(body);
+        const body: ZodValidationAddOneStaff = c.get("body");
+        await ValidationStaffRoleAndPerUtils.addOneUser(body);
         const response = await StaffManageMutationServices.addOne(body);
         return c.json(response, 201);
     } catch (error) {
@@ -61,10 +61,10 @@ staffManageRestRouter.post("/staffs/:addByStaffId/add-staff", ZodValidateRestApi
 });
 
 // update staff by id
-staffManageRestRouter.put("/staffs/:targetStaffId/edit-staff/:updatedByStaffId", ZodValidateRestApi.validate("param", zodValidateRestApiUpdatedStaffParam), AuthRestMiddleware.authSanitizedParamAndBody, async (c) => {
+staffManageRestRouter.put("/staffs/:targetStaffId/edit-staff/:updatedByStaffId", ZodValidateRestApi.validate("param", zodValidationRestApiEditStaffParam), AuthRestMiddleware.authSanitizedParamAndBody, async (c) => {
     try {
-        const body: ZodValidateUpdatedStaff = c.get("body");
-        await ValidateStaffRoleAndPerUtils.editOneUserById(body);
+        const body: ZodValidationEditStaff = c.get("body");
+        await ValidationStaffRoleAndPerUtils.editOneUserById(body);
         const response = await StaffManageMutationServices.editById(body);
         return c.json(response, 201);
     } catch (error) {
@@ -73,14 +73,10 @@ staffManageRestRouter.put("/staffs/:targetStaffId/edit-staff/:updatedByStaffId",
 });
 
 // update my data by id
-staffManageRestRouter.put("/staffs/:targetStaffId/edit-my-data/:updatedByStaffId", ZodValidateRestApi.validate("param", zodValidateRestApiUpdatedMyDataParam), AuthRestMiddleware.authSanitizedParamAndBody, async (c) => {
+staffManageRestRouter.put("/staffs/:targetStaffId/edit-my-data/:updatedByStaffId", ZodValidateRestApi.validate("param", zodValidationRestApiEditMyDataParam), AuthRestMiddleware.authSanitizedParamAndBody, async (c) => {
     try {
-        const body: ZodValidateUpdatedMyData = c.get("body");
-        const { targetStaffId, updatedByStaffId } = body;
-        await ValidateStaffRoleAndPerUtils.editMyData({
-            targetStaffId,
-            updatedByStaffId
-        });
+        const body: ZodValidationEditMyData = c.get("body");
+        await ValidationStaffRoleAndPerUtils.editMyData(body);
         const response = await StaffManageMutationServices.editMyDataById(body);
         return c.json(response, 201);
     } catch (error) {

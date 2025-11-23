@@ -1,5 +1,5 @@
 import { StaffPermissionEnum, StaffRoleEnum, StaffStatusEnum } from "@/api/packages/utils/constants/auth";
-import type { ZodValidateSignUp } from "@/api/packages/validations/auth";
+import type { ZodValidationSignUp } from "@/api/packages/validations/auth";
 import { TRPCError } from "@trpc/server";
 import { Helper } from "../utils/helper";
 import { staffs } from "../db";
@@ -9,7 +9,7 @@ import db from "../config/db";
 export async function autoSignup() {
     try {
 
-        const body: ZodValidateSignUp = {
+        const body: ZodValidationSignUp = {
             fullName: "johndoe",
             email: "johndoe@gmail.com",
             password: 'Johndoe@1234',

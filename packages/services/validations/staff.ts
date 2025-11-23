@@ -1,108 +1,108 @@
 import z from "zod";
-import { zodValidateEmail, zodValidateTRPCFilter, zodValidateFullName, zodValidatePassword, zodValidatePermissions, zodValidateRole, zodValidateSearchQuery, zodValidateSearchQueryPermissions, zodValidateSearchQueryRole, zodValidateSearchQueryStatus, zodValidateStatus, zodValidateStrDate, zodValidateUuid } from "./constants";
+import { zodValidationEmail, zodValidationTRPCFilter, zodValidationFullName, zodValidationPassword, zodValidationPermissions, zodValidationRole, zodValidationSearchQuery, zodValidationSearchQueryPermissions, zodValidationSearchQueryRole, zodValidationSearchQueryStatus, zodValidationStatus, zodValidationStrDate, zodValidationUuid } from "./constants";
 
 // rest api
 
 // add staff param
-export const zodValidateRestApiAddNewStaffParam = z.object({
-    addByStaffId: zodValidateUuid,
+export const zodValidationRestApiAddOneStaffParam = z.object({
+    addByStaffId: zodValidationUuid,
 });
 
 // add staff body data
-export const zodValidateRestApiAddNewStaff = z.object({
-    fullName: zodValidateFullName,
-    email: zodValidateEmail,
-    password: zodValidatePassword,
-    role: zodValidateRole,
-    status: zodValidateStatus,
-    permissions: zodValidatePermissions
+export const zodValidationRestApiAddOneStaff = z.object({
+    fullName: zodValidationFullName,
+    email: zodValidationEmail,
+    password: zodValidationPassword,
+    role: zodValidationRole,
+    status: zodValidationStatus,
+    permissions: zodValidationPermissions
 });
 
 // udpate staff param
-export const zodValidateRestApiUpdatedStaffParam = z.object({
-    targetStaffId: zodValidateUuid,
-    updatedByStaffId: zodValidateUuid,
+export const zodValidationRestApiEditStaffParam = z.object({
+    targetStaffId: zodValidationUuid,
+    updatedByStaffId: zodValidationUuid,
 });
 
 // update staff body data
-export const zodValidateRestApiUpdatedStaff = z.object({
-    role: zodValidateRole,
-    status: zodValidateStatus,
-    permissions: zodValidatePermissions
+export const zodValidationRestApiEditStaff = z.object({
+    role: zodValidationRole,
+    status: zodValidationStatus,
+    permissions: zodValidationPermissions
 });
 
-export const zodValidateRestApiUpdatedMyDataParam = z.object({
-    updatedByStaffId: zodValidateUuid,
-    targetStaffId: zodValidateUuid,
+export const zodValidationRestApiEditMyDataParam = z.object({
+    updatedByStaffId: zodValidationUuid,
+    targetStaffId: zodValidationUuid,
 });
 
 // update my body data
-export const zodValidateRestApiUpdatedMyData = z.object({
-    email: zodValidateEmail,
-    role: zodValidateRole,
-    status: zodValidateStatus,
-    permissions: zodValidatePermissions
+export const zodValidationRestApiEditMyData = z.object({
+    email: zodValidationEmail,
+    role: zodValidationRole,
+    status: zodValidationStatus,
+    permissions: zodValidationPermissions
 });
 
 // trpc or rest api
 
 // add new staff
-export const zodValidateAddNewStaff = zodValidateRestApiAddNewStaff.extend({
-    addByStaffId: zodValidateUuid,
+export const zodValidationAddOneStaff = zodValidationRestApiAddOneStaff.extend({
+    addByStaffId: zodValidationUuid,
 });
 
 // update staff
-export const zodValidateUpdatedStaff = zodValidateRestApiUpdatedStaff.extend({
-    targetStaffId: zodValidateUuid,
-    updatedByStaffId: zodValidateUuid,
-    role: zodValidateRole,
-    status: zodValidateStatus,
-    permissions: zodValidatePermissions
+export const zodValidationEditStaff = zodValidationRestApiEditStaff.extend({
+    targetStaffId: zodValidationUuid,
+    updatedByStaffId: zodValidationUuid,
+    role: zodValidationRole,
+    status: zodValidationStatus,
+    permissions: zodValidationPermissions
 });
 
 // update my data
-export const zodValidateUpdatedMyData = zodValidateRestApiUpdatedMyData.extend({
-    updatedByStaffId: zodValidateUuid,
-    targetStaffId: zodValidateUuid,
+export const zodValidationEditMyData = zodValidationRestApiEditMyData.extend({
+    updatedByStaffId: zodValidationUuid,
+    targetStaffId: zodValidationUuid,
 });
 
-export const zodValidateGetBySessionToken = z.object({
+export const zodValidationGetBySessionToken = z.object({
     sessionToken: z.string().min(40, "Invalid sessionToken length").nonempty("SessionToken is required"),
-    staffId: zodValidateUuid,
+    staffId: zodValidationUuid,
 })
 
 // remove staff by id
-export const zodValidateRemoveStaffById = z.object({
-    removeByStaffId: zodValidateUuid,
-    targetStaffId: zodValidateUuid,
+export const zodValidationRemoveOneStaffById = z.object({
+    removeByStaffId: zodValidationUuid,
+    targetStaffId: zodValidationUuid,
 });
 
 // query or search staff by this condition
-export const zodValidateSearchStaffData = zodValidateTRPCFilter.extend({
-    query: zodValidateSearchQuery,
-    role: zodValidateSearchQueryRole,
-    status: zodValidateSearchQueryStatus,
-    startDate: zodValidateStrDate,
-    endDate: zodValidateStrDate,
+export const zodValidationSearchStaffData = zodValidationTRPCFilter.extend({
+    query: zodValidationSearchQuery,
+    role: zodValidationSearchQueryRole,
+    status: zodValidationSearchQueryStatus,
+    startDate: zodValidationStrDate,
+    endDate: zodValidationStrDate,
 });
 
-export const zodValidateGetStaffById = z.object({
-    staffId: zodValidateUuid
+export const zodValidationGetOneStaffById = z.object({
+    staffId: zodValidationUuid
 });
 
 // rest api only
-export type ZodValidateRestApiAddNewStaffParam = z.infer<typeof zodValidateRestApiAddNewStaffParam>;
-export type ZodValidateRestApiAddNewStaff = z.infer<typeof zodValidateRestApiAddNewStaff>;
-export type ZodValidateRestApiUpdatedStaffParam = z.infer<typeof zodValidateRestApiUpdatedStaffParam>;
-export type ZodValidateRestApiUpdatedStaff = z.infer<typeof zodValidateRestApiUpdatedStaff>;
-export type ZodValidateRestApiUpdatedMyData = z.infer<typeof zodValidateRestApiUpdatedMyData>;
+export type ZodValidationRestApiAddOneStaffParam = z.infer<typeof zodValidationRestApiAddOneStaffParam>;
+export type ZodValidationRestApiAddOneStaff = z.infer<typeof zodValidationRestApiAddOneStaff>;
+export type ZodValidationRestApiEditStaffParam = z.infer<typeof zodValidationRestApiEditStaffParam>;
+export type ZodValidationRestApiEditStaff = z.infer<typeof zodValidationRestApiEditStaff>;
+export type ZodValidationRestApiEditMyData = z.infer<typeof zodValidationRestApiEditMyData>;
 
 // trpc or rest api
-export type ZodValidateGetBySessionToken = z.infer<typeof zodValidateGetBySessionToken>;
-export type ZodValidateRestApiUpdatedMyDataParam = z.infer<typeof zodValidateRestApiUpdatedMyDataParam>;
-export type ZodValidateUpdatedMyData = z.infer<typeof zodValidateUpdatedMyData>;
-export type ZodValidateAddNewStaff = z.infer<typeof zodValidateAddNewStaff>;
-export type ZodValidateUpdatedStaff = z.infer<typeof zodValidateUpdatedStaff>;
-export type ZodValidateSearchStaffData = z.infer<typeof zodValidateSearchStaffData>;
-export type ZodValidateGetStaffById = z.infer<typeof zodValidateGetStaffById>;
-export type ZodValidateRemoveStaffById = z.infer<typeof zodValidateRemoveStaffById>;
+export type ZodValidationGetBySessionToken = z.infer<typeof zodValidationGetBySessionToken>;
+export type ZodValidationRestApiEditMyDataParam = z.infer<typeof zodValidationRestApiEditMyDataParam>;
+export type ZodValidationEditMyData = z.infer<typeof zodValidationEditMyData>;
+export type ZodValidationAddOneStaff = z.infer<typeof zodValidationAddOneStaff>;
+export type ZodValidationEditStaff = z.infer<typeof zodValidationEditStaff>;
+export type ZodValidationSearchStaffData = z.infer<typeof zodValidationSearchStaffData>;
+export type ZodValidationGetOneStaffById = z.infer<typeof zodValidationGetOneStaffById>;
+export type ZodValidationRemoveOneStaffById = z.infer<typeof zodValidationRemoveOneStaffById>;

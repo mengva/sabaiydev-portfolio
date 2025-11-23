@@ -1,11 +1,11 @@
 import { AuthRestMiddleware } from '@/api/middleware/authREST';
 import { Hono } from 'hono';
-import { zodValidateTRPCFilter } from '@/api/packages/validations/constants';
-import { ValidateStaffRoleAndPerUtils } from '@/api/modules/admin/managements/staff/utils/validateRoleAndPer';
+import { zodValidationTRPCFilter } from '@/api/packages/validations/constants';
+import { ValidationStaffRoleAndPerUtils } from '@/api/modules/admin/managements/staff/utils/ValidationRoleAndPer';
 import { HandlerHonoError } from '@/api/utils/handlerHonoError';
-import { DOMAndSanitizeService } from '@/api/packages/utils/DOMAndSanitize';
+import { DOMAndSanitizedServices } from '@/api/packages/utils/DOMAndSanitize';
 import type { FileDto } from '@/api/packages/types/constants';
-import type { ZodValidateAddNewProduct } from '@/api/packages/validations/product';
+import type { ZodValidationAddOneProduct } from '@/api/packages/validations/product';
 import { DomAndSanitizeRESTBodyMiddleware } from '@/api/middleware/domAndSanitizeRESTBody';
 
 const productManageRestRouter = new Hono();

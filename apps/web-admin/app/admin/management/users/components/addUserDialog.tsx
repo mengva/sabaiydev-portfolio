@@ -2,7 +2,7 @@ import { StaffSchema } from '@/admin/packages/schema/staff';
 import { ServerResponseDto, StaffPermissionDto, StaffRoleDto, MyDataDto } from '@/admin/packages/types/constants';
 import { UserValidRolePermissions } from '@/admin/packages/utils/constants';
 import { StaffRoleArray, StaffStatusArray } from '@/admin/packages/utils/constants/auth';
-import { zodValidateAddNewStaff, ZodValidateAddNewStaff } from '@/admin/packages/validations/staff';
+import { zodValidationAddOneStaff, ZodValidationAddOneStaff } from '@/admin/packages/validations/staff';
 import trpc from '@/app/trpc/client';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@workspace/ui/components/button';
@@ -36,8 +36,8 @@ function AddUserDialogComponent({
     const [showConfirmClose, setShowConfirmClose] = useState(false);
     const [editRoles, setEditRoles] = useState([] as StaffRoleDto[]);
     const isNotViewer = myData && myData.role !== "VIEWER";
-    const form = useForm<ZodValidateAddNewStaff>({
-        resolver: zodResolver(zodValidateAddNewStaff),
+    const form = useForm<ZodValidationAddOneStaff>({
+        resolver: zodResolver(zodValidationAddOneStaff),
         defaultValues: {
             addByStaffId: myData.id,
             fullName: "",
@@ -175,7 +175,7 @@ function AddUserDialogComponent({
                 role: user.role ?? "VIEWER",
                 status: user.status ?? "ACTIVE",
                 permissions: user.permissions ?? ["READ"],
-            } as ZodValidateAddNewStaff;
+            } as ZodValidationAddOneStaff;
 
             onChangeRole(user.role);
             form.reset(resetValues);
@@ -207,7 +207,7 @@ function AddUserDialogComponent({
 
     const editMyDataMutation = trpc.app.admin.manage.staff.editMyDataById.useMutation({ ...userMutation });
 
-    const onSubmit = (data: ZodValidateAddNewStaff) => {
+    const onSubmit = (data: ZodValidationAddOneStaff) => {
         if (!data) return;
 
         if (!editById) return addOneUserMutation.mutate(data);

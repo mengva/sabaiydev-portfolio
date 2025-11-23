@@ -10,21 +10,21 @@ import Link from "next/link";
 import CookieHelper from "@/admin/packages/utils/Cookie";
 import trpc from "@/app/trpc/client";
 import toast from "react-hot-toast";
-import { zodValidateEmail } from "@/admin/packages/validations/constants";
+import { zodValidationEmail } from "@/admin/packages/validations/constants";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Clock } from "lucide-react";
 import { ServerResponseDto } from "@/admin/packages/types/constants";
-import { zodValidateSignInOTP, ZodValidateSignInOTP } from "@/admin/packages/validations/auth";
+import { zodValidationSignInOTP, ZodValidationSignInOTP } from "@/admin/packages/validations/auth";
 
 export default function VerifyOtpFormPage() {
   const email = CookieHelper.getCookieByKey("email") || "";
   const router = useRouter();
-  const [isValidateEmail, setIsValidateEmail] = useState(false);
+  const [isValidationEmail, setIsValidationEmail] = useState(false);
   const [timeLeft, setTimeLeft] = useState(30); // 30 seconds
   const [isExpired, setIsExpired] = useState(false);
-  const form = useForm<ZodValidateSignInOTP>({
-    resolver: zodResolver(zodValidateSignInOTP),
+  const form = useForm<ZodValidationSignInOTP>({
+    resolver: zodResolver(zodValidationSignInOTP),
     defaultValues: { email, code: "" },
   });
 
@@ -51,26 +51,26 @@ export default function VerifyOtpFormPage() {
   });
 
   const sendOTP = () => {
-    if (email && isValidateEmail) {
+    if (email && isValidationEmail) {
       verifiedByEmailMutation.mutate({ email });
       return;
     } else toast.error("Request failed, Please try again later");
   };
 
-  const onSubmit = (data: ZodValidateSignInOTP) => {
+  const onSubmit = (data: ZodValidationSignInOTP) => {
     if (data) {
       verifiedOTPCodeMutation.mutate({ email: data.email, code: data.code });
     }
   }
 
   useEffect(() => {
-    if (!isValidateEmail && email) {
-      const validateEmail = zodValidateEmail.safeParse(email);
-      if (validateEmail?.success) {
-        setIsValidateEmail(true);
+    if (!isValidationEmail && email) {
+      const ValidationEmail = zodValidationEmail.safeParse(email);
+      if (ValidationEmail?.success) {
+        setIsValidationEmail(true);
       }
     } else {
-      setIsValidateEmail(false);
+      setIsValidationEmail(false);
       toast.error("Email is required, Please try again later.")
     }
   }, [email]);

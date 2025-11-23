@@ -1,7 +1,7 @@
 import { DOMPurifyServices } from "./DOMPurify";
 import { SecureSanitizeServices } from "./Sanitize";
 
-export class DOMAndSanitizeService {
+export class DOMAndSanitizedServices {
     public static domAndSanitizeObject(obj: unknown) {
         const domPurifyData = DOMPurifyServices.domSanitizedObject(obj);
         const sanitizedData = SecureSanitizeServices.sanitizedArrayOrObject(domPurifyData);

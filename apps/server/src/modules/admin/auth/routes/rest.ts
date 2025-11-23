@@ -1,19 +1,19 @@
 import { Hono } from 'hono';
-import { zodValidateResetPassword, zodValidateSignIn, zodValidateVerifiedOTPCode, zodValidateVerifiedEmail, zodValidateSignUp, type ZodValidateVerifiedOTPCode, type ZodValidateSignIn, type ZodValidateSignUp, type ZodValidateVerifiedEmail, type ZodValidateResetPassword, zodValidateSignInOTP, type ZodValidateSignInOTP } from '@/api/packages/validations/auth';
+import { zodValidationResetPassword, zodValidationSignIn, zodValidationVerifiedOTPCode, zodValidationVerifiedEmail, zodValidationSignUp, type ZodValidationVerifiedOTPCode, type ZodValidationSignIn, type ZodValidationSignUp, type ZodValidationVerifiedEmail, type ZodValidationResetPassword, zodValidationSignInOTP, type ZodValidationSignInOTP } from '@/api/packages/validations/auth';
 import { ZodValidateRestApi } from '@/api/utils/zodValidateRestApi';
 import { AuthRestMiddleware } from '@/api/middleware/authREST';
 import type { ServerErrorDto } from '@/api/packages/types/constants';
 import { HandlerTRPCError } from '@/api/utils/handleTRPCError';
-import { DOMAndSanitizeService } from '@/api/packages/utils/DOMAndSanitize';
+import { DOMAndSanitizedServices } from '@/api/packages/utils/DOMAndSanitize';
 import { AuthFuncHelperServices } from '../utils/authFuncHelperUtils';
 import { AuthFuncUtils } from '../utils/AuthFuncUtils';
 
 const authRestRouter = new Hono();
 
-authRestRouter.post("/sign-in", ZodValidateRestApi.validate("json", zodValidateSignIn), AuthRestMiddleware.alreadySignIn, async (c) => {
+authRestRouter.post("/sign-in", ZodValidateRestApi.validate("json", zodValidationSignIn), AuthRestMiddleware.alreadySignIn, async (c) => {
     try {
-        const body: ZodValidateSignIn = c.req.valid("json");
-        const sanitizeBody = DOMAndSanitizeService.domAndSanitizeObject(body) as ZodValidateSignIn;
+        const body: ZodValidationSignIn = c.req.valid("json");
+        const sanitizeBody = DOMAndSanitizedServices.domAndSanitizeObject(body) as ZodValidationSignIn;
         const response = await AuthFuncUtils.signInFunc(sanitizeBody, c);
         if (response) {
             return c.json(response, 201);
@@ -23,10 +23,10 @@ authRestRouter.post("/sign-in", ZodValidateRestApi.validate("json", zodValidateS
     }
 });
 
-authRestRouter.post("/sign-in/OTP", ZodValidateRestApi.validate("json", zodValidateSignInOTP), AuthRestMiddleware.alreadySignIn, async (c) => {
+authRestRouter.post("/sign-in/OTP", ZodValidateRestApi.validate("json", zodValidationSignInOTP), AuthRestMiddleware.alreadySignIn, async (c) => {
     try {
-        const body: ZodValidateSignInOTP = c.req.valid("json");
-        const sanitizeBody = DOMAndSanitizeService.domAndSanitizeObject(body) as ZodValidateSignInOTP;
+        const body: ZodValidationSignInOTP = c.req.valid("json");
+        const sanitizeBody = DOMAndSanitizedServices.domAndSanitizeObject(body) as ZodValidationSignInOTP;
         const response = await AuthFuncUtils.signInOTPFunc(sanitizeBody, c);
         if (response) {
             return c.json(response, 201);
@@ -36,10 +36,10 @@ authRestRouter.post("/sign-in/OTP", ZodValidateRestApi.validate("json", zodValid
     }
 });
 
-authRestRouter.post("/sign-up", ZodValidateRestApi.validate("json", zodValidateSignUp), AuthRestMiddleware.alreadySignIn, async (c) => {
+authRestRouter.post("/sign-up", ZodValidateRestApi.validate("json", zodValidationSignUp), AuthRestMiddleware.alreadySignIn, async (c) => {
     try {
-        const body: ZodValidateSignUp = c.req.valid("json");
-        const sanitizeBody = DOMAndSanitizeService.domAndSanitizeObject(body) as ZodValidateSignUp;
+        const body: ZodValidationSignUp = c.req.valid("json");
+        const sanitizeBody = DOMAndSanitizedServices.domAndSanitizeObject(body) as ZodValidationSignUp;
         const response = await AuthFuncUtils.signUpFunc(sanitizeBody);
         if (response) {
             return c.json(response, 201);
@@ -60,10 +60,10 @@ authRestRouter.post("/sign-out", AuthRestMiddleware.authSession, async (c) => {
     }
 });
 
-authRestRouter.post("/verified-email", ZodValidateRestApi.validate("json", zodValidateVerifiedEmail), AuthRestMiddleware.alreadySignIn, async (c) => {
+authRestRouter.post("/verified-email", ZodValidateRestApi.validate("json", zodValidationVerifiedEmail), AuthRestMiddleware.alreadySignIn, async (c) => {
     try {
-        const body: ZodValidateVerifiedEmail = c.req.valid("json");
-        const sanitizeBody = DOMAndSanitizeService.domAndSanitizeString(body.email, 100) as string;
+        const body: ZodValidationVerifiedEmail = c.req.valid("json");
+        const sanitizeBody = DOMAndSanitizedServices.domAndSanitizeString(body.email, 100) as string;
         const { userAgent, ipAddress } = AuthFuncHelperServices.getIpAddressAndUserAgent(c);
         const res = await AuthFuncUtils.verifiedEmailFunc(sanitizeBody, userAgent, ipAddress);
         return c.json(res, 201);
@@ -72,10 +72,10 @@ authRestRouter.post("/verified-email", ZodValidateRestApi.validate("json", zodVa
     }
 });
 
-authRestRouter.post("/verified-OTP-code", ZodValidateRestApi.validate("json", zodValidateVerifiedOTPCode), AuthRestMiddleware.alreadySignIn, async (c) => {
+authRestRouter.post("/verified-OTP-code", ZodValidateRestApi.validate("json", zodValidationVerifiedOTPCode), AuthRestMiddleware.alreadySignIn, async (c) => {
     try {
-        const body: ZodValidateVerifiedOTPCode = c.req.valid("json");
-        const sanitizeBody = DOMAndSanitizeService.domAndSanitizeObject(body) as ZodValidateVerifiedOTPCode;
+        const body: ZodValidationVerifiedOTPCode = c.req.valid("json");
+        const sanitizeBody = DOMAndSanitizedServices.domAndSanitizeObject(body) as ZodValidationVerifiedOTPCode;
         const { userAgent, ipAddress } = AuthFuncHelperServices.getIpAddressAndUserAgent(c);
         const res = await AuthFuncUtils.verifiedOTPCodeFunc({ ...sanitizeBody, ipAddress, userAgent });
         return c.json(res, 201);
@@ -84,10 +84,10 @@ authRestRouter.post("/verified-OTP-code", ZodValidateRestApi.validate("json", zo
     }
 });
 
-authRestRouter.post("/reset-password", ZodValidateRestApi.validate("json", zodValidateResetPassword), AuthRestMiddleware.alreadySignIn, async (c) => {
+authRestRouter.post("/reset-password", ZodValidateRestApi.validate("json", zodValidationResetPassword), AuthRestMiddleware.alreadySignIn, async (c) => {
     try {
-        const body: ZodValidateResetPassword = c.req.valid("json");
-        const sanitizeBody = DOMAndSanitizeService.domAndSanitizeObject(body) as ZodValidateResetPassword;
+        const body: ZodValidationResetPassword = c.req.valid("json");
+        const sanitizeBody = DOMAndSanitizedServices.domAndSanitizeObject(body) as ZodValidationResetPassword;
         const res = await AuthFuncUtils.resetPasswordFunc(sanitizeBody, c);
         return c.json(res, 201);
     } catch (error: ServerErrorDto) {

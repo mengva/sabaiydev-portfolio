@@ -5,7 +5,7 @@ export type ProductStatusDto = "ACTIVE" | "INACTIVE" | "DEVELOPMENT" | "DEPRECAT
 export type SearchQueryProductCategoryDto = "DEFAULT" | ProductCategoryDto;
 export type SearchQueryProductStatusDto = "DEFAULT" | ProductStatusDto;
 
-export interface AddNewProductDto {
+export interface AddOneProductDto {
     addByStaffId: string;
     translations: TranslationProductDto[];
     technologies: string[];

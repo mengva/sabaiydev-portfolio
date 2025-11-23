@@ -1,19 +1,19 @@
 import db from "@/api/config/db";
 import { addAndEditStaffs, staffs } from "@/api/db";
-import type { ZodValidateAddNewStaff, ZodValidateSearchStaffData, ZodValidateUpdatedMyData, ZodValidateUpdatedStaff } from "@/api/packages/validations/staff";
+import type { ZodValidationAddOneStaff, ZodValidationSearchStaffData, ZodValidationEditMyData, ZodValidationEditStaff } from "@/api/packages/validations/staff";
 import { Helper } from "@/api/utils/helper";
 import { ManageStaffUtils } from "../../utils/staff";
 import { count, desc, eq, ne } from "drizzle-orm";
-import type { ZodValidatePermissions } from "@/api/packages/validations/constants";
+import type { ZodValidationPermissions } from "@/api/packages/validations/constants";
 import { HandlerSuccess } from "@/api/utils/handleSuccess";
 import { getHTTPError, HTTPError } from "@/api/packages/utils/HttpJsError";
 
 export class StaffManageMutationServices {
 
-    public static async addOne(input: ZodValidateAddNewStaff) {
+    public static async addOne(input: ZodValidationAddOneStaff) {
         try {
             const { permissions, addByStaffId, email, ...data } = input;
-            const newPermissions: ZodValidatePermissions = await ManageStaffUtils.validateAddOne(email, permissions);
+            const newPermissions: ZodValidationPermissions = await ManageStaffUtils.validationAddOne(email, permissions);
             await db.transaction(async tx => {
                 const hastPassword = await Helper.bcryptHast(data.password);
                 const newStaff = await tx.insert(staffs).values({
@@ -31,16 +31,16 @@ export class StaffManageMutationServices {
                     targetStaffId,
                 });
             });
-            return HandlerSuccess.success("Add new staff successfully");
+            return HandlerSuccess.success("Add one staff successfully");
         } catch (error) {
             throw getHTTPError(error);
         }
     }
 
-    public static async editById(input: ZodValidateUpdatedStaff) {
+    public static async editById(input: ZodValidationEditStaff) {
         try {
             const { permissions, updatedByStaffId, targetStaffId, ...data } = input;
-            const newPermissions: ZodValidatePermissions = ManageStaffUtils.validatePermission(permissions);
+            const newPermissions: ZodValidationPermissions = ManageStaffUtils.validationPermission(permissions);
             await db.transaction(async tx => {
                 await tx.update(staffs).set({
                     ...data,
@@ -50,16 +50,16 @@ export class StaffManageMutationServices {
                     updatedByStaffId
                 }).where(eq(addAndEditStaffs.targetStaffId, targetStaffId))
             });
-            return HandlerSuccess.success("Update staff data successfully");
+            return HandlerSuccess.success("Edit staff data successfully");
         } catch (error) {
             throw getHTTPError(error);
         }
     }
 
-    public static async editMyDataById(input: ZodValidateUpdatedMyData) {
+    public static async editMyDataById(input: ZodValidationEditMyData) {
         try {
             const { updatedByStaffId, targetStaffId, permissions, ...data } = input;
-            const newPermissions: ZodValidatePermissions = ManageStaffUtils.validatePermission(permissions);
+            const newPermissions: ZodValidationPermissions = ManageStaffUtils.validationPermission(permissions);
             const response = await db.transaction(async tx => {
                 let updateStaff = null;
                 if (["SUPER_ADMIN", "ADMIN"].includes(data.role)) {
@@ -79,13 +79,13 @@ export class StaffManageMutationServices {
                 }).where(eq(addAndEditStaffs.targetStaffId, targetStaffId));
                 return updateStaff;
             });
-            return HandlerSuccess.success("Update my data successfully", response);
+            return HandlerSuccess.success("Edit my data successfully", response);
         } catch (error) {
             throw getHTTPError(error);
         }
     }
 
-    public static async searchQuery(input: ZodValidateSearchStaffData) {
+    public static async searchQuery(input: ZodValidationSearchStaffData) {
         try {
             const { page, limit } = input;
             const offset = (page - 1) * limit;

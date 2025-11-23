@@ -1,8 +1,8 @@
 import db from "@/api/config/db";
 import GlobalHelper from "@/api/packages/utils/GlobalHelper";
 import { staffs } from "../entities";
-import type { ZodValidatePermissions } from "@/api/packages/validations/constants";
-import type { ZodValidateSearchStaffData } from "@/api/packages/validations/staff";
+import type { ZodValidationPermissions } from "@/api/packages/validations/constants";
+import type { ZodValidationSearchStaffData } from "@/api/packages/validations/staff";
 import { and, between, eq, ilike, or, sql } from "drizzle-orm";
 import { getHTTPError, HTTPErrorMessage } from "@/api/packages/utils/HttpJsError";
 
@@ -17,9 +17,9 @@ export class ManageStaffUtils {
         createdAt: staffs.createdAt,
         updatedAt: staffs.updatedAt
     }
-    public static async validateAddOne(email: string, permissions: ZodValidatePermissions) {
+    public static async validationAddOne(email: string, permissions: ZodValidationPermissions) {
         try {
-            const newPermissions: ZodValidatePermissions = this.validatePermission(permissions);
+            const newPermissions: ZodValidationPermissions = this.validationPermission(permissions);
             const emailExisting = await db.query.staffs.findFirst({
                 where: (staffs, { eq }) => eq(staffs.email, email),
             });
@@ -30,9 +30,9 @@ export class ManageStaffUtils {
         }
     }
 
-    public static validatePermission(permissions: ZodValidatePermissions) {
+    public static validationPermission(permissions: ZodValidationPermissions) {
         try {
-            const newPermissions: ZodValidatePermissions = GlobalHelper.uniquePermissions(permissions);
+            const newPermissions: ZodValidationPermissions = GlobalHelper.uniquePermissions(permissions);
             if (!newPermissions.length) throw new HTTPErrorMessage("Permissions is required", "403");
             return newPermissions;
         } catch (error) {
@@ -40,7 +40,7 @@ export class ManageStaffUtils {
         }
     }
 
-    public static async searchQuery(input: ZodValidateSearchStaffData) {
+    public static async searchQuery(input: ZodValidationSearchStaffData) {
         const { query, role, startDate, endDate, status } = input;
         const conditions: any[] = [];
         if (query) {

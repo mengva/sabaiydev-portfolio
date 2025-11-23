@@ -1,6 +1,6 @@
 import { HandlerTRPCError } from "../utils/handleTRPCError";
 import type { MyContext } from "../server/trpc/context";
-import { DOMAndSanitizeService } from "@/api/packages/utils/DOMAndSanitize";
+import { DOMAndSanitizedServices } from "@/api/packages/utils/DOMAndSanitize";
 
 export class DomAndSanitizeRESTBodyMiddleware {
     public static setData(bodyData: any, data: any) {
@@ -22,7 +22,7 @@ export class DomAndSanitizeRESTBodyMiddleware {
         if (queries && typeof queries === "object") {
             this.setData(bodyQueries, queries);
         }
-        const sanitizeQueries = DOMAndSanitizeService.domAndSanitizeObject(bodyQueries);
+        const sanitizeQueries = DOMAndSanitizedServices.domAndSanitizeObject(bodyQueries);
         if (sanitizeQueries) {
             ctx.set("body", sanitizeQueries);
             return ctx;
@@ -40,7 +40,7 @@ export class DomAndSanitizeRESTBodyMiddleware {
         if (body && typeof body === "object") {
             this.setData(bodyData, body);
         }
-        const sanitizeBody = DOMAndSanitizeService.domAndSanitizeObject(bodyData);
+        const sanitizeBody = DOMAndSanitizedServices.domAndSanitizeObject(bodyData);
         if (sanitizeBody) {
             ctx.set("body", sanitizeBody);
             return ctx;
@@ -55,7 +55,7 @@ export class DomAndSanitizeRESTBodyMiddleware {
             this.setData(bodyData, body);
         }
         if (!bodyData) throw HandlerTRPCError.TRPCErrorMessage("BodyData is required", "FORBIDDEN");
-        const sanitizeBody = DOMAndSanitizeService.domAndSanitizeObject(bodyData);
+        const sanitizeBody = DOMAndSanitizedServices.domAndSanitizeObject(bodyData);
         if (sanitizeBody) {
             ctx.set("body", sanitizeBody);
             return ctx;
@@ -63,7 +63,7 @@ export class DomAndSanitizeRESTBodyMiddleware {
         throw HandlerTRPCError.TRPCErrorMessage("Sanitized body data is required", "FORBIDDEN");
     }
 
-    public static async validateFile(ctx: MyContext) {
+    public static async ValidationFile(ctx: MyContext) {
 
     }
 }

@@ -1,57 +1,57 @@
 import z from "zod";
-import { zodValidateEmail, zodValidateFullName, zodValidateOTPCode, zodValidatePassword, zodValidatePermissions, zodValidatePhoneNumber, zodValidateRole, zodValidateSearchQuery, zodValidateSearchQueryPermissions, zodValidateSearchQueryRole, zodValidateSearchQueryStatus, zodValidateStatus, zodValidateStrDate, zodValidateTRPCFilter } from "./constants";
+import { zodValidationEmail, zodValidationFullName, zodValidationOTPCode, zodValidationPassword, zodValidationPermissions, zodValidationPhoneNumber, zodValidationRole, zodValidationSearchQuery, zodValidationSearchQueryPermissions, zodValidationSearchQueryRole, zodValidationSearchQueryStatus, zodValidationStatus, zodValidationStrDate, zodValidationTRPCFilter } from "./constants";
 
-export const zodValidateSignIn = z.object({
-    email: zodValidateEmail,
-    password: zodValidatePassword,
+export const zodValidationSignIn = z.object({
+    email: zodValidationEmail,
+    password: zodValidationPassword,
 });
 
-export const zodValidateSignInOTP = z.object({
-    email: zodValidateEmail,
-    code: zodValidateOTPCode
+export const zodValidationSignInOTP = z.object({
+    email: zodValidationEmail,
+    code: zodValidationOTPCode
 });
 
-export const zodValidateSignUp = z.object({
-    fullName: zodValidateFullName,
-    email: zodValidateEmail,
-    password: zodValidatePassword,
-    role: zodValidateRole,
-    status: zodValidateStatus,
-    permissions: zodValidatePermissions
+export const zodValidationSignUp = z.object({
+    fullName: zodValidationFullName,
+    email: zodValidationEmail,
+    password: zodValidationPassword,
+    role: zodValidationRole,
+    status: zodValidationStatus,
+    permissions: zodValidationPermissions
 });
 
-export const zodValidateVerifiedEmail = z.object({
-    email: zodValidateEmail,
+export const zodValidationVerifiedEmail = z.object({
+    email: zodValidationEmail,
 });
 
-export const zodValidateVerifiedPhoneNumber = z.object({
-    phomeNumber: zodValidatePhoneNumber,
+export const zodValidationVerifiedPhoneNumber = z.object({
+    phomeNumber: zodValidationPhoneNumber,
 });
 
-export const zodValidateVerifiedOTPCode = z.object({
-    email: zodValidateEmail,
-    code: zodValidateOTPCode
+export const zodValidationVerifiedOTPCode = z.object({
+    email: zodValidationEmail,
+    code: zodValidationOTPCode
 });
 
-export const zodValidateResetPassword = z.object({
-    email: zodValidateEmail,
-    newPassword: zodValidatePassword
+export const zodValidationResetPassword = z.object({
+    email: zodValidationEmail,
+    newPassword: zodValidationPassword
 });
 
-export const zodValidateListAndQueryStaff = zodValidateTRPCFilter.extend({
-    search: zodValidateSearchQuery,
-    role: zodValidateSearchQueryRole,
-    status: zodValidateSearchQueryStatus,
-    permissions: zodValidateSearchQueryPermissions,
-    startDate: zodValidateStrDate,
-    endDate: zodValidateStrDate,
+export const zodValidationQueryStaff = zodValidationTRPCFilter.extend({
+    search: zodValidationSearchQuery,
+    role: zodValidationSearchQueryRole,
+    status: zodValidationSearchQueryStatus,
+    permissions: zodValidationSearchQueryPermissions,
+    startDate: zodValidationStrDate,
+    endDate: zodValidationStrDate,
 })
 
-export type ZodValidateSignIn = z.infer<typeof zodValidateSignIn>;
-export type ZodValidateSignInOTP = z.infer<typeof zodValidateSignInOTP>;
-export type ZodValidateSignUp = z.infer<typeof zodValidateSignUp>;
-export type ZodValidateVerifiedEmail = z.infer<typeof zodValidateVerifiedEmail>;
-export type ZodValidateVerifiedPhoneNumber = z.infer<typeof zodValidateVerifiedPhoneNumber>;
-export type ZodValidateVerifiedOTPCode = z.infer<typeof zodValidateVerifiedOTPCode>;
-export type ZodValidateResetPassword = z.infer<typeof zodValidateResetPassword>;
-export type ZodValidateListAndQueryStaff = z.infer<typeof zodValidateListAndQueryStaff>;
+export type ZodValidationSignIn = z.infer<typeof zodValidationSignIn>;
+export type ZodValidationSignInOTP = z.infer<typeof zodValidationSignInOTP>;
+export type ZodValidationSignUp = z.infer<typeof zodValidationSignUp>;
+export type ZodValidationVerifiedEmail = z.infer<typeof zodValidationVerifiedEmail>;
+export type ZodValidationVerifiedPhoneNumber = z.infer<typeof zodValidationVerifiedPhoneNumber>;
+export type ZodValidationVerifiedOTPCode = z.infer<typeof zodValidationVerifiedOTPCode>;
+export type ZodValidationResetPassword = z.infer<typeof zodValidationResetPassword>;
+export type ZodValidationQueryStaff = z.infer<typeof zodValidationQueryStaff>;

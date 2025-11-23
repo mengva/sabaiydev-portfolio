@@ -1,7 +1,7 @@
 import DOMPurify from "dompurify";
 import { JSDOM } from 'jsdom';
 
-interface ValidationResult {
+interface ValidationResultDto {
     message: string;
     error: boolean;
 }
@@ -20,7 +20,7 @@ export class DOMPurifyServices {
         return clean;
     }
 
-    public static validateDate(date: string): ValidationResult {
+    public static ValidationDate(date: string): ValidationResultDto {
         const start = new Date(date)
         if (!date) {
             return {

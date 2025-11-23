@@ -4,11 +4,11 @@ import type { Tx } from "@/api/types/constants";
 import { SecureFileUploadServices } from "@/api/utils/secureFileUpload";
 import type { FileDto } from "@/api/packages/types/constants";
 import db from "@/api/config/db";
-import type { ZodValidateUpdatedProductData } from "@/api/packages/validations/product";
+import type { ZodValidationEditOneProductData } from "@/api/packages/validations/product";
 import { eq } from "drizzle-orm";
 import { getHTTPError, HTTPErrorMessage } from "@/api/packages/utils/HttpJsError";
 
-interface AddNewProductUtilsDto {
+interface AddOneProductUtilsDto {
     translations: TranslationProductDto[];
     data: {
         addByStaffId: string;
@@ -32,7 +32,7 @@ interface ProductUploadFileDto {
 }
 
 export class ManageProductUtils {
-    public static async addNewProduct({ tx, data, translations }: AddNewProductUtilsDto): Promise<string> {
+    public static async addOneProduct({ tx, data, translations }: AddOneProductUtilsDto): Promise<string> {
         try {
             const newProduct = await tx.insert(products).values(data).returning({
                 id: products.id
@@ -62,7 +62,7 @@ export class ManageProductUtils {
         }
     }
 
-    public static async updatedProductDataById(input: ZodValidateUpdatedProductData) {
+    public static async editProductDataById(input: ZodValidationEditOneProductData) {
         try {
             const { targetProductId, updatedByStaffId, translations, ...data } = input;
             const findProduct = await db.query.products.findFirst({

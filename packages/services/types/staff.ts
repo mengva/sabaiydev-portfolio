@@ -1,25 +1,25 @@
 import type { RoleStatusPermissionDto } from "./constants";
 
-export interface AddNewStaffDto extends RoleStatusPermissionDto {
+export interface AddOneStaffDto extends RoleStatusPermissionDto {
     addByStaffId: string;
     fullName: string;
     email: string;
     password: string;
 }
 
-export interface UpdatedStaffDto extends RoleStatusPermissionDto {
+export interface EditOneStaffDto extends RoleStatusPermissionDto {
     targetStaffId: string;
     updatedByStaffId: string;
 }
 
-export interface UpdateMyDataDto {
+export interface EditOneMyDataDto {
     updatedByStaffId: string;
     targetByStaffId: string;
     fullName: string;
     email: string;
 }
 
-export interface UpdateMyAdminDataDto extends RoleStatusPermissionDto {
+export interface EditOneMyAdminDataDto extends RoleStatusPermissionDto {
     updatedByStaffId: string;
     targetByStaffId: string;
     fullName: string;

@@ -2,10 +2,10 @@ import z from "zod"
 import { SearchQueryStaffPermissionDto, SearchQueryStaffRoleDto, SearchQueryStaffStatusDto } from "../types/constants";
 
 // variable const
-export const zodValidateStr = z.string().min(2, "String should be 2 characters").nonempty("String is required");
-export const zodValidateUuid = z.string().uuid("Invalid uuid formatter").nonempty("UUID is required");
-export const zodValidateEmail = z.string().email("Invalid email formatter").nonempty("Email is required");
-export const zodValidatePassword = z.string()
+export const zodValidationStr = z.string().min(2, "String should be 2 characters").nonempty("String is required");
+export const zodValidationUuid = z.string().uuid("Invalid uuid formatter").nonempty("UUID is required");
+export const zodValidationEmail = z.string().email("Invalid email formatter").nonempty("Email is required");
+export const zodValidationPassword = z.string()
     .min(6, "password must be at least 6 characters")
     .max(128, "password too long")
     .regex(/^(?=.*[a-z])/, "must contain lowercase letter")
@@ -13,29 +13,29 @@ export const zodValidatePassword = z.string()
     .regex(/^(?=.*\d)/, "must contain number")
     .regex(/^(?=.*[@$!%*?&])/, "must contain special character")
     .nonempty("Password is required");
-export const zodValidateOTPCode = z.string()
+export const zodValidationOTPCode = z.string()
     .length(6, 'OTP must be exactly 6 digits')
     .regex(/^\d+$/, 'OTP must contain only numbers').nonempty('OTP is required');
-export const zodValidatePhoneNumber = z.string()
+export const zodValidationPhoneNumber = z.string()
     .min(8, "Phone number must be at least 8 digits")
     .max(14, "Phone number must be at most 14 digits")
     .regex(/^\+?\d+$/, "Phone number must contain only numbers and optional leading +").nonempty("Phone number is required");
-export const zodValidateSearchQuery = z.string().default("");
-export const zodValidateStrDate = z.string().default("");
-export const zodValidateDate = z.string().date("Invalid date formatter").nonempty("Date is required");
-export const zodValidateFullName = z.string().nonempty("FullName is required");
-export const zodValidateOrderBy = z.enum(['desc', 'asc']).default("desc");
-export const zodValidateRole = z.enum(["SUPER_ADMIN", "ADMIN", "EDITOR", "VIEWER"]);
-export const zodValidateStatus = z.enum(["ACTIVE", "INACTIVE"]);
-export const zodValidatePermissions = z.array(z.enum(["READ", "WRITE", "CREATE", "DELETE", "UPDATE", "MANAGE"]));
+export const zodValidationSearchQuery = z.string().default("");
+export const zodValidationStrDate = z.string().default("");
+export const zodValidationDate = z.string().date("Invalid date formatter").nonempty("Date is required");
+export const zodValidationFullName = z.string().nonempty("FullName is required");
+export const zodValidationOrderBy = z.enum(['desc', 'asc']).default("desc");
+export const zodValidationRole = z.enum(["SUPER_ADMIN", "ADMIN", "EDITOR", "VIEWER"]);
+export const zodValidationStatus = z.enum(["ACTIVE", "INACTIVE"]);
+export const zodValidationPermissions = z.array(z.enum(["READ", "WRITE", "CREATE", "DELETE", "UPDATE", "MANAGE"]));
 
-export const zodValidateSearchQueryRole = z.enum(["DEFAULT", "SUPER_ADMIN", "ADMIN", "EDITOR", "VIEWER"]).default("DEFAULT" as SearchQueryStaffRoleDto);
-export const zodValidateSearchQueryStatus = z.enum(["DEFAULT", "ACTIVE", "INACTIVE"]).default("DEFAULT" as SearchQueryStaffStatusDto);
-export const zodValidateSearchQueryPermissions = z.array(z.enum(["DEFAULT", "READ", "WRITE", "CREATE", "DELETE", "UPDATE", "MANAGE"])).default(["DEFAULT"] as SearchQueryStaffPermissionDto[]);
+export const zodValidationSearchQueryRole = z.enum(["DEFAULT", "SUPER_ADMIN", "ADMIN", "EDITOR", "VIEWER"]).default("DEFAULT" as SearchQueryStaffRoleDto);
+export const zodValidationSearchQueryStatus = z.enum(["DEFAULT", "ACTIVE", "INACTIVE"]).default("DEFAULT" as SearchQueryStaffStatusDto);
+export const zodValidationSearchQueryPermissions = z.array(z.enum(["DEFAULT", "READ", "WRITE", "CREATE", "DELETE", "UPDATE", "MANAGE"])).default(["DEFAULT"] as SearchQueryStaffPermissionDto[]);
 
 
 // file zod
-export const zodValidateFile = z.object({
+export const zodValidationFile = z.object({
     // fieldname: z.string(),
     // originalname: z.string(),
     // encoding: z.string(),
@@ -47,36 +47,36 @@ export const zodValidateFile = z.object({
     fileType: z.string(),
     size: z.number() // in bytes
 });
-export const zodValidateFiles = z.array(zodValidateFile);
+export const zodValidationFiles = z.array(zodValidationFile);
 
 // filter query
-export const zodValidateTRPCFilter = z.object({
+export const zodValidationTRPCFilter = z.object({
     page: z.number().default(1),
     limit: z.number().max(100).default(20)
 });
 
 // zod typeof validate....
-export type ZodValidateStr = z.infer<typeof zodValidateStr>;
-export type ZodValidateUuid = z.infer<typeof zodValidateUuid>;
-export type ZodValidateFullName = z.infer<typeof zodValidateFullName>;
+export type ZodValidationStr = z.infer<typeof zodValidationStr>;
+export type ZodValidationUuid = z.infer<typeof zodValidationUuid>;
+export type ZodValidationFullName = z.infer<typeof zodValidationFullName>;
 
-export type ZodValidateRole = z.infer<typeof zodValidateRole>;
-export type ZodValidateStatus = z.infer<typeof zodValidateStatus>;
-export type ZodValidatePermissions = z.infer<typeof zodValidatePermissions>;
+export type ZodValidationRole = z.infer<typeof zodValidationRole>;
+export type ZodValidationStatus = z.infer<typeof zodValidationStatus>;
+export type ZodValidationPermissions = z.infer<typeof zodValidationPermissions>;
 
-export type ZodValidateSearchQueryRole = z.infer<typeof zodValidateSearchQueryRole>;
-export type ZodValidateSearchQueryStatus = z.infer<typeof zodValidateSearchQueryStatus>;
-export type ZodValidateSearchQueryPermissions = z.infer<typeof zodValidateSearchQueryPermissions>;
+export type ZodValidationSearchQueryRole = z.infer<typeof zodValidationSearchQueryRole>;
+export type ZodValidationSearchQueryStatus = z.infer<typeof zodValidationSearchQueryStatus>;
+export type ZodValidationSearchQueryPermissions = z.infer<typeof zodValidationSearchQueryPermissions>;
 
-export type ZodValidateEmail = z.infer<typeof zodValidateEmail>;
-export type ZodValidateOTPCode = z.infer<typeof zodValidateOTPCode>;
-export type ZodValidatePhoneNumber = z.infer<typeof zodValidatePhoneNumber>;
+export type ZodValidationEmail = z.infer<typeof zodValidationEmail>;
+export type ZodValidationOTPCode = z.infer<typeof zodValidationOTPCode>;
+export type ZodValidationPhoneNumber = z.infer<typeof zodValidationPhoneNumber>;
 
-export type ZodValidatePassword = z.infer<typeof zodValidatePassword>;
-export type ZodValidateTRPCFilter = z.infer<typeof zodValidateTRPCFilter>;
-export type ZodValidateSearchQuery = z.infer<typeof zodValidateSearchQuery>;
-export type ZodValidateStrDate = z.infer<typeof zodValidateStrDate>;
-export type ZodValidateDate = z.infer<typeof zodValidateDate>;
+export type ZodValidationPassword = z.infer<typeof zodValidationPassword>;
+export type ZodValidationTRPCFilter = z.infer<typeof zodValidationTRPCFilter>;
+export type ZodValidationSearchQuery = z.infer<typeof zodValidationSearchQuery>;
+export type ZodValidationStrDate = z.infer<typeof zodValidationStrDate>;
+export type ZodValidationDate = z.infer<typeof zodValidationDate>;
 
-export type ZodValidateFile = z.infer<typeof zodValidateFile>;
-export type ZodValidateFiles = z.infer<typeof zodValidateFiles>;
+export type ZodValidationFile = z.infer<typeof zodValidationFile>;
+export type ZodValidationFiles = z.infer<typeof zodValidationFiles>;

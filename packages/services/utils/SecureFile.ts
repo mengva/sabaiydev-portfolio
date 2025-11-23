@@ -1,14 +1,13 @@
 import type { FileDto } from "../types/constants";
 import { validateMaxFileSize } from "./constants";
 
-export class ValidateSecureFileUploadServices {
+export class ValidationSecureFileUploadServices {
 
     public static readonly IMAGE_FILE_TYPE = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp']
 
     public static readonly ALLOWED_PDF_FILE_SIGNATURES = {
         '25504446': 'application/pdf', // PDF file
     };
-
 
     public static readonly ALLOWED_IMAGE_FILE_SIGNATURES = {
         'ffd8ff': 'image/jpeg',      // JPEG file
@@ -22,7 +21,7 @@ export class ValidateSecureFileUploadServices {
         ...this.ALLOWED_IMAGE_FILE_SIGNATURES,
     };
 
-    public static validateFile(file: FileDto): { valid: boolean; error?: string } {
+    public static ValidationFile(file: FileDto): { valid: boolean; error?: string } {
         if (file.size > validateMaxFileSize) {
             return { valid: false, error: 'File size exceeds 10MB limit' };
         }
@@ -43,9 +42,9 @@ export class ValidateSecureFileUploadServices {
         return { valid: true };
     }
 
-    public static async validateFiles(files: FileDto[]) {
+    public static async ValidationFiles(files: FileDto[]) {
         const valids = await Promise.all(
-            files.map(file => this.validateFile(file))
+            files.map(file => this.ValidationFile(file))
         )
         return valids;
     }
@@ -55,7 +54,7 @@ export class ValidateSecureFileUploadServices {
 // import type { FileDto } from "../types/constants";
 // import { validateMaxFileSize } from "./constants";
 
-// export class ValidateSecureFileUploadServices {
+// export class ValidationSecureFileUploadServices {
 
 //     public static readonly IMAGE_FILE_TYPE = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp']
 
@@ -75,7 +74,7 @@ export class ValidateSecureFileUploadServices {
 //         ...this.ALLOWED_IMAGE_FILE_SIGNATURES,
 //     };
 
-//     public static validateFile(file: FileDto): { valid: boolean; error?: string } {
+//     public static ValidationFile(file: FileDto): { valid: boolean; error?: string } {
 //         // Check file size
 //         if (file.size > validateMaxFileSize) {
 //             return { valid: false, error: 'File size exceeds 10MB limit' };
@@ -104,9 +103,9 @@ export class ValidateSecureFileUploadServices {
 //         return { valid: true };
 //     }
 
-//     public static async validateFiles(files: FileDto[]) {
+//     public static async ValidationFiles(files: FileDto[]) {
 //         const valids = await Promise.all(
-//             files.map(file => this.validateFile(file))
+//             files.map(file => this.ValidationFile(file))
 //         );
 //         return valids;
 //     }

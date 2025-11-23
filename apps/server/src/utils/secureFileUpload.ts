@@ -2,7 +2,7 @@ import { env } from '@/api/config/env';
 import { v2 as cloudinary } from 'cloudinary';
 import type { FileDto } from '@/api/packages/types/constants';
 import { HandlerTRPCError } from './handleTRPCError';
-import { ValidateSecureFileUploadServices } from '@/api/packages/utils/SecureFile';
+import { ValidationSecureFileUploadServices } from '@/api/packages/utils/SecureFile';
 
 cloudinary.config({
     cloud_name: env('CLOUDINARY_NAME'),
@@ -44,8 +44,8 @@ export interface ResponseFileDto {
 
 export class SecureFileUploadServices {
 
-    private static async validateFileAndUpload({ file, isPDF }: { file: FileDto; isPDF: boolean }): Promise<ResponseFileDto> {
-        const validation = ValidateSecureFileUploadServices.validateFile(file);
+    private static async ValidationFileAndUpload({ file, isPDF }: { file: FileDto; isPDF: boolean }): Promise<ResponseFileDto> {
+        const validation = ValidationSecureFileUploadServices.ValidationFile(file);
         if (!validation.valid) {
             throw new Error(validation.error);
         }
@@ -67,12 +67,12 @@ export class SecureFileUploadServices {
         if (Array.isArray(files) && files.length > 0) {
             const uploadResults = await Promise.all(
                 files.map(async (file) => {
-                    return await this.validateFileAndUpload({ file, isPDF: false });
+                    return await this.ValidationFileAndUpload({ file, isPDF: false });
                 })
             );
             return uploadResults;
         } else if (!Array.isArray(files)) {
-            return await this.validateFileAndUpload({ file: files as FileDto, isPDF: false });
+            return await this.ValidationFileAndUpload({ file: files as FileDto, isPDF: false });
         }
     }
 
@@ -83,12 +83,12 @@ export class SecureFileUploadServices {
         if (Array.isArray(files) && files.length > 0) {
             const uploadResults = await Promise.all(
                 files.map(async (file) => {
-                    return await this.validateFileAndUpload({ file, isPDF: true });
+                    return await this.ValidationFileAndUpload({ file, isPDF: true });
                 })
             );
             return uploadResults;
         } else {
-            return await this.validateFileAndUpload({ file: files as FileDto, isPDF: true });
+            return await this.ValidationFileAndUpload({ file: files as FileDto, isPDF: true });
         }
     }
 
