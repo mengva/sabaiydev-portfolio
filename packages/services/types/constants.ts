@@ -49,7 +49,7 @@ export interface RoleStatusPermissionDto {
     permissions: StaffPermissionDto[];
 }
 
-export interface StaffSessionDto {
+export interface MyDataDto {
     id: string;
     fullName: string;
     email: string;

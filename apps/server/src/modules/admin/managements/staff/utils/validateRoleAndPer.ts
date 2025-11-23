@@ -2,9 +2,10 @@ import db from "@/api/config/db";
 import { staffs } from "@/api/db";
 import type { StaffPermissionDto, StaffRoleDto } from "@/api/packages/types/constants";
 import { eq } from "drizzle-orm";
-import { RolePermissions } from "@/api/packages/utils/constants";
-import type { ZodValidateAddNewStaff, ZodValidateUpdatedStaff } from "@/api/packages/validations/staff";
+import { CheckedRolePermissions, UserValidRolePermissions } from "@/api/packages/utils/constants";
+import type { ZodValidateAddNewStaff, ZodValidateUpdatedMyData, ZodValidateUpdatedStaff } from "@/api/packages/validations/staff";
 import { getHTTPError, HTTPErrorMessage } from "@/api/packages/utils/HttpJsError";
+import type { StatusCodeErrorDto } from "@/api/utils/constants";
 
 export class ValidateStaffRoleAndPerUtils {
 
@@ -31,21 +32,30 @@ export class ValidateStaffRoleAndPerUtils {
     };
 
     public static async roleAndPermissions(role: StaffRoleDto, permissions: StaffPermissionDto[]) {
-        // check user role and permissions
-        const superAdmin = role === "SUPER_ADMIN" && !this.permissions(permissions, RolePermissions.SUPER_ADMIN);
-        const admin = role === "ADMIN" && !this.permissions(permissions, RolePermissions.ADMIN);
-        const editor = role === "EDITOR" && !this.permissions(permissions, RolePermissions.EDITOR);
-        const viewer = role === "VIEWER" && !this.permissions(permissions, RolePermissions.VIEWER);
-        if (superAdmin || admin || editor || viewer) {
-            throw new HTTPErrorMessage("Invalid user role and permissions", "403");
+        try {
+            // check user role and permissions
+            const isValidRoleAndPer = !this.permissions(permissions, UserValidRolePermissions[role]);
+            if (isValidRoleAndPer) {
+                return {
+                    message: "Invalid user role and permissions",
+                    code: "403"
+                }
+            }
+            return {
+                message: "success",
+                code: "200"
+            }
+        } catch (error) {
+            throw getHTTPError(error);
         }
-        return true;
     }
 
     public static async addOneUser({ addByStaffId, ...data }: ZodValidateAddNewStaff) {
         try {
             const valid = await this.roleAndPermissions(data.role, data.permissions);
-            if (!valid) return;
+            if (valid.code !== "200") {
+                throw new HTTPErrorMessage(valid.message, valid.code as StatusCodeErrorDto);
+            }
 
             // check email existing in the database
             const emailExisting = await db.query.staffs.findFirst({
@@ -66,9 +76,6 @@ export class ValidateStaffRoleAndPerUtils {
             if (myRole === "VIEWER") {
                 throw new HTTPErrorMessage("VIEWER have no an permissions to add user", "403")
             }
-
-            return true;
-
         } catch (error) {
             throw getHTTPError(error);
         }
@@ -76,11 +83,17 @@ export class ValidateStaffRoleAndPerUtils {
 
     public static async editOneUserById(data: ZodValidateUpdatedStaff) {
         try {
-            const valid = await this.roleAndPermissions(data.role, data.permissions);
-            if (!valid) return;
 
             const { targetStaffId, updatedByStaffId } = data;
-            const findMyEditData = await db.query.staffs.findFirst({
+            const isValidMe = targetStaffId === updatedByStaffId;
+            if (isValidMe) throw new HTTPErrorMessage("Invalid edit my data", "403");
+
+            const valid = await this.roleAndPermissions(data.role, data.permissions);
+            if (valid.code !== "200") {
+                throw new HTTPErrorMessage(valid.message, valid.code as StatusCodeErrorDto);
+            }
+
+            const myData = await db.query.staffs.findFirst({
                 where: eq(staffs.id, updatedByStaffId),
             });
 
@@ -88,23 +101,15 @@ export class ValidateStaffRoleAndPerUtils {
                 where: eq(staffs.id, targetStaffId),
             });
 
-            const isEmptyData = !findMyEditData || !targetData;
+            const isEmptyData = !myData || !targetData;
             if (isEmptyData) throw new HTTPErrorMessage("Find not found", "404");
 
-            const isEditMyData = targetStaffId === updatedByStaffId;
-            if (isEditMyData) throw new HTTPErrorMessage("Invalid edit my data", "403");
-
-            const myRole = findMyEditData.role;
+            const myRole = myData.role;
             const targetRole = targetData.role;
 
             // user can be edit other user by condition here
-            const isCanEdit = Boolean(
-                myRole === "SUPER_ADMIN" && ["ADMIN", "VIEWER", "EDITOR"].includes(targetRole) ||
-                myRole === "ADMIN" && ["VIEWER", "EDITOR"].includes(targetRole) ||
-                myRole === "EDITOR" && ["VIEWER"].includes(targetRole) || false
-            );
+            const isCanEdit = Boolean(CheckedRolePermissions[myRole]?.includes(targetRole));
             if (!isCanEdit) throw new HTTPErrorMessage("You have no an permission to edit user data", "403");
-            return isCanEdit;
         } catch (error) {
             throw getHTTPError(error);
         }
@@ -119,14 +124,14 @@ export class ValidateStaffRoleAndPerUtils {
     }) {
         try {
             // find my data need to remove other user data
-            const findMyRemoveData = await db.query.staffs.findFirst({
+            const myData = await db.query.staffs.findFirst({
                 where: eq(staffs.id, removeByStaffId),
                 with: {
                     sessions: true
                 }
             });
             // check my empty data 
-            if (!findMyRemoveData) throw new HTTPErrorMessage("Find not found", "404");
+            if (!myData) throw new HTTPErrorMessage("Find not found", "404");
 
             // find target data need to remove
             const targetStaffInfo = await db.query.staffs.findFirst({
@@ -136,10 +141,10 @@ export class ValidateStaffRoleAndPerUtils {
             if (!targetStaffInfo) throw new HTTPErrorMessage("Find target user not found", "404");
 
             // check can't remove my account
-            const isMe = findMyRemoveData.id === targetStaffInfo.id;
+            const isMe = myData.id === targetStaffInfo.id;
             if (isMe) return false;
 
-            const myRole = findMyRemoveData.role;
+            const myRole = myData.role;
             const targetRole = targetStaffInfo.role;
 
             // admin can be remove user by condition here
@@ -147,28 +152,35 @@ export class ValidateStaffRoleAndPerUtils {
                 myRole === "SUPER_ADMIN" && ["ADMIN", "VIEWER", "EDITOR"].includes(targetRole) ||
                 myRole === "ADMIN" && ["VIEWER", "EDITOR"].includes(targetRole) || false
             )
-            // if isCanRemove is true can be remove but isCanRemove is false can't be to remove
-            return isCanRemove;
         } catch (error) {
             throw getHTTPError(error);
         }
     }
 
-    public static async editMyData({
-        targetStaffId,
-        updatedByStaffId
-    }: {
-        targetStaffId: string;
-        updatedByStaffId: string;
-    }) {
+    public static async editMyData(input: ZodValidateUpdatedMyData) {
         try {
-            const isMe = targetStaffId === updatedByStaffId;
-            if (!isMe) throw new HTTPErrorMessage("Invalid my id", "403");
-            const findEditMyData = await db.query.staffs.findFirst({
-                where: eq(staffs.id, updatedByStaffId),
+            const { targetStaffId, updatedByStaffId, role, permissions } = input;
+            const valid = await this.roleAndPermissions(role, permissions);
+            if (valid.code !== "200") {
+                throw new HTTPErrorMessage(valid.message, valid.code as StatusCodeErrorDto);
+            }
+            const isValidMe = targetStaffId === updatedByStaffId;
+            if (!isValidMe) throw new HTTPErrorMessage("Invalid my id", "403");
+            // find my data
+            const myData = await db.query.staffs.findFirst({
+                where: eq(staffs.id, updatedByStaffId)
             });
-            if (!findEditMyData) throw new HTTPErrorMessage("Find not found", "404");
-            return findEditMyData;
+            if (!myData) throw new HTTPErrorMessage("Find not found", "403");
+            const myRole = myData.role;
+            const isValidateRoleAndPer = Boolean(
+                (myRole === "ADMIN" && !["ADMIN", "EDITOR", "VIEWER"].includes(role)) ||
+                (myRole === "EDITOR" && !["EDITOR", "VIEWER"].includes(role)) ||
+                (myRole === "VIEWER" && !["VIEWER"].includes(role)) || false
+            )
+            if (isValidateRoleAndPer) {
+                throw new HTTPErrorMessage("Invalid edit my role and permissions", "403");
+            }
+            return myData;
         } catch (error) {
             throw getHTTPError(error);
         }

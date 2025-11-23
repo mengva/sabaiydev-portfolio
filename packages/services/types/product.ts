@@ -2,6 +2,8 @@ import type { FileDto, LocalDto } from "./constants";
 
 export type ProductCategoryDto = "COLLABORATION" | "MEDIA" | "ANALYTICS" | "SECURITY" | "DEVELOPMENT";
 export type ProductStatusDto = "ACTIVE" | "INACTIVE" | "DEVELOPMENT" | "DEPRECATED";
+export type SearchQueryProductCategoryDto = "DEFAULT" | ProductCategoryDto;
+export type SearchQueryProductStatusDto = "DEFAULT" | ProductStatusDto;
 
 export interface AddNewProductDto {
     addByStaffId: string;

@@ -26,8 +26,6 @@ import {
     TableHeader,
     TableRow,
 } from "@workspace/ui/components/table";
-import { Checkbox } from "@workspace/ui/components/checkbox";
-import { Label } from "@workspace/ui/components/label";
 import { Calendar } from "@workspace/ui/components/calendar";
 import {
     Popover,
@@ -40,28 +38,26 @@ import trpc from "@/app/trpc/client";
 import { StaffSchema } from "@/admin/packages/schema/staff";
 import LoadingUserComponent from "./components/loading";
 import TableUserItemComponent from "./components/tableUserItem";
-import { PaginationFilterDto, SearchQueryStaffPermissionDto, SearchQueryStaffRoleDto, SearchQueryStaffStatusDto, ServerResponseDto } from "@/admin/packages/types/constants";
-import { SearchQueryStaffPermissionArray, SearchQueryStaffRoleArray, SearchQueryStaffStatusArray } from "@/admin/packages/utils/constants/staff";
+import { PaginationFilterDto, SearchQueryStaffRoleDto, SearchQueryStaffStatusDto, ServerResponseDto } from "@/admin/packages/types/constants";
+import { SearchQueryStaffRoleArray, SearchQueryStaffStatusArray } from "@/admin/packages/utils/constants/staff";
 import AddUserDialogComponent from "./components/addUserDialog";
-import { StaffSessionContext } from "../../layout";
+import { MyDataContext } from "../../layout";
 import toast from "react-hot-toast";
 import { ErrorHandler } from "@/admin/packages/utils/HandleError";
 import GlobalHelper from "@/admin/packages/utils/GlobalHelper";
 import { PaginationComponent } from "@/components/pagination";
-import LoadingComponent from "../../dashboard/components/loading";
 
 interface SearchSelectDto {
     query: string;
     role: SearchQueryStaffRoleDto,
     status: SearchQueryStaffStatusDto,
-    permissions: SearchQueryStaffPermissionDto[];
     startDate: Date | undefined;
     endDate: Date | undefined;
 }
 
 export default function UserManagementPage() {
-    const staffSessionContext = useContext(StaffSessionContext);
-    if (!staffSessionContext) return <LoadingUserComponent />
+    const myDataContext = useContext(MyDataContext);
+    if (!myDataContext) return null;
     // === Filters State ===
     const [open, setOpen] = useState(false);
     const [filter, setFilter] = useState({
@@ -77,7 +73,6 @@ export default function UserManagementPage() {
     const [search, setSearch] = useState("");
     const [role, setRole] = useState<SearchQueryStaffRoleDto>("DEFAULT");
     const [status, setStatus] = useState<SearchQueryStaffStatusDto>("DEFAULT");
-    const [permissions, setPermissions] = useState<SearchQueryStaffPermissionDto[]>([]);
     const [startDate, setStartDate] = useState<Date | undefined>();
     const [endDate, setEndDate] = useState<Date | undefined>();
     const [users, setUsers] = useState([] as StaffSchema[]);
@@ -121,43 +116,47 @@ export default function UserManagementPage() {
         }
     });
 
+    const convertDate = (startDate: Date | undefined, endDate: Date | undefined) => {
+        const start = startDate ? GlobalHelper.formatDate(startDate) : '';
+        const end = endDate ? GlobalHelper.formatDate(endDate) : '';
+        return {
+            startDate: start,
+            endDate: end
+        }
+    }
+
     const onSearch = () => {
         try {
-            const start = startDate ? GlobalHelper.formatDate(startDate) : '';
-            const end = endDate ? GlobalHelper.formatDate(endDate) : '';
+            const date = convertDate(startDate, endDate);
             searchQueryMutation.mutate({
                 ...filter,
                 query: search.trim() ?? '',
                 role: role ?? "DEFAULT",
                 status: status ?? "DEFAULT",
-                permissions: permissions ?? ["DEFAULT"],
-                startDate: start,
-                endDate: end,
+                startDate: date.startDate,
+                endDate: date.endDate,
             });
         } catch (error) {
             ErrorHandler.handleClientError(error);
         }
     }
 
-    const onSearchSelected = ({
+    const onSelectSearch = ({
         query,
         role,
         status,
-        permissions,
         startDate,
         endDate
     }: SearchSelectDto) => {
         try {
-            const start = startDate ? GlobalHelper.formatDate(startDate) : '';
-            const end = endDate ? GlobalHelper.formatDate(endDate) : '';
+            const date = convertDate(startDate, endDate);
             searchQueryMutation.mutate({
                 ...filter,
                 query,
                 role: role ?? "DEFAULT",
                 status: status ?? "DEFAULT",
-                permissions: permissions ?? ["DEFAULT"],
-                startDate: start,
-                endDate: end,
+                startDate: date.startDate,
+                endDate: date.endDate,
             });
         } catch (error) {
             ErrorHandler.handleClientError(error);
@@ -170,16 +169,8 @@ export default function UserManagementPage() {
         setSearch("");
         setRole("DEFAULT");
         setStatus("DEFAULT");
-        setPermissions([]);
         setStartDate(undefined);
         setEndDate(undefined);
-    };
-
-    // === Permission Toggle ===
-    const togglePermission = (perm: SearchQueryStaffPermissionDto) => {
-        setPermissions((prev) =>
-            prev.includes(perm) ? prev.filter((p) => p !== perm) : [...prev, perm]
-        );
     };
 
     return (
@@ -190,7 +181,7 @@ export default function UserManagementPage() {
                     <p className="text-muted-foreground">Manage users, roles, and permissions</p>
                 </div>
                 <div>
-                    <AddUserDialogComponent open={open} setOpen={setOpen} refetch={refetch} setEditById={setEditById} editById={editById} />
+                    <AddUserDialogComponent open={open} setOpen={setOpen} refetch={refetch} setEditById={setEditById} editById={editById} myData={myDataContext.data} refetchMyData={myDataContext.refetch} />
                 </div>
             </div>
 
@@ -204,7 +195,7 @@ export default function UserManagementPage() {
                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
                         {/* Search */}
                         <div className="relative">
-                            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                            <Search onClick={() => onSearch()} className="absolute left-3 top-3 h-4 w-4 text-muted-foreground cursor-pointer" />
                             <Input
                                 placeholder="Search by fullName or email..."
                                 value={search}
@@ -226,11 +217,10 @@ export default function UserManagementPage() {
                         {/* Role */}
                         <Select value={role} onValueChange={r => {
                             setRole(r as SearchQueryStaffRoleDto);
-                            onSearchSelected({
+                            onSelectSearch({
                                 query: search ?? '',
                                 role: r as SearchQueryStaffRoleDto,
                                 status: status ?? "DEFAULT",
-                                permissions: permissions ?? ["DEFAULT"],
                                 startDate,
                                 endDate
                             });
@@ -250,11 +240,10 @@ export default function UserManagementPage() {
                         {/* Status */}
                         <Select value={status} onValueChange={(s) => {
                             setStatus(s as SearchQueryStaffStatusDto);
-                            onSearchSelected({
+                            onSelectSearch({
                                 query: search ?? '',
                                 role: role ?? "DEFAULT",
                                 status: s as SearchQueryStaffStatusDto,
-                                permissions: permissions ?? ["DEFAULT"],
                                 startDate,
                                 endDate
                             });
@@ -287,11 +276,10 @@ export default function UserManagementPage() {
                                     selected={startDate}
                                     onSelect={start => {
                                         setStartDate(start);
-                                        onSearchSelected({
+                                        onSelectSearch({
                                             query: search ?? '',
                                             role: role ?? "DEFAULT",
                                             status: status ?? "DEFAULT",
-                                            permissions: permissions ?? ["DEFAULT"],
                                             startDate: start,
                                             endDate
                                         });
@@ -320,11 +308,10 @@ export default function UserManagementPage() {
                                     selected={endDate}
                                     onSelect={end => {
                                         setEndDate(end);
-                                        onSearchSelected({
+                                        onSelectSearch({
                                             query: search ?? '',
                                             role: role ?? "DEFAULT",
                                             status: status ?? "DEFAULT",
-                                            permissions: permissions ?? ["DEFAULT"],
                                             startDate,
                                             endDate: end
                                         });
@@ -335,32 +322,11 @@ export default function UserManagementPage() {
                         </Popover>
                     </div>
 
-                    {/* Permissions */}
-                    <div className="space-y-2">
-                        <Label>Permissions</Label>
-                        <div className="flex flex-wrap gap-4">
-                            {(SearchQueryStaffPermissionArray).map((perm) => (
-                                <div key={perm} className="flex items-center space-x-2">
-                                    <Checkbox
-                                        id={perm}
-                                        checked={permissions.includes(perm)}
-                                        onCheckedChange={() => togglePermission(perm)}
-                                    />
-                                    <label
-                                        htmlFor={perm}
-                                        className="text-sm font-medium capitalize cursor-pointer"
-                                    >
-                                        {perm}
-                                    </label>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
                     {/* Actions */}
                     <div className="flex gap-2">
                         <Button onClick={refetch} disabled={isRefetching} className="cursor-pointer">
                             <RotateCw className={cn("mr-2 h-4 w-4", isRefetching && "animate-spin")} />
-                            {isRefetching ? "Loading..." : "Refresh"}
+                            Refresh
                         </Button>
                         <Button variant="outline" onClick={resetFilters} className="cursor-pointer">
                             Reset Filters
@@ -400,7 +366,7 @@ export default function UserManagementPage() {
                                                     </TableRow>
                                                 ) : (
                                                     users && users.map((user, index) => {
-                                                        return <TableUserItemComponent key={index} user={user} index={index} filter={filter} refetch={refetch} data={staffSessionContext.data} setOpen={setOpen} setEditById={setEditById} />
+                                                        return <TableUserItemComponent key={index} user={user} index={index} filter={filter} refetch={refetch} myData={myDataContext.data} setOpen={setOpen} setEditById={setEditById} />
                                                     })
                                                 )
                                             }

@@ -39,7 +39,6 @@ export const zodValidateRestApiUpdatedMyDataParam = z.object({
 // update my body data
 export const zodValidateRestApiUpdatedMyData = z.object({
     email: zodValidateEmail,
-    password: zodValidatePassword,
     role: zodValidateRole,
     status: zodValidateStatus,
     permissions: zodValidatePermissions
@@ -83,7 +82,6 @@ export const zodValidateSearchStaffData = zodValidateTRPCFilter.extend({
     query: zodValidateSearchQuery,
     role: zodValidateSearchQueryRole,
     status: zodValidateSearchQueryStatus,
-    permissions: zodValidateSearchQueryPermissions,
     startDate: zodValidateStrDate,
     endDate: zodValidateStrDate,
 });

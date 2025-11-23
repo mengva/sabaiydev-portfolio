@@ -11,7 +11,7 @@ export class DOMPurifyServices {
     private static window = new JSDOM('').window;
     private static purify = DOMPurify(this.window);
 
-    public static domSanitizeString(str: string): string | null {
+    public static domSanitizedString(str: string): string | null {
         if (!str || typeof str !== "string") {
             return '';
         }
@@ -47,14 +47,14 @@ export class DOMPurifyServices {
         };
     }
 
-    public static domSanitizeObject(obj: unknown): unknown {
+    public static domSanitizedObject(obj: unknown): unknown {
         // Handle null and undefined explicitly
         if (obj === null || obj === undefined || !obj) {
             return ''; // or '' depending on your needs
         }
         // Handle arrays
         if (Array.isArray(obj)) {
-            return obj.map(item => this.domSanitizeObject(item));
+            return obj.map(item => this.domSanitizedObject(item));
         }
         
         // Handle objects
@@ -62,7 +62,7 @@ export class DOMPurifyServices {
             const sanitized: Record<string, unknown> = {};
             for (const key in obj) {
                 if (Object.prototype.hasOwnProperty.call(obj, key)) {
-                    sanitized[key] = this.domSanitizeObject((obj as Record<string, unknown>)[key]);
+                    sanitized[key] = this.domSanitizedObject((obj as Record<string, unknown>)[key]);
                 }
             }
             return sanitized;
@@ -70,7 +70,7 @@ export class DOMPurifyServices {
 
         // Handle strings
         if (typeof obj === "string") {
-            const str = this.domSanitizeString(obj);
+            const str = this.domSanitizedString(obj);
             // if (str === null || str === undefined || str === '') {
             //     throw new Error("Not allowed");
             // }

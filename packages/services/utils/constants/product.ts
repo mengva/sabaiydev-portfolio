@@ -1,4 +1,5 @@
-import type { ProductCategoryDto, ProductStatusDto } from "../../types/product";
+export const ProductCategoryArray = ["COLLABORATION", "MEDIA", "ANALYTICS", "SECURITY", "DEVELOPMENT"] as const;
+export const ProductStatusArray = ["ACTIVE", "INACTIVE", "DEVELOPMENT", "DEPRECATED"] as const;
 
-export const ProductCategoryArray = ["COLLABORATION", "MEDIA", "ANALYTICS", "SECURITY", "DEVELOPMENT"] as ProductCategoryDto[];
-export const ProductStatusArray = ["ACTIVE", "INACTIVE", "DEVELOPMENT", "DEPRECATED"] as ProductStatusDto[];
+export const SearchQueryProductCategoryArray = ["DEFAULT", ...ProductCategoryArray] as const;
+export const SearchQueryProductStatusArray = ["DEFAULT", ...ProductStatusArray] as const;

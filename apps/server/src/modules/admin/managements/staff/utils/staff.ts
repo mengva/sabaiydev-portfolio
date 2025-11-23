@@ -41,7 +41,7 @@ export class ManageStaffUtils {
     }
 
     public static async searchQuery(input: ZodValidateSearchStaffData) {
-        const { query, role, permissions, startDate, endDate, status } = input;
+        const { query, role, startDate, endDate, status } = input;
         const conditions: any[] = [];
         if (query) {
             conditions.push(
@@ -62,13 +62,13 @@ export class ManageStaffUtils {
             conditions.push(between(staffs.createdAt, new Date(startDate), new Date(endDate)));
         }
         // Permissions filter (example for text[] or jsonb column)
-        if (permissions?.length) {
-            const validPermissions = permissions.filter(p => p !== "DEFAULT");
-            if (validPermissions.length > 0) {
-                // Use PostgreSQL array operator @>
-                conditions.push(sql`${staffs.permissions} @> ${validPermissions}`);
-            }
-        }
+        // if (permissions?.length) {
+        //     const validPermissions = permissions.filter(p => p !== "DEFAULT");
+        //     if (validPermissions.length > 0) {
+        //         // Use PostgreSQL array operator @>
+        //         conditions.push(sql`${staffs.permissions} @> ${validPermissions}`);
+        //     }
+        // }
         return and(...conditions);
     }
 }

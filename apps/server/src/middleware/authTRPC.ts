@@ -19,17 +19,21 @@ export class AuthTRPCMiddleware {
         const authHeader = c.req.header("authorization");
         const sessionToken = c.get("getCookie").get(adminSessionTokenName) || authHeader?.replace("Bearer ", "");
         if (!sessionToken || sessionToken === undefined) throw HandlerTRPCError.TRPCErrorMessage(AuthEnumMessage.unauthorized, "UNAUTHORIZED");
-        const sessionInfo = await SecureSessionManagerServices.verifySession(sessionToken, c);
-        if (!sessionInfo) throw HandlerTRPCError.TRPCErrorMessage(AuthEnumMessage.notFound, "UNAUTHORIZED");
-        if (sessionInfo.expired < Helper.currentDate()) throw HandlerTRPCError.TRPCErrorMessage(AuthEnumMessage.expiredSessionToken, "UNAUTHORIZED");
-        if (sessionInfo.staff && sessionInfo.staff.status !== "ACTIVE") {
+        const result = await SecureSessionManagerServices.verifySession(sessionToken, c);
+        if (result?.message !== "success") {
+            throw HandlerTRPCError.TRPCErrorMessage(result?.message, "FORBIDDEN");
+        }
+        const session = result.data;
+        if (!session) throw HandlerTRPCError.TRPCErrorMessage("Session is required", "FORBIDDEN");
+        if (session.expired < Helper.currentDate()) throw HandlerTRPCError.TRPCErrorMessage(AuthEnumMessage.expiredSessionToken, "UNAUTHORIZED");
+        if (session.staff && session.staff.status !== "ACTIVE") {
             c.get("deleteCookie").del(adminSessionTokenName);
             throw HandlerTRPCError.TRPCErrorMessage(AuthEnumMessage.disabledAccount, "UNAUTHORIZED");
         }
         c.set("session", {
-            sessionId: sessionInfo.id,
-            sessionToken: sessionInfo.sessionToken,
-            staffId: sessionInfo.staffId
+            sessionId: session.id,
+            sessionToken: session.sessionToken,
+            staffId: session.staffId
         });
         return c;
     }
@@ -50,9 +54,14 @@ export class AuthTRPCMiddleware {
         const authHeader = c?.req?.header("authorization");
         const sessionToken = c.get("getCookie").get(adminSessionTokenName) || authHeader?.replace("Bearer ", "");
         if (sessionToken) {
-            const sessionInfo = await SecureSessionManagerServices.verifySession(sessionToken, c);
-            const hasSessionAndValid = sessionInfo && sessionInfo.updatedAt as Date > Helper.currentDate();
-            const hasSessionTokenAndInfo = sessionToken && sessionInfo;
+            const result = await SecureSessionManagerServices.verifySession(sessionToken, c);
+            if (result?.message !== "success") {
+                throw HandlerTRPCError.TRPCErrorMessage(result?.message, "FORBIDDEN");
+            }
+            const session = result.data;
+            if (!session) throw HandlerTRPCError.TRPCErrorMessage("Session is required", "FORBIDDEN");
+            const hasSessionAndValid = session && session.updatedAt as Date > Helper.currentDate();
+            const hasSessionTokenAndInfo = sessionToken && session;
             if (hasSessionAndValid || hasSessionTokenAndInfo) {
                 throw HandlerTRPCError.TRPCErrorMessage(AuthEnumMessage.alreadySignIn, "FORBIDDEN");
             }

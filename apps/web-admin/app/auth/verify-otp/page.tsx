@@ -4,7 +4,6 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@workspace/ui/components/form";
-import { zodValidateSignInWithOTPAndEmail, ZodValidateSignInWithOTPAndEmail } from "@/admin/packages/validations/auth";
 import { Input } from "@workspace/ui/components/input";
 import { Button } from "@workspace/ui/components/button";
 import Link from "next/link";
@@ -16,6 +15,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Clock } from "lucide-react";
 import { ServerResponseDto } from "@/admin/packages/types/constants";
+import { zodValidateSignInOTP, ZodValidateSignInOTP } from "@/admin/packages/validations/auth";
 
 export default function VerifyOtpFormPage() {
   const email = CookieHelper.getCookieByKey("email") || "";
@@ -23,8 +23,8 @@ export default function VerifyOtpFormPage() {
   const [isValidateEmail, setIsValidateEmail] = useState(false);
   const [timeLeft, setTimeLeft] = useState(30); // 30 seconds
   const [isExpired, setIsExpired] = useState(false);
-  const form = useForm<ZodValidateSignInWithOTPAndEmail>({
-    resolver: zodResolver(zodValidateSignInWithOTPAndEmail),
+  const form = useForm<ZodValidateSignInOTP>({
+    resolver: zodResolver(zodValidateSignInOTP),
     defaultValues: { email, code: "" },
   });
 
@@ -57,7 +57,7 @@ export default function VerifyOtpFormPage() {
     } else toast.error("Request failed, Please try again later");
   };
 
-  const onSubmit = (data: ZodValidateSignInWithOTPAndEmail) => {
+  const onSubmit = (data: ZodValidateSignInOTP) => {
     if (data) {
       verifiedOTPCodeMutation.mutate({ email: data.email, code: data.code });
     }

@@ -42,10 +42,9 @@ export function AppSidebar() {
                 <SidebarGroup>
                     <SidebarGroupLabel className="!text-3xl !font-bold flex justify-center items-center h-14 mb-4 bg-gradient-to-r from-purple-500 to-green-600 bg-clip-text text-transparent">Sabaiydev</SidebarGroupLabel>
                     <SidebarMenu>
-                        {/* <SidebarMenuItem className="!text-2xl mb-4">Admin Panel</SidebarMenuItem> */}
                         {menuItems.map((item) => {
                             const Icon = item.icon;
-                            const isActive = pathname === item.href;
+                            const isActive = pathname.startsWith(item.href);
                             return (
                                 <SidebarMenuItem key={item.title}>
                                     <SidebarMenuButton asChild isActive={isActive}>

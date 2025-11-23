@@ -10,7 +10,7 @@ export class ValidateAuthServices {
         callback: (input: any) => Promise<any | null>;
         input: any,
     }) {
-        const domValidate = DOMPurifyServices.domSanitizeObject(input);
+        const domValidate = DOMPurifyServices.domSanitizedObject(input);
         if (domValidate) {
             return await callback(domValidate) as ServerResponseDto;
         }

@@ -1,9 +1,8 @@
 import { StaffSchema } from '@/admin/packages/schema/staff';
-import { ServerResponseDto, StaffPermissionDto, StaffRoleDto } from '@/admin/packages/types/constants';
-import { RolePermissions } from '@/admin/packages/utils/constants';
+import { ServerResponseDto, StaffPermissionDto, StaffRoleDto, MyDataDto } from '@/admin/packages/types/constants';
+import { UserValidRolePermissions } from '@/admin/packages/utils/constants';
 import { StaffRoleArray, StaffStatusArray } from '@/admin/packages/utils/constants/auth';
 import { zodValidateAddNewStaff, ZodValidateAddNewStaff } from '@/admin/packages/validations/staff';
-import { StaffSessionContext } from '@/app/admin/layout';
 import trpc from '@/app/trpc/client';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@workspace/ui/components/button';
@@ -13,7 +12,8 @@ import { Input } from '@workspace/ui/components/input';
 import { Label } from '@workspace/ui/components/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@workspace/ui/components/select';
 import { AlertCircle } from 'lucide-react';
-import { useContext, useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 
@@ -23,23 +23,23 @@ interface AddUserDialogDto {
     setOpen: React.Dispatch<React.SetStateAction<boolean>>;
     editById: string;
     setEditById: React.Dispatch<React.SetStateAction<string>>;
+    myData: MyDataDto;
+    refetchMyData: () => void;
 }
 
 function AddUserDialogComponent({
-    open, setOpen, refetch, editById, setEditById
+    open, setOpen, refetch, editById, setEditById, myData, refetchMyData
 }: AddUserDialogDto) {
 
-    const staffSessionContext = useContext(StaffSessionContext);
-    if (!staffSessionContext) return null;
-
-    const [permissions, setPermissions] = useState(['READ'] as StaffPermissionDto[]);
+    const router = useRouter();
+    const [permissions, setPermissions] = useState(["READ"] as StaffPermissionDto[])
     const [showConfirmClose, setShowConfirmClose] = useState(false);
-    const isNotViewer = staffSessionContext.data && staffSessionContext.data.role !== "VIEWER";
-    const [editUser, setEditUser] = useState({} as StaffSchema);
-
+    const [editRoles, setEditRoles] = useState([] as StaffRoleDto[]);
+    const isNotViewer = myData && myData.role !== "VIEWER";
     const form = useForm<ZodValidateAddNewStaff>({
         resolver: zodResolver(zodValidateAddNewStaff),
         defaultValues: {
+            addByStaffId: myData.id,
             fullName: "",
             email: "",
             password: "",
@@ -51,17 +51,46 @@ function AddUserDialogComponent({
 
     const formValueKeys = ['fullName', 'email', 'password'] as const;
 
+    // TRUE = editing existing user, FALSE = adding new user
+    const isEditing = !!editById;
+
+    const isEditMe = editById === myData.id;
+
+    const onEditRoleStatusAndPermissions = () => {
+
+        // if editUser empty can add new user
+        if (!isEditing) {
+            return true;
+        }
+
+        // it's me can edit my role, status and permissions
+        if (isEditMe && ["SUPER_ADMIN", "ADMIN"].includes(myData.role)) {
+            return true;
+        }
+
+        if (["VIEWER", "EDITOR", "ADMIN"].includes(form.getValues("role")) && !isEditMe) {
+            return true;
+        }
+
+        // can't edit other user role, status and permissions
+        return false;
+    }
+
+    // Who can edit what
+    const canEditFullNameAndEmail = !isEditing || isEditMe;
+
+    const canEditRoleStatusAndPermission = onEditRoleStatusAndPermissions()
+
     const hasUnsavedChanges = () => {
         return formValueKeys.some(key => {
             const value = form.getValues(key);
-            const isEdit = !isEditFullNameAndEmail() && !isEditRoleStatusAndPermissions();
-            return value !== "" && isEdit;
+            const isEdit = canEditFullNameAndEmail && canEditRoleStatusAndPermission;
+            return value && isEdit;
         });
     };
 
     const onResetForm = () => {
         setEditById("");
-        setEditUser({} as StaffSchema);
         form.reset({
             fullName: "",
             email: "",
@@ -72,9 +101,9 @@ function AddUserDialogComponent({
         });
     }
 
-    // Handle dialog close attempt
     const handleClose = () => {
-        if (hasUnsavedChanges()) {
+        const hasUnsaved = hasUnsavedChanges();
+        if (hasUnsaved) {
             setShowConfirmClose(true);
         } else {
             setOpen(false);
@@ -82,28 +111,32 @@ function AddUserDialogComponent({
         }
     };
 
-    // Confirm close (user clicks "Yes, discard")
     const confirmClose = () => {
-        setOpen(false);
         setShowConfirmClose(false);
+        setOpen(false);
         onResetForm();
     };
 
-    // Cancel close (stay in dialog)
     const cancelClose = () => {
-        setShowConfirmClose(false);
-        onResetForm();
+        setShowConfirmClose(false); // DO NOT reset form — keep editing
     };
 
     const onChangeRole = (value: StaffRoleDto) => {
         form.setValue("role", value as StaffRoleDto);
+        const pers = UserValidRolePermissions;
         if (value === "SUPER_ADMIN") {
-            setPermissions(RolePermissions.SUPER_ADMIN)
+            form.setValue("permissions", pers.SUPER_ADMIN);
+            setPermissions(pers.SUPER_ADMIN)
         } else if (value === "ADMIN") {
-            setPermissions(RolePermissions.ADMIN);
+            setPermissions(pers.ADMIN)
+            form.setValue("permissions", pers.ADMIN);
         } else if (value === "EDITOR") {
-            setPermissions(RolePermissions.EDITOR);
-        } else setPermissions(RolePermissions.VIEWER);
+            setPermissions(pers.EDITOR)
+            form.setValue("permissions", pers.EDITOR);
+        } else {
+            setPermissions(pers.VIEWER)
+            form.setValue("permissions", pers.VIEWER);
+        }
     }
 
     const getUserOneQuery = trpc.app.admin.manage.staff.getOne.useQuery(
@@ -111,89 +144,95 @@ function AddUserDialogComponent({
         {
             enabled: !!editById && open, // fetch only when true
             refetchOnWindowFocus: false,
-            keepPreviousData: true,
+            keepPreviousData: false,
         }
     );
 
-    // 2. When loaded → reset form
     useEffect(() => {
-        const user = getUserOneQuery?.data?.data;
+        if (editById) {
+            refetchMyData();
+            getUserOneQuery.refetch();
+        }
+    }, [editById]);
 
-        if (user) {
-            // save for later (optional)
-            setEditUser(user);
-            // reset the form with fetched values
-            onChangeRole(user.role);
-            form.reset({
+    useEffect(() => {
+        const user = getUserOneQuery.data?.data as StaffSchema;
+        const pers = UserValidRolePermissions.PERMISSIONS;
+        if (user && editById) {
+            if (user.role === "SUPER_ADMIN") {
+                setEditRoles(pers)
+            } else if (user.role === "ADMIN") {
+                setEditRoles(pers.filter(per => per !== "SUPER_ADMIN"))
+            } else if (user.role === "EDITOR") {
+                setEditRoles(pers.filter(per => ["EDITOR", "VIEWER"].includes(per)))
+            } else setEditRoles(pers.filter(per => per === "VIEWER"))
+
+            const resetValues = {
+                addByStaffId: myData.id,
                 fullName: user.fullName ?? "",
                 email: user.email ?? "",
-                password: "",              // usually kept empty
+                password: "Demo@1234",
                 role: user.role ?? "VIEWER",
                 status: user.status ?? "ACTIVE",
                 permissions: user.permissions ?? ["READ"],
-            });
+            } as ZodValidateAddNewStaff;
+
+            onChangeRole(user.role);
+            form.reset(resetValues);
         }
-    }, [getUserOneQuery.data]);
+    }, [getUserOneQuery.data, editById]);
 
-    const isEditFullNameAndEmail = () => {
-
-        // if editUser empty can add new user
-        if (!editUser || !editUser?.id || !editById) {
-            return true;
-        }
-
-        const myUser = staffSessionContext.data;
-        const isEditMe = myUser.id === editUser.id;
-
-        // it's me can edit my fullName and email
-        if (isEditMe) {
-            return true;
-        }
-
-        // can't edit other user fullName and email
-        return false;
-    }
-
-    const isEditRoleStatusAndPermissions = () => {
-
-        // if editUser empty can add new user
-        if (!editUser || !editUser?.id || !editById) {
-            return true;
-        }
-
-        const myUser = staffSessionContext.data;
-        const isEditMe = myUser.id === editUser.id;
-
-        // it's me can edit my role, status and permissions
-        if (isEditMe && myUser.role === "SUPER_ADMIN") {
-            return true;
-        }
-
-        if (["VIEWER", "EDITOR", "ADMIN"].includes(editUser.role) && !isEditMe) {
-            return true;
-        }
-
-        // can't edit other user role, status and permissions
-        return false;
-    }
-
-    const addOneUserMutation = trpc.app.admin.manage.staff.addOne.useMutation({
+    const userMutation = {
         onSuccess: (data: ServerResponseDto) => {
-            setOpen(false);
-            toast.success(data.message);
-            onResetForm();
-            refetch(); // refresh list
+            if (!isEditMe) {
+                setOpen(false);
+                toast.success(data.message);
+                onResetForm();
+                refetch(); // refresh list
+            }
+            const getStatus = form.getValues("status");
+            if (getStatus === "INACTIVE") {
+                return router.push("/auth/signin");
+            }
+            refetchMyData();
         },
         onError: (error: Error) => {
             toast.error(error.message);
         },
-    });
+    }
+
+    const addOneUserMutation = trpc.app.admin.manage.staff.addOne.useMutation({ ...userMutation });
+
+    const editOneUserMutation = trpc.app.admin.manage.staff.editById.useMutation({ ...userMutation });
+
+    const editMyDataMutation = trpc.app.admin.manage.staff.editMyDataById.useMutation({ ...userMutation });
 
     const onSubmit = (data: ZodValidateAddNewStaff) => {
-        if (data) {
-            addOneUserMutation.mutate(data);
+        if (!data) return;
+
+        if (!editById) return addOneUserMutation.mutate(data);
+
+        const editUserData = {
+            role: data.role,
+            status: data.status,
+            permissions: data.permissions,
+            updatedByStaffId: myData.id,
+            targetStaffId: editById
         }
+
+        // edit my account
+        if (isEditMe) {
+            return editMyDataMutation.mutate({
+                email: data.email,
+                ...editUserData
+            });
+        }
+        // edit other account
+        editOneUserMutation.mutate(editUserData);
     };
+
+    const isLoadingEditUser = editOneUserMutation.isPending || editMyDataMutation.isPending;
+    const isLoadingAddUser = addOneUserMutation.isPending;
 
     if (getUserOneQuery.isLoading) return null;
 
@@ -223,7 +262,7 @@ function AddUserDialogComponent({
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                     {/* Full Name */}
                     {
-                        isEditFullNameAndEmail() &&
+                        canEditFullNameAndEmail &&
                         <>
                             <div>
                                 <Label htmlFor="fullName" className='mb-2'>Full Name</Label>
@@ -233,9 +272,11 @@ function AddUserDialogComponent({
                                     {...form.register("fullName")}
                                     className={form.formState.errors.fullName ? "border-destructive" : ""}
                                 />
-                                {form.formState.errors.fullName && (
-                                    <p className="text-sm text-destructive mt-1">{form.formState.errors.fullName.message}</p>
-                                )}
+                                {
+                                    form.formState.errors.fullName && (
+                                        <p className="text-sm text-destructive mt-1">{form.formState.errors.fullName.message}</p>
+                                    )
+                                }
                             </div>
 
                             {/* Email */}
@@ -274,7 +315,7 @@ function AddUserDialogComponent({
                     }
 
                     {
-                        isEditRoleStatusAndPermissions() &&
+                        canEditRoleStatusAndPermission &&
                         <>
 
                             {/* Role */}
@@ -289,7 +330,7 @@ function AddUserDialogComponent({
                                     </SelectTrigger>
                                     <SelectContent>
                                         {
-                                            StaffRoleArray.map((s, index) => (
+                                            (editById && open && isEditMe ? editRoles : StaffRoleArray).map((s, index) => (
                                                 <SelectItem key={index} value={s}>{s}</SelectItem>
                                             ))
                                         }
@@ -324,6 +365,7 @@ function AddUserDialogComponent({
                                     {(permissions).map((perm) => (
                                         <div key={perm} className="flex items-center space-x-2">
                                             <Checkbox
+                                                disabled
                                                 id={perm.toLowerCase()}
                                                 checked={form.watch("permissions").includes(perm as any)}
                                                 onCheckedChange={(checked) => {
@@ -335,7 +377,7 @@ function AddUserDialogComponent({
                                                     }
                                                 }}
                                             />
-                                            <label htmlFor={perm.toLowerCase()} className="text-sm font-medium capitalize cursor-pointer">
+                                            <label htmlFor={perm.toLowerCase()} className="text-sm font-medium capitalize">
                                                 {perm}
                                             </label>
                                         </div>
@@ -345,19 +387,16 @@ function AddUserDialogComponent({
                                     <p className="text-sm text-destructive mt-1">{form?.formState?.errors?.permissions?.message}</p>
                                 )}
                             </div>
-
                         </>
                     }
 
-
-
                     <DialogFooter>
-                        <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={addOneUserMutation.isPending} className='cursor-pointer'>
+                        <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={isLoadingAddUser} className='cursor-pointer'>
                             Cancel
                         </Button>
-                        <Button type="submit" disabled={addOneUserMutation.isPending} className='cursor-pointer'>
+                        <Button type="submit" disabled={isLoadingAddUser || isLoadingEditUser} className='cursor-pointer'>
                             {
-                                editById && open ? (false ? "Editing..." : "Edit User") : (addOneUserMutation.isPending ? "Adding..." : "Add User")
+                                editById && open ? (isLoadingEditUser ? "Editing..." : "Edit User") : (isLoadingAddUser ? "Adding..." : "Add User")
                             }
                         </Button>
                     </DialogFooter>
@@ -390,4 +429,4 @@ function AddUserDialogComponent({
     </>
 }
 
-export default AddUserDialogComponent
+export default AddUserDialogComponent;

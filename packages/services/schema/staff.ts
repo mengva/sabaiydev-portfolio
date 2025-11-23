@@ -1,4 +1,3 @@
-import { staffPermissionEnum, staffRoleEnum, staffStatusEnum } from "../../../apps/server/src/modules/admin/managements/staff/entities/enum";
 import { StaffPermissionDto, StaffRoleDto, StaffStatusDto } from "../types/constants";
 
 export interface StaffSchema {

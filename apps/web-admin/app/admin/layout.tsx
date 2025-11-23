@@ -3,20 +3,19 @@
 // src/app/(dashboard)/layout.tsx
 import { SidebarProvider, SidebarTrigger } from "@workspace/ui/components/sidebar";
 import trpc from "../trpc/client";
-import { StaffSessionDto } from "@/admin/packages/types/constants";
+import { MyDataDto } from "@/admin/packages/types/constants";
 import { createContext } from "react";
-import LoadingComponent from "./dashboard/components/loading";
 import { AppSidebar } from "@/components/sidebar";
 import { Topbar } from "@/components/topbar";
 
-interface StaffSessionContextDto {
+interface MyDataContextDto {
   refetch: () => void;
   isLoading: boolean;
   isRefetching: boolean;
-  data: StaffSessionDto;
+  data: MyDataDto;
 }
 
-export const StaffSessionContext = createContext<StaffSessionContextDto | undefined>(undefined);
+export const MyDataContext = createContext<MyDataContextDto | undefined>(undefined);
 
 export default function AdminLayout({
   children,
@@ -30,11 +29,11 @@ export default function AdminLayout({
     isRefetching,
   } = trpc.app.admin.manage.staff.getBySessionToken.useQuery();
   if (isLoading) {
-    return <LoadingComponent />
+    return <div></div>
   }
-  const data: StaffSessionDto = response?.data ?? null;
+  const data: MyDataDto = response?.data ?? null;
   return (
-    <StaffSessionContext.Provider value={{ refetch, isLoading, isRefetching, data }}>
+    <MyDataContext.Provider value={{ refetch, isLoading, isRefetching, data }}>
       <SidebarProvider>
         <AppSidebar />
         <main className="md:min-w-[calc(100%-16rem)] w-full">
@@ -45,6 +44,6 @@ export default function AdminLayout({
           </div>
         </main>
       </SidebarProvider>
-    </StaffSessionContext.Provider>
+    </MyDataContext.Provider>
   );
 }

@@ -17,6 +17,7 @@ export class AuthFuncFindStaffUtils {
                 with: { sessions: true }
             });
             if (!staff) throw new HTTPErrorMessage(AuthEnumMessage.notFoundEmail, "404");
+            if (staff.status !== "ACTIVE") throw new HTTPErrorMessage(AuthEnumMessage.disabledAccount, "403");
             const match = await Helper.bcryptCompare(password, staff.password);
             if (!match) {
                 throw new HTTPErrorMessage(AuthEnumMessage.incorrectPassword, "400");
@@ -47,6 +48,7 @@ export class AuthFuncFindStaffUtils {
                 }
             }) as StaffSchema;
             if (!staff) throw new HTTPErrorMessage(AuthEnumMessage.notFoundEmail, "404");
+            if (staff.status !== "ACTIVE") throw new HTTPErrorMessage(AuthEnumMessage.disabledAccount, "403");
             const verification = await AuthFuncHelperServices.verifiedOTPCode({
                 staff, clientOTP: code,
                 userAgent,
@@ -77,6 +79,7 @@ export class AuthFuncFindStaffUtils {
                 with: { verifications: true }
             });
             if (!staff) throw new HTTPErrorMessage(AuthEnumMessage.notFoundEmail, "404");
+            if (staff.status !== "ACTIVE") throw new HTTPErrorMessage(AuthEnumMessage.disabledAccount, "403");
             return staff;
         } catch (error: ServerErrorDto) {
             throw getHTTPError(error);
@@ -87,6 +90,7 @@ export class AuthFuncFindStaffUtils {
         try {
             const staff = await this.findStaffVerifiedEmail(email) as StaffSchema;
             if (!staff) throw new HTTPErrorMessage(AuthEnumMessage.notVerifiedEmail, "400");
+            if (staff.status !== "ACTIVE") throw new HTTPErrorMessage(AuthEnumMessage.disabledAccount, "403");
             return staff;
         } catch (error: ServerErrorDto) {
             throw getHTTPError(error);

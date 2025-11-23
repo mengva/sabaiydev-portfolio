@@ -10,7 +10,7 @@ import { DomAndSanitizeRESTBodyMiddleware } from "./domAndSanitizeRESTBody";
 
 export class AuthRestMiddleware {
 
-    public static async authSessionFunc(c: MyContext) {
+    public static async authSessionFunc(c: MyContext['honoContext']) {
         const error = await RateLimiterMiddleware.rateLimitAPI(c);
         if (error.error && error.message) {
             throw new HTTPException(429, { message: error.message });
@@ -20,21 +20,25 @@ export class AuthRestMiddleware {
         if (!sessionToken || sessionToken === undefined) {
             throw new HTTPException(401, { message: AuthEnumMessage.unauthorized });
         }
-        const sessionInfo = await SecureSessionManagerServices.verifySession(sessionToken, c);
-        if (!sessionInfo) {
+        const result = await SecureSessionManagerServices.verifySession(sessionToken, c);
+        if (result?.message !== "success") {
+            throw new HTTPException(403, { message: result.message });
+        }
+        const session = result.data;
+        if (!session) {
             throw new HTTPException(404, { message: AuthEnumMessage.notFound });
         }
-        if (sessionInfo.expired < Helper.currentDate()) {
+        if (session.expired < Helper.currentDate()) {
             throw new HTTPException(401, { message: AuthEnumMessage.expiredSessionToken });
         }
-        if (sessionInfo.staff && sessionInfo.staff.status !== "ACTIVE") {
+        if (session.staff && session.staff.status !== "ACTIVE") {
             c.get("deleteCookie").del(adminSessionTokenName)
             throw new HTTPException(401, { message: AuthEnumMessage.disabledAccount });
         }
         c.set("session", {
-            sessionId: sessionInfo.id,
-            sessionToken: sessionInfo.sessionToken,
-            staffId: sessionInfo.staffId
+            sessionId: session.id,
+            sessionToken: session.sessionToken,
+            staffId: session.staffId
         });
         return c;
     }
@@ -55,9 +59,14 @@ export class AuthRestMiddleware {
         if (!sessionToken) {
             return await next();
         }
-        const sessionInfo = await SecureSessionManagerServices.verifySession(sessionToken, c);
-        const hasSessionAndValid = sessionInfo && sessionInfo.updatedAt as Date > Helper.currentDate();
-        const hasSessionTokenAndInfo = sessionToken && sessionInfo;
+        const result = await SecureSessionManagerServices.verifySession(sessionToken, c);
+        if (result?.message !== "success") {
+            throw new HTTPException(403, { message: result.message });
+        }
+        const session = result.data;
+        if (!session) throw new HTTPException(400, { message: "Session is required" });
+        const hasSessionAndValid = session.updatedAt as Date > Helper.currentDate();
+        const hasSessionTokenAndInfo = sessionToken && session;
         if (hasSessionAndValid || hasSessionTokenAndInfo) {
             throw new HTTPException(403, { message: AuthEnumMessage.alreadySignIn });
         }

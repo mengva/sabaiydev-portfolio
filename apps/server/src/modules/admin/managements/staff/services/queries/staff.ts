@@ -26,7 +26,7 @@ export class StaffManageQueriesServices {
             // 3️⃣ Calculate pagination
             const totalPage = Math.ceil(Number(total) / limit);
             // 4️⃣ Return formatted response
-            return HandlerSuccess.success("Staff all retrieved successfully", {
+            return HandlerSuccess.success("Staff list retrieved successfully", {
                 data: admins,
                 pagination: {
                     total,

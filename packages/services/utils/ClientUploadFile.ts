@@ -1,6 +1,6 @@
 import type { FileDto } from "../types/constants";
 
-export class ClientUploadFileServices {
+export class UploadFileServices {
 
     public static async uploadFile(file: File): Promise<FileDto> {
         return new Promise((resolve, reject) => {

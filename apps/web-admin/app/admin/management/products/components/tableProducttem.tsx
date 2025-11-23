@@ -6,7 +6,6 @@ import {
     TableRow,
 } from "@workspace/ui/components/table";
 import { Badge } from '@workspace/ui/components/badge';
-import { StaffSchema } from '@/admin/packages/schema/staff';
 import GlobalHelper from '@/admin/packages/utils/GlobalHelper';
 import {
     DropdownMenu,
@@ -29,27 +28,28 @@ import { Edit, MoreHorizontal, Trash2 } from 'lucide-react';
 import { FilterDto, ServerResponseDto, MyDataDto } from '@/admin/packages/types/constants';
 import toast from 'react-hot-toast';
 import trpc from '@/app/trpc/client';
-import { CheckedRolePermissions } from '@/admin/packages/utils/constants';
+import { ProductSchema } from '@/admin/packages/schema/product';
 import TableIdComponent from '@/components/tableId';
 
 interface ItemDto {
-    user: StaffSchema;
+    product: ProductSchema;
     index: number;
     filter: FilterDto;
     myData: MyDataDto;
     refetch: () => void;
     setOpen: React.Dispatch<React.SetStateAction<boolean>>;
-    setEditById: React.Dispatch<React.SetStateAction<string>>;
 }
 
 // Helper: Get initials
 const getInitials = (name: string) =>
     name.split(' ').map(n => n[0]).join('').toUpperCase();
 
+function TableProductItemComponent({ product, index, filter, myData, refetch, setOpen }: ItemDto) {
 
-function TableUserItemComponent({ user, index, filter, myData, refetch, setOpen, setEditById }: ItemDto) {
-
+    const myRole = myData.role ?? "VIEWER";
     const [openDelete, setOpenDelete] = useState(false);
+
+    const translationProducts = product.translationProducts.find(tr => tr.local === "en");
 
     // Mutations
     const onSuccess = (data: ServerResponseDto) => {
@@ -62,32 +62,33 @@ function TableUserItemComponent({ user, index, filter, myData, refetch, setOpen,
 
     const onError = (error: Error) => toast.error(error.message);
 
-    const removeStaffByIdMutation = trpc.app.admin.manage.staff.removeOneById.useMutation({
+    const removeStaffByIdMutation = trpc.app.admin.manage.product.removeOneById.useMutation({
         onSuccess,
         onError,
     });
 
     const handleDelete = () => {
         removeStaffByIdMutation.mutate({
-            targetStaffId: user.id,
+            targetProductId: product.id,
             removeByStaffId: myData.id,
         });
     };
 
-    // ----------- PERMISSION CHECKERS (clean version) -----------
-    const isMe = user.id === myData.id;
+    const onDelete = () => {
+        return ["SUPER_ADMIN", "ADMIN"].includes(myRole);
+    }
 
-    const validRolePer = CheckedRolePermissions[myData.role]?.includes(user.role);
+    const onEdit = () => {
+        return ["SUPER_ADMIN", "ADMIN", "EDITOR"].includes(myRole);
+    }
 
-    const canDelete = !isMe && validRolePer;
-
-    const canEdit = isMe || validRolePer;
-
+    const canDelete = onDelete();
+    const canEdit = onEdit();
     const canInteract = canDelete || canEdit;
 
     return (
         <>
-            <TableRow key={user.id} className="w-auto">
+            <TableRow key={product.id} className="w-auto">
 
                 {/* Row number */}
                 <TableCell>
@@ -100,41 +101,39 @@ function TableUserItemComponent({ user, index, filter, myData, refetch, setOpen,
                 <TableCell>
                     <div className="flex items-center gap-3">
                         <div
-                            className={`h-9 w-9 rounded-full flex items-center justify-center text-sm font-medium ${index % 2 === 0 ? 'bg-muted' : 'bg-green-600/50'}`}
+                            className={`h-9 w-9 rounded-full flex items-center justify-center text-sm font-medium ${index % 2 === 0 ? 'bg-muted' : 'bg-green-600/50'
+                                }`}
                         >
-                            {getInitials(user.fullName)}
+                            {getInitials(translationProducts?.name ?? '')}
                         </div>
 
                         <div>
-                            <p className="font-medium">{user.fullName}</p>
-                            <p className="text-sm text-muted-foreground">{user.email}</p>
+                            <p className="font-medium">{translationProducts?.name ?? ''}</p>
                         </div>
-
-                        {isMe && <Badge variant="default">Me</Badge>}
                     </div>
                 </TableCell>
 
                 {/* Role */}
                 <TableCell>
                     <Badge variant="outline" className="capitalize">
-                        {user.role}
+                        {product.category}
                     </Badge>
                 </TableCell>
 
                 {/* Status */}
                 <TableCell>
                     <Badge
-                        variant={user.status === 'ACTIVE' ? 'default' : 'destructive'}
+                        variant={product.status === 'ACTIVE' ? 'default' : ["INACTIVE", "DEPRECATED"].includes(product.status) ? "destructive" : "secondary"}
                         className="capitalize"
                     >
-                        {user.status}
+                        {product.status}
                     </Badge>
                 </TableCell>
 
                 {/* Permissions */}
                 <TableCell>
                     <div className="flex gap-1">
-                        {user.permissions.map((p, i) => (
+                        {product.technologies.map((p, i) => (
                             <Badge key={i} variant="secondary" className="text-xs capitalize">
                                 {p}
                             </Badge>
@@ -144,7 +143,7 @@ function TableUserItemComponent({ user, index, filter, myData, refetch, setOpen,
 
                 {/* Created date */}
                 <TableCell className="text-muted-foreground">
-                    {GlobalHelper.formatDate(user.createdAt as Date)}
+                    {GlobalHelper.formatDate(product.createdAt as Date)}
                 </TableCell>
 
                 {/* ACTION DROPDOWN */}
@@ -174,7 +173,6 @@ function TableUserItemComponent({ user, index, filter, myData, refetch, setOpen,
                                     <DropdownMenuItem
                                         onClick={() => {
                                             setOpen(true);
-                                            setEditById(user.id);
                                         }}
                                         className="text-sky-500 hover:!text-sky-600 cursor-pointer"
                                     >
@@ -200,11 +198,11 @@ function TableUserItemComponent({ user, index, filter, myData, refetch, setOpen,
                 <AlertDialogContent>
                     <AlertDialogHeader>
                         <AlertDialogTitle className="!text-xl">
-                            Are you sure you want to delete this user?
+                            Are you sure you want to delete this product?
                         </AlertDialogTitle>
                         <AlertDialogDescription>
                             This action cannot be undone. It will permanently remove{' '}
-                            <span className="font-medium text-red-600">{user.fullName}</span> from
+                            <span className="font-medium text-red-600">{translationProducts?.name ?? ''}</span> from
                             the system.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
@@ -226,4 +224,4 @@ function TableUserItemComponent({ user, index, filter, myData, refetch, setOpen,
     );
 }
 
-export default TableUserItemComponent;
+export default TableProductItemComponent;
