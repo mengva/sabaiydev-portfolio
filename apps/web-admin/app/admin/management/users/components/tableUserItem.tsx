@@ -100,7 +100,7 @@ function TableUserItemComponent({ user, index, filter, myData, refetch, setOpen,
                 <TableCell>
                     <div className="flex items-center gap-3">
                         <div
-                            className={`h-9 w-9 rounded-full flex items-center justify-center text-sm font-medium ${index % 2 === 0 ? 'bg-muted' : 'bg-green-600/50'}`}
+                            className={`h-9 w-9 rounded-full flex items-center justify-center text-sm font-medium ${index % 2 === 0 ? 'bg-muted' : 'bg-[#8e51ff]/50'}`}
                         >
                             {getInitials(user.fullName)}
                         </div>

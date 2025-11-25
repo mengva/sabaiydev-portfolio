@@ -1,6 +1,6 @@
 import React from 'react'
 
-function ViewOneProductPage() {
+function PreViewOneProductPage() {
     return (
         <div>
             View One Product
@@ -8,4 +8,4 @@ function ViewOneProductPage() {
     )
 }
 
-export default ViewOneProductPage
+export default PreViewOneProductPage;

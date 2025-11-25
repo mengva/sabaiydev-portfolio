@@ -22,7 +22,7 @@ export class ProductManageMutationServices {
         }
     }
 
-    public static async addDataOne(input: ZodValidationAddOneProductData) {
+    public static async addOneData(input: ZodValidationAddOneProductData) {
         try {
             const { translations, ...data } = input;
             await db.transaction(async tx => {
@@ -43,7 +43,7 @@ export class ProductManageMutationServices {
                 await ManageProductUtils.editProductDataById(input);
                 await ManageProductUtils.productUploadFiles({ files: imageFiles, productId: targetProductId, tx });
             });
-            return HandlerSuccess.success("Update product by id successfully");
+            return HandlerSuccess.success("Edit product by id successfully");
         } catch (error) {
             throw getHTTPError(error);
         }
@@ -66,14 +66,14 @@ export class ProductManageMutationServices {
         }
     }
 
-    public static async removeOneById(targetProductId: string, cloudId: string) {
+    public static async removeOneById(productId: string, cloudId: string) {
         try {
             const findProduct = await db.query.products.findFirst({
-                where: eq(products.id, targetProductId)
+                where: eq(products.id, productId)
             });
             if (!findProduct) throw new HTTPErrorMessage("Find product not found", "404");
             await db.transaction(async tx => {
-                await tx.delete(products).where(eq(products.id, targetProductId));
+                await tx.delete(products).where(eq(products.id, productId));
                 await SecureFileUploadServices.destoryCloudinaryImage(cloudId);
             });
             return HandlerSuccess.success("Removed product by id successfully");

@@ -8,12 +8,20 @@ import { ProductManageQueriesServices } from "../services/queries";
 
 export const ProductManageTRPCRouter = router({
     list: publicProcedure.input(zodValidationTRPCFilter).use(AuthTRPCMiddleware.authSanitizedBody).query(async ({ ctx }) => {
-        const filter: ZodValidationTRPCFilter = ctx.honoContext.get("body");
-        return await ProductManageQueriesServices.list(filter);
+        try {
+            const filter: ZodValidationTRPCFilter = ctx.honoContext.get("body");
+            return await ProductManageQueriesServices.list(filter);
+        } catch (error) {
+            throw HandlerTRPCError.TRPCError(error);
+        }
     }),
     getOne: publicProcedure.input(zodValidationGetOneProductById).use(AuthTRPCMiddleware.authSession).query(async ({ ctx }) => {
-        const param = ctx.honoContext.req.param() as ZodValidationGetOneProductById;
-        return await ProductManageQueriesServices.getOne(param.productId);
+        try {
+            const param = ctx.honoContext.req.param() as ZodValidationGetOneProductById;
+            return await ProductManageQueriesServices.getOne(param.productId);
+        } catch (error) {
+            throw HandlerTRPCError.TRPCError(error);
+        }
     }),
     addOne: publicProcedure.input(zodValidationAddOneProduct).use(AuthTRPCMiddleware.authSanitizedBody).mutation(async ({ ctx }) => {
         try {
@@ -23,10 +31,10 @@ export const ProductManageTRPCRouter = router({
             throw HandlerTRPCError.TRPCError(error);
         }
     }),
-    addDataOne: publicProcedure.input(zodValidationAddOneProductData).use(AuthTRPCMiddleware.authSanitizedBody).mutation(async ({ ctx }) => {
+    addOneData: publicProcedure.input(zodValidationAddOneProductData).use(AuthTRPCMiddleware.authSanitizedBody).mutation(async ({ ctx }) => {
         try {
             const body: ZodValidationAddOneProductData = ctx.honoContext.get("body")
-            return await ProductManageMutationServices.addDataOne(body);
+            return await ProductManageMutationServices.addOneData(body);
         } catch (error) {
             throw HandlerTRPCError.TRPCError(error);
         }

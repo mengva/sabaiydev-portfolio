@@ -30,7 +30,7 @@ export class HTTPErrorMessage extends Error {
 }
 
 export const getHTTPError = (error: ServerErrorDto) => {
-    let message = ErrorHandler.getErrorMessage(error);
+    const message = ErrorHandler.getErrorMessage(error);
     if (error instanceof HTTPError) {
         const statusCode = (error.statusCode.toString() || '400') as StatusCodeErrorDto;
         throw new HTTPError(message, statusCode);

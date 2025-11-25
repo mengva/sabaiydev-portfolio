@@ -1,6 +1,7 @@
 // src/components/sidebar.tsx
 "use client";
 
+import { Button } from "@workspace/ui/components/button";
 import {
     Sidebar,
     SidebarContent,
@@ -48,9 +49,9 @@ export function AppSidebar() {
                             return (
                                 <SidebarMenuItem key={item.title}>
                                     <SidebarMenuButton asChild isActive={isActive}>
-                                        <Link href={item.href} className={`${isActive && '!bg-green-600'}`}>
+                                        <Link href={item.href} className={`${isActive && '!bg-[#8e51ff]'}`}>
                                             <Icon className="mr-2 h-4 w-4" />
-                                            <span>{item.title}</span>
+                                            <span className={`${isActive && 'text-white'}`}>{item.title}</span>
                                         </Link>
                                     </SidebarMenuButton>
                                 </SidebarMenuItem>
