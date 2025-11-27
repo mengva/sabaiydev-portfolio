@@ -5,6 +5,7 @@ import { HandlerTRPCError } from "@/api/utils/handleTRPCError";
 import { ProductManageMutationServices } from "../services/mutation";
 import { zodValidationTRPCFilter, type ZodValidationTRPCFilter } from "@/api/packages/validations/constants";
 import { ProductManageQueriesServices } from "../services/queries";
+import { ValidationProductRoleAndPerUtils } from "../utils/validationRoleAndPer";
 
 export const ProductManageTRPCRouter = router({
     list: publicProcedure.input(zodValidationTRPCFilter).use(AuthTRPCMiddleware.authSanitizedBody).query(async ({ ctx }) => {
@@ -26,6 +27,13 @@ export const ProductManageTRPCRouter = router({
     addOne: publicProcedure.input(zodValidationAddOneProduct).use(AuthTRPCMiddleware.authSanitizedBody).mutation(async ({ ctx }) => {
         try {
             const body: ZodValidationAddOneProduct = ctx.honoContext.get("body");
+
+            const canBeAdd = await ValidationProductRoleAndPerUtils.canBeAddAndEdit(body.addByStaffId);
+
+            if (canBeAdd.message !== "success") {
+                throw HandlerTRPCError.TRPCErrorMessage(canBeAdd.message, canBeAdd.status);
+            }
+
             return await ProductManageMutationServices.addOne(body);
         } catch (error) {
             throw HandlerTRPCError.TRPCError(error);
@@ -33,7 +41,14 @@ export const ProductManageTRPCRouter = router({
     }),
     addOneData: publicProcedure.input(zodValidationAddOneProductData).use(AuthTRPCMiddleware.authSanitizedBody).mutation(async ({ ctx }) => {
         try {
-            const body: ZodValidationAddOneProductData = ctx.honoContext.get("body")
+            const body: ZodValidationAddOneProductData = ctx.honoContext.get("body");
+
+            const canBeAdd = await ValidationProductRoleAndPerUtils.canBeAddAndEdit(body.addByStaffId);
+
+            if (canBeAdd.message !== "success") {
+                throw HandlerTRPCError.TRPCErrorMessage(canBeAdd.message, canBeAdd.status);
+            }
+
             return await ProductManageMutationServices.addOneData(body);
         } catch (error) {
             throw HandlerTRPCError.TRPCError(error);
@@ -41,7 +56,14 @@ export const ProductManageTRPCRouter = router({
     }),
     editById: publicProcedure.input(zodValidationEditOneProduct).use(AuthTRPCMiddleware.authSanitizedBody).mutation(async ({ ctx }) => {
         try {
-            const body: ZodValidationEditOneProduct = ctx.honoContext.get("body")
+            const body: ZodValidationEditOneProduct = ctx.honoContext.get("body");
+
+            const canBeEdit = await ValidationProductRoleAndPerUtils.canBeAddAndEdit(body.updatedByStaffId);
+
+            if (canBeEdit.message !== "success") {
+                throw HandlerTRPCError.TRPCErrorMessage(canBeEdit.message, canBeEdit.status);
+            }
+
             return await ProductManageMutationServices.editById(body);
         } catch (error) {
             throw HandlerTRPCError.TRPCError(error);
@@ -50,15 +72,28 @@ export const ProductManageTRPCRouter = router({
     editDataById: publicProcedure.input(zodValidationEditOneProductData).use(AuthTRPCMiddleware.authSanitizedBody).mutation(async ({ ctx }) => {
         try {
             const body: ZodValidationEditOneProductData = ctx.honoContext.get("body");
+
+            const canBeEdit = await ValidationProductRoleAndPerUtils.canBeAddAndEdit(body.updatedByStaffId);
+
+            if (canBeEdit.message !== "success") {
+                throw HandlerTRPCError.TRPCErrorMessage(canBeEdit.message, canBeEdit.status);
+            }
+
             return await ProductManageMutationServices.editDataById(body);
         } catch (error) {
             throw HandlerTRPCError.TRPCError(error);
         }
     }),
-    removeOneById: publicProcedure.input(zodValidationRemoveOneProductById).use(AuthTRPCMiddleware.authSession).mutation(async ({ ctx }) => {
+    removeOneById: publicProcedure.input(zodValidationRemoveOneProductById).use(AuthTRPCMiddleware.authSession).mutation(async ({ ctx, input }) => {
         try {
-            const body = ctx.honoContext.req.param() as ZodValidationRemoveOneProductById;
-            return await ProductManageMutationServices.removeOneById(body.targetProductId, body.cloudId);
+
+            const canBeRemove = await ValidationProductRoleAndPerUtils.canBeRemove(input.removeByStaffId);
+
+            if (canBeRemove.message !== "success") {
+                throw HandlerTRPCError.TRPCErrorMessage(canBeRemove.message, canBeRemove.status);
+            }
+
+            return await ProductManageMutationServices.removeOneById(input.targetProductId);
         } catch (error) {
             throw HandlerTRPCError.TRPCError(error);
         }

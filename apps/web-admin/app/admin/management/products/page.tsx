@@ -93,9 +93,11 @@ function ProductPage() {
     useEffect(() => {
         if (response) {
             const result = response?.data;
-            const productResults = result?.data ?? []; // the array
+            console.log("result", result);
+            const resultProducts = result?.data ?? []; // the array
+            console.log("resultProducts", resultProducts);
             const pagination: PaginationFilterDto = result?.pagination; // pagination info
-            setProducts(productResults);
+            setProducts(resultProducts);
             setPaginationFilter(pagination);
         }
     }, [response]);
@@ -168,7 +170,7 @@ function ProductPage() {
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <div>
-                    <h1 className="!text-3xl font-bold">Product Management</h1>
+                    <h1 className="text-3xl! font-bold">Product Management</h1>
                     <p className="text-muted-foreground">Manage your product portfolio</p>
                 </div>
                 {

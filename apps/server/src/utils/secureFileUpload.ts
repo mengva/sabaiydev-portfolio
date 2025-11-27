@@ -42,59 +42,89 @@ export interface ResponseFileDto {
     cloudinaryId: string;
 }
 
+export interface ImageFileDto {
+    files: FileDto[];
+}
+
 export class SecureFileUploadServices {
 
-    private static async ValidationFileAndUpload({ file, isPDF }: { file: FileDto; isPDF: boolean }): Promise<ResponseFileDto> {
-        const validation = ValidationSecureFileUploadServices.ValidationFile(file);
-        if (!validation.valid) {
-            throw new Error(validation.error);
+    private static async validationFileAndUploadFunc({ file, isPDF }: { file: FileDto; isPDF: boolean }): Promise<ResponseFileDto> {
+        try {
+            const validation = ValidationSecureFileUploadServices.validationFile(file);
+            console.log("validation", validation)
+            if (!validation.valid) {
+                throw new Error(validation.error);
+            }
+            const result = isPDF ? await this.uploadPDFFileCloudinaryFunc(file) : await this.uploadImageCloudinaryFunc(file);
+            if (!result) throw new Error(`Falied to uploaded ${isPDF ? 'PDF file' : 'file'}`);
+            return {
+                imageUrl: result.secure_url,
+                size: +result.bytes,
+                type: result.resource_type,
+                width: +result.width,
+                height: +result.height,
+                cloudinaryId: result.public_id
+            };
+        } catch (error) {
+            throw HandlerTRPCError.TRPCError(error);
         }
-        const result = isPDF ? await this.uploadPDFFileCloudinary(file) : await this.uploadImageCloudinary(file);
-        if (!result) throw new Error(`Falied to uploaded ${isPDF ? 'PDF file' : 'file'}`);
-        return {
-            imageUrl: result.secure_url,
-            size: +result.bytes,
-            type: result.resource_type,
-            width: +result.width,
-            height: +result.height,
-            cloudinaryId: result.public_id
-        };
     }
 
-    public static async uploadFileToCloudinary({ files }: {
-        files: FileDto[] | FileDto;
-    }) {
-        if (Array.isArray(files) && files.length > 0) {
+    public static async uploadCloudinaryImageFiles({ files }: ImageFileDto) {
+        try {
+            if (!files.length) return [];
+
             const uploadResults = await Promise.all(
                 files.map(async (file) => {
-                    return await this.ValidationFileAndUpload({ file, isPDF: false });
+                    return await this.validationFileAndUploadFunc({ file, isPDF: false });
                 })
             );
             return uploadResults;
-        } else if (!Array.isArray(files)) {
-            return await this.ValidationFileAndUpload({ file: files as FileDto, isPDF: false });
+        } catch (error) {
+            throw HandlerTRPCError.TRPCError(error);
         }
     }
 
-    public static async uploadPDFFileToCloudinary({
-        files }: {
-            files: FileDto[] | FileDto;
-        }) {
-        if (Array.isArray(files) && files.length > 0) {
+    public static async uploadCloudinaryImageFile(file: FileDto) {
+        try {
+            if (!file) return undefined;
+
+            const uploadResult = await this.validationFileAndUploadFunc({ file, isPDF: false });
+            return uploadResult;
+        } catch (error) {
+            throw HandlerTRPCError.TRPCError(error);
+        }
+    }
+
+    public static async uploadCloudinaryPDFFile(file: FileDto) {
+        try {
+            if (!file) return undefined;
+
+            const uploadResult = await this.validationFileAndUploadFunc({ file, isPDF: true });
+            return uploadResult;
+        } catch (error) {
+            throw HandlerTRPCError.TRPCError(error);
+        }
+    }
+
+    public static async uploadCloudinaryPDFFiles({ files }: ImageFileDto) {
+        try {
+            if (!files.length) return [];
+
             const uploadResults = await Promise.all(
                 files.map(async (file) => {
-                    return await this.ValidationFileAndUpload({ file, isPDF: true });
+                    return await this.validationFileAndUploadFunc({ file, isPDF: true });
                 })
             );
             return uploadResults;
-        } else {
-            return await this.ValidationFileAndUpload({ file: files as FileDto, isPDF: true });
+        } catch (error) {
+            throw HandlerTRPCError.TRPCError(error);
         }
     }
 
-    public static async uploadImageCloudinary(file: File | any) {
+    public static async uploadImageCloudinaryFunc(file: File | any) {
         const result = await cloudinary.uploader.upload(file.fileData, {
-            folder: 'sabaiydev_portfolio',
+            folder: 'sabaiydev',
             public_id: `${Date.now()}-${file.fileName.split('.')[0]}`,
             resource_type: "image",
             allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
@@ -104,9 +134,9 @@ export class SecureFileUploadServices {
         return result;
     }
 
-    public static async uploadPDFFileCloudinary(file: File | any) {
+    public static async uploadPDFFileCloudinaryFunc(file: File | any) {
         const result = await cloudinary.uploader.upload(file.fileData, {
-            folder: 'sabaiydev_portfolio',
+            folder: 'sabaiydev',
             public_id: `${Date.now()}-${file.fileName.split('.')[0]}`,
             resource_type: "raw",
             allowed_formats: ['pdf', 'doc', 'docx'],
@@ -116,11 +146,11 @@ export class SecureFileUploadServices {
         return result;
     }
 
-    public static async destoryCloudinaryImage(cloudinaryId: string) {
+    public static async destoryCloudinaryFunc(cloudinaryId: string) {
         try {
             const result = await cloudinary.uploader.destroy(
                 cloudinaryId,
-                { resource_type: 'sabaiydev_portfolio' }
+                { resource_type: 'sabaiydev' }
             );
             return result;
         } catch (error) {

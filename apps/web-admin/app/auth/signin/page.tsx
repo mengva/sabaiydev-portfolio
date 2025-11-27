@@ -42,7 +42,7 @@ export default function SignInPage() {
     return (
         <div className="w-full min-h-screen flex justify-center items-center">
             <div className="w-full max-w-md mx-auto">
-                <h1 className="text-center !font-bold !text-4xl mb-4 bg-gradient-to-r from-purple-500 to-green-600 bg-clip-text text-transparent">
+                <h1 className="text-center font-bold! text-4xl! mb-4 bg-gradient-to-r from-purple-500 to-green-600 bg-clip-text text-transparent">
                     Sabaiydev
                 </h1>
                 <p className="text-center mb-4">
@@ -50,7 +50,7 @@ export default function SignInPage() {
                 </p>
                 <Card className="w-full">
                     <CardHeader>
-                        <CardTitle className="!text-2xl text-center">Sign In</CardTitle>
+                        <CardTitle className="text-2xl! text-center">Sign In</CardTitle>
                         <CardDescription className="text-center">
                             Enter your email and password to sign in to your account.
                         </CardDescription>

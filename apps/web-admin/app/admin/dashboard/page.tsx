@@ -73,7 +73,7 @@ export default function DashboardPage() {
                 <Icon className={`h-8 w-8 ${stat.color}`} />
               </CardHeader>
               <CardContent>
-                <div className={`!text-2xl !font-bold ${stat.color}`}>{stat.value}</div>
+                <div className={`text-2xl! font-bold! ${stat.color}`}>{stat.value}</div>
                 <p
                   className={`text-xs ${isPositive ? "text-green-600" : "text-red-600"
                     }`}

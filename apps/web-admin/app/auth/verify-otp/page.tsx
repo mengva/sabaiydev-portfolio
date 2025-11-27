@@ -92,10 +92,10 @@ export default function VerifyOtpFormPage() {
   return (
     <div className="w-full min-h-screen flex justify-center items-center">
       <div className="w-full max-w-md shadow-xl">
-        <h1 className="text-center !font-bold !text-4xl mb-4 bg-gradient-to-r from-purple-500 to-green-600 bg-clip-text text-transparent">Sabaiydev</h1>
+        <h1 className="text-center font-bold! text-4xl! mb-4 bg-gradient-to-r from-purple-500 to-green-600 bg-clip-text text-transparent">Sabaiydev</h1>
         <Card className="">
           <CardHeader>
-            <CardTitle className="text-center !text-2xl">Verify OTP</CardTitle>
+            <CardTitle className="text-center text-2xl!">Verify OTP</CardTitle>
             <CardDescription className="text-center">Please enter the OTP code sent to your email.</CardDescription>
           </CardHeader>
           <CardContent>

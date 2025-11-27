@@ -1,8 +1,17 @@
-import toast from "react-hot-toast";
 import type { FileDto } from "../types/constants";
 import { validateMaxFileSize } from "./constants";
 import { ValidationSecureFileUploadServices } from "./SecureFile";
 import { ErrorHandler } from "./HandleError";
+
+interface UploadFileDto {
+    message: string;
+    file: FileDto | undefined;
+}
+
+interface UploadFilesDto {
+    message: string;
+    files: FileDto[];
+}
 
 export class UploadFileServices {
 
@@ -26,18 +35,45 @@ export class UploadFileServices {
         });
     }
 
-    public static async uploadFile(file: File): Promise<FileDto | undefined> {
-        if (!file) return undefined;
+    public static async uploadFile(file: File): Promise<UploadFileDto> {
+
+        if (!file) return {
+            message: "File is required",
+            file: undefined
+        };
+
         const validFile = file.size <= validateMaxFileSize;
+
         if (!validFile) {
-            return undefined;
+            return {
+                message: "Can't uploaded file size > 10MB",
+                file: undefined
+            };
         }
-        return await this.uploadFile(file);
+
+        const resultFile = await this.uploadFileFunc(file);
+        const validationFormattedFile = ValidationSecureFileUploadServices.validationFile(resultFile);
+
+        if (validationFormattedFile.error) {
+            return {
+                message: validationFormattedFile.error || "Invalid file formatted",
+                file: undefined
+            };
+        }
+
+        const res = await this.uploadFileFunc(file);
+        return {
+            message: "success",
+            file: res
+        }
     }
 
-    public static async uploadFiles(files: File[]): Promise<FileDto[] | undefined> {
+    public static async uploadFiles(files: File[]): Promise<UploadFilesDto> {
         try {
-            if (files.length === 0) return [];
+            if (files.length === 0) return {
+                message: "Files is required",
+                files: []
+            }
 
             // check max file size
             const validFiles = files.filter(file => file.size <= validateMaxFileSize);
@@ -46,16 +82,21 @@ export class UploadFileServices {
             const resultFiles = await Promise.all(validFiles.map(async file => await this.uploadFileFunc(file)));
 
             // validation file
-            const validationFormattedFiles = await ValidationSecureFileUploadServices.ValidationFiles(resultFiles);
+            const validationFormattedFiles = await ValidationSecureFileUploadServices.validationFiles(resultFiles);
 
             const findErrorMessage = validationFormattedFiles.find(file => file.valid && file.error);
 
             if (findErrorMessage) {
-                toast.error(findErrorMessage.error || "Invalid file formatted");
-                return undefined;
+                return {
+                    message: findErrorMessage.error || "Invalid file formatted",
+                    files: []
+                };
             }
 
-            return resultFiles as FileDto[];
+            return {
+                message: "success",
+                files: resultFiles as FileDto[]
+            }
         } catch (error) {
             const message = ErrorHandler.getErrorMessage(error);
             throw new Error(message);

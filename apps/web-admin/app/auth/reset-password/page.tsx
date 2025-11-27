@@ -70,12 +70,12 @@ export default function ResetPasswordFormPage() {
     return (
         <div className="w-full min-h-screen flex justify-center items-center">
             <div className="w-full max-w-md mx-auto">
-                <h1 className="text-center !font-bold !text-4xl mb-4 bg-gradient-to-r from-purple-500 to-green-600 bg-clip-text text-transparent">
+                <h1 className="text-center font-bold! text-4xl! mb-4 bg-gradient-to-r from-purple-500 to-green-600 bg-clip-text text-transparent">
                     Sabaiydev
                 </h1>
                 <Card className="w-full">
                     <CardHeader>
-                        <CardTitle className="text-center !text-2xl">Reset Password</CardTitle>
+                        <CardTitle className="text-center text-2xl!">Reset Password</CardTitle>
                         <CardDescription className="text-center">
                             Please enter your new password below to reset your account password.
                         </CardDescription>

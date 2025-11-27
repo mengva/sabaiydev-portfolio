@@ -71,9 +71,6 @@ export class DOMPurifyServices {
         // Handle strings
         if (typeof obj === "string") {
             const str = this.domSanitizedString(obj);
-            // if (str === null || str === undefined || str === '') {
-            //     throw new Error("Not allowed");
-            // }
             return str?.trim() ?? '';
         }
         // Fallback

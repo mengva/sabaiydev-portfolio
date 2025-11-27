@@ -48,15 +48,13 @@ export class ManageProductUtils {
 
     public static async productUploadFiles({ files, productId, tx }: ProductUploadFileDto) {
         try {
-            const resultFiles = await SecureFileUploadServices.uploadFileToCloudinary({ files });
-            if (resultFiles && Array.isArray(resultFiles) && resultFiles.length > 0) {
-                await tx.insert(productImages).values(
-                    resultFiles.map(file => ({
-                        ...file,
-                        productId
-                    }))
-                );
-            } else throw new HTTPErrorMessage("Falied to uploaded image file to cloud", "415")
+            const resultFiles = await SecureFileUploadServices.uploadCloudinaryImageFiles({ files });
+            await tx.insert(productImages).values(
+                resultFiles.map(file => ({
+                    ...file,
+                    productId
+                }))
+            );
         } catch (error) {
             throw getHTTPError(error);
         }

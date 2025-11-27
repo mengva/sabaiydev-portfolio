@@ -11,39 +11,68 @@ import { Textarea } from "@workspace/ui/components/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/ui/components/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@workspace/ui/components/tabs";
-import { Badge } from "@workspace/ui/components/badge";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@workspace/ui/components/form";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@workspace/ui/components/command";
-import { Popover, PopoverContent, PopoverTrigger } from "@workspace/ui/components/popover";
-import { HiMiniXMark, HiXMark } from "react-icons/hi2";
+import { HiMiniXMark } from "react-icons/hi2";
 import { zodValidationAddOneProduct, ZodValidationAddOneProduct } from "@/admin/packages/validations/product";
 import { ProductCategoryArray, ProductStatusArray } from "@/admin/packages/utils/constants/product";
 import { MyDataContext } from "@/app/admin/layout";
 import { BreadcrumbComponent } from "@/components/breadcrumb";
 import Link from "next/link";
-import { LocalArray } from "@/admin/packages/utils/constants";
+import { AllowedImageFileType, LocalArray } from "@/admin/packages/utils/constants";
 import { UploadFileServices } from "@/admin/packages/utils/ClientUploadFile";
-import { ValidationSecureFileUploadServices } from "@/admin/packages/utils/SecureFile";
 import toast from "react-hot-toast";
-import { getHTTPError, HTTPErrorMessage } from "@/admin/packages/utils/HttpJsError";
 import { ErrorHandler } from "@/admin/packages/utils/HandleError";
-
-const availableTechnologies = [
-    "React", "Node.js", "TypeScript", "Next.js", "Tailwind CSS",
-    "PostgreSQL", "MongoDB", "Docker", "AWS", "Firebase", "GraphQL"
-];
+import { ZodValidationFiles } from "@/admin/packages/validations/constants";
+import trpc from "@/app/trpc/client";
+import { ServerResponseDto } from "@/admin/packages/types/constants";
 
 export default function AddProductFormPage() {
+
     const myDataContext = useContext(MyDataContext);
     if (!myDataContext) return null;
-    const [openTechPopover, setOpenTechPopover] = useState(false);
-    const [previewImages, setPreviewImages] = useState<string[]>([]);
-    const inputFiles = useRef<HTMLInputElement | null>(null)
+
+    const [myData, setMyData] = useState(myDataContext.data);
+    const inputFiles = useRef<HTMLInputElement | null>(null);
+    const [imageFiles, setImageFiles] = useState([] as ZodValidationFiles);
 
     const form = useForm<ZodValidationAddOneProduct>({
         resolver: zodResolver(zodValidationAddOneProduct),
         defaultValues: {
-            addByStaffId: myDataContext.data.id ?? "",
+            addByStaffId: myData.id ?? "",
+            technologies: ["react", "nextjs", "tailwind"],
+            status: "ACTIVE",
+            category: "MEDIA",
+            // demo image object - cast to match your ZodValidationFiles type
+            imageFiles: [],
+            translations: [
+                {
+                    name: "Demo Product (EN)",
+                    local: "en",
+                    description: "Short demo description in English.",
+                    longDescription: "This is a longer demo description for the product in English.",
+                    features: ["Fast performance", "Responsive design"],
+                },
+                {
+                    name: "ສິນຄ້າຕົວຢ່າງ (LO)",
+                    local: "lo",
+                    description: "ຄຳອະທິບາຍສັ້ນໃນພາສາລາວ",
+                    longDescription: "ຄຳອະທິບາຍຍາວເພີ່ມເຕີມ",
+                    features: ["ປວດໄວ", "ອອບຊັ່ນຮອບດ້ວຍ"],
+                },
+                {
+                    name: "สินค้าเดโม (TH)",
+                    local: "th",
+                    description: "คำอธิบายสั้น ๆ เป็นภาษาไทย",
+                    longDescription: "คำอธิบายยาวสำหรับผลิตภัณฑ์ตัวอย่างเป็นภาษาไทย",
+                    features: ["ประสิทธิภาพสูง", "ออกแบบตอบสนอง"],
+                },
+            ],
+        },
+    });
+
+    const onResetForm = () => {
+        form.reset({
+            addByStaffId: myData.id ?? "",
             technologies: [],
             status: "ACTIVE",
             category: "MEDIA",
@@ -53,12 +82,37 @@ export default function AddProductFormPage() {
                 { name: "", local: "lo", description: "", longDescription: "", features: [""] },
                 { name: "", local: "th", description: "", longDescription: "", features: [""] },
             ],
+        });
+    }
+
+    const addMutation = {
+        onSuccess: (data: ServerResponseDto) => {
+            if (data && data.success) {
+                onResetForm();
+                toast.success(data.message);
+            }
         },
-    });
+        onError: (error: Error) => {
+            toast.error(error.message);
+        }
+    }
+
+    const addOneDataMutation = trpc.app.admin.manage.product.addOneData.useMutation(addMutation);
+
+    const addOneMutation = trpc.app.admin.manage.product.addOne.useMutation(addMutation);
 
     const onSubmit = (data: ZodValidationAddOneProduct) => {
-        console.log("data", data);
-        alert("Product added successfully!");
+        // check data is empty
+        if (!data) return;
+
+        const { imageFiles, ...newData } = data;
+
+        if (!imageFiles.length || imageFiles.length === 0) {
+            addOneDataMutation.mutate(newData);
+            return;
+        }
+
+        addOneMutation.mutate(data);
     };
 
     const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -69,8 +123,14 @@ export default function AddProductFormPage() {
             const arrayFiles = Array.from(files);
 
             const cleanFiles = await UploadFileServices.uploadFiles(arrayFiles);
-            if (!cleanFiles || cleanFiles === undefined) return;
-            form.setValue("imageFiles", [...(form.getValues("imageFiles") || []), ...cleanFiles]);
+
+            if (cleanFiles.message !== "success" && cleanFiles.files.length === 0) {
+                toast.error(cleanFiles.message);
+                return;
+            }
+
+            form.setValue("imageFiles", [...(form.getValues("imageFiles") || []), ...cleanFiles.files]);
+            setImageFiles(prev => [...prev, ...cleanFiles.files] as ZodValidationFiles);
         } catch (error) {
             const message = ErrorHandler.getErrorMessage(error);
             toast.error(message || "Falied Upload files");
@@ -78,8 +138,8 @@ export default function AddProductFormPage() {
     };
 
     const removeImage = (index: number) => {
-        setPreviewImages((prev) => prev.filter((_, i) => i !== index));
         const currentFiles = form.getValues("imageFiles") || [];
+        setImageFiles(prev => prev.filter((_, i) => i !== index));
         form.setValue("imageFiles", currentFiles.filter((_, i) => i !== index));
     };
 
@@ -106,7 +166,55 @@ export default function AddProductFormPage() {
                 <CardContent>
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+
+                            {/* Image Upload */}
+                            <div>
+                                <div>
+                                    {/* <div className="sm:mt-6">
+                                        <Button type="button" variant={"destructive"} onClick={() => form.setValue("imageFiles", [])} className="cursor-pointer w-full">Delete All File Select</Button>
+                                    </div> */}
+                                    <Label>Product Images</Label>
+                                    <Card className="mt-2 grid place-items-center">
+                                        <CardContent onClick={() => inputFiles.current?.click()} className="lg:min-w-xl w-[80%] border-dotted border-4 p-4 dark:border-slate-600 cursor-pointer h-48 grid place-items-center rounded-xl">
+                                            <Input
+                                                ref={inputFiles}
+                                                type="file"
+                                                multiple
+                                                accept={AllowedImageFileType}
+                                                onChange={handleImageChange}
+                                                className="sr-only"
+                                            />
+                                            <div className="w-16 h-16 rounded-full border grid place-items-center">
+                                                <Upload />
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                </div>
+
+                                {
+                                    imageFiles.length > 0 && (
+                                        <Card className="mt-4">
+                                            <CardContent className="grid 2xl:grid-cols-8 xl:grid-cols-6 lg:grid-cols-4 sm:grid-cols-2 gap-4">
+                                                {imageFiles.map((src, idx) => (
+                                                    <div key={idx} className="relative group">
+                                                        <img src={src.fileData} alt="preview" className="w-full aspect-5/4 object-cover rounded-lg border" />
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => removeImage(idx)}
+                                                            className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition cursor-pointer"
+                                                        >
+                                                            <HiMiniXMark className="w-4 h-4" />
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                            </CardContent>
+                                        </Card>
+                                    )
+                                }
+                            </div>
+
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
                                 {/* Status */}
                                 <FormField
                                     control={form.control}
@@ -161,60 +269,60 @@ export default function AddProductFormPage() {
                             </div>
 
                             {/* Technologies Multi-Select */}
-                            <FormField
-                                control={form.control}
-                                name="technologies"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Technologies Used</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="technology1, technology2, technology3,..." {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-
-                            {/* Image Upload */}
+                            {/* Technologies Dynamic List */}
                             <div>
-                                <div>
-                                    <div className="sm:mt-6">
-                                        <Button type="button" variant={"destructive"} onClick={() => form.setValue("imageFiles", [])} className="cursor-pointer w-full">Delete All File Select</Button>
+                                <FormLabel className="text-lg font-semibold">Technologies Used</FormLabel>
+
+                                {form.watch("technologies")?.map((_, techIdx) => (
+                                    <div key={techIdx} className="flex gap-2 mt-2">
+                                        <FormField
+                                            control={form.control}
+                                            name={`technologies.${techIdx}`}
+                                            render={({ field }) => (
+                                                <FormItem className="flex-1">
+                                                    <FormControl>
+                                                        <Input placeholder="e.g. React" {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+
+                                        <Button
+                                            type="button"
+                                            variant="destructive"
+                                            className="cursor-pointer"
+                                            size="icon"
+                                            onClick={() => {
+                                                const techs = form.getValues("technologies").filter((_, i) => i !== techIdx);
+                                                form.setValue(
+                                                    "technologies",
+                                                    techs as string[] | any
+                                                );
+                                            }}
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </Button>
                                     </div>
-                                    <Label>Product Images</Label>
-                                    <Card className="mt-2 grid place-items-center">
-                                        <CardContent className="min-w-xl border-dotted border-4 p-4 border-slate-600 cursor-pointer h-48 grid place-items-center rounded-xl">
-                                            <Input
-                                                ref={inputFiles}
-                                                type="file"
-                                                multiple
-                                                accept="image/jpeg, image/png, image/web"
-                                                onChange={handleImageChange}
-                                                className="cursor-pointer"
-                                            />
-                                            <div onClick={() => inputFiles.current?.focus()} className="w-16 h-16 rounded-full border grid place-items-center">
-                                                <Upload />
-                                            </div>
-                                        </CardContent>
-                                    </Card>
-                                </div>
-                                {previewImages.length > 0 && (
-                                    <div className="grid 2xl:grid-cols-8 xl:grid-cols-6 lg:grid-cols-4 sm:grid-cols-2 gap-4 mt-4">
-                                        {previewImages.map((src, idx) => (
-                                            <div key={idx} className="relative group">
-                                                <img src={src} alt="preview" className="w-full aspect-[5/4] object-cover rounded-lg border" />
-                                                <button
-                                                    type="button"
-                                                    onClick={() => removeImage(idx)}
-                                                    className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition cursor-pointer"
-                                                >
-                                                    <HiMiniXMark className="w-4 h-4" />
-                                                </button>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
+                                ))}
+
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    className="mt-3"
+                                    onClick={() => {
+                                        form.setValue("technologies", [
+                                            ...form.getValues("technologies"),
+                                            ""
+                                        ]);
+                                    }}
+                                >
+                                    <Plus className="w-4 h-4 mr-2" /> Add Technology
+                                </Button>
                             </div>
+
+
 
                             {/* Translations Tabs */}
                             <div>
@@ -325,7 +433,7 @@ export default function AddProductFormPage() {
                             </div>
 
                             <Button type="submit" size="lg" className="cursor-pointer w-full">
-                                Add Product
+                                {(addOneMutation.isPending || addOneDataMutation.isPending) ? "Adding Product..." : "Add Product"}
                             </Button>
                         </form>
                     </Form>

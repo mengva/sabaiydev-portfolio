@@ -67,11 +67,11 @@ function ForgotPasswordFormComponent() {
     return (
         <div className="w-full min-h-screen flex justify-center items-center">
             <div className="w-full max-w-md mx-auto">
-                <h1 className="text-center !font-bold !text-4xl mb-4 bg-gradient-to-r from-purple-500 to-green-600 bg-clip-text text-transparent">Sabaiydev</h1>
+                <h1 className="text-center font-bold! text-4xl! mb-4 bg-gradient-to-r from-purple-500 to-green-600 bg-clip-text text-transparent">Sabaiydev</h1>
                 <p className="text-center mb-4">Enter your email address below and we'll send you a link to reset your password.</p>
                 <Card className="w-full max-w-md mx-auto">
                     <CardHeader>
-                        <CardTitle className="text-center !text-2xl">Forgot Password</CardTitle>
+                        <CardTitle className="text-center text-2xl!">Forgot Password</CardTitle>
                         <CardDescription className="text-center mb-4">
                             Enter your email or phone number to receive a password reset link.
                         </CardDescription>

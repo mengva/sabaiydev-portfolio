@@ -11,6 +11,9 @@
       "@/admin/packages/*": [
         "../../packages/services/*"
       ],
+      "@workspace/*": [
+        "../server/src/*"
+      ],
     },
     "plugins": [
       {
@@ -25,6 +28,7 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "../../packages/services",
+    "../server",
   ],
   "exclude": ["node_modules"]
 }

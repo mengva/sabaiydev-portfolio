@@ -1,5 +1,5 @@
 import db from "@/api/config/db";
-import { products } from "@/api/db";
+import { products, translationProducts } from "@/api/db";
 import { count, desc, eq } from "drizzle-orm";
 import type { ZodValidationTRPCFilter } from "@/api/packages/validations/constants";
 import { HandlerTRPCError } from "@/api/utils/handleTRPCError";
@@ -12,8 +12,11 @@ export class ProductManageQueriesServices {
         try {
             const { limit, page } = input;
             const offset = (page - 1) * limit;
+
+            // Status filter
             const productActive = eq(products.status, "ACTIVE");
-            // 1️⃣ Get paginated data
+
+            // 1️⃣ Get paginated product + translation
             const resultProducts = await db
                 .select()
                 .from(products)
@@ -21,12 +24,18 @@ export class ProductManageQueriesServices {
                 .orderBy(desc(products.createdAt))
                 .limit(limit)
                 .offset(offset);
-            // 2️⃣ Count total
-            const resultTotal = await db.select({ total: count() }).from(products).where(productActive);
-            const total = resultTotal[0]?.total || 0;
-            // 3️⃣ Calculate pagination
-            const totalPage = Math.ceil(Number(total) / limit);
-            // 4️⃣ Return formatted response
+
+            // 2️⃣ Count total products (NO JOIN)
+            const resultTotal = await db
+                .select({ total: count() })
+                .from(products)
+                .where(productActive);
+
+            const total = Number(resultTotal[0]?.total ?? 0);
+
+            // 3️⃣ Pagination calculation
+            const totalPage = Math.ceil(total / limit);
+
             return HandlerSuccess.success("Product list retrieved successfully", {
                 data: resultProducts,
                 pagination: {

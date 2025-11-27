@@ -5,6 +5,7 @@ import { SecureSessionManagerServices } from "@/api/utils/secureSession";
 import { eq } from "drizzle-orm";
 import { createMiddleware } from "hono/factory";
 import { sessions } from "../modules/admin/auth/entities";
+import { HandlerTRPCError } from "../utils/handleTRPCError";
 export const updatedSession = createMiddleware(async (c, next) => {
     try {
         const oneDay = 24 * 60 * 60 * 1000;
@@ -14,20 +15,24 @@ export const updatedSession = createMiddleware(async (c, next) => {
             await next();
             return;
         }
-        const sessionInfo = await SecureSessionManagerServices.verifySession(sessionToken, c);
-        if (sessionInfo) {
-            const age = Date.now() - new Date(sessionInfo.updatedAt as Date).getTime();
+        const result = await SecureSessionManagerServices.verifySession(sessionToken, c);
+        if (result?.message !== "success") {
+            throw HandlerTRPCError.TRPCErrorMessage(result?.message, "FORBIDDEN");
+        }
+        const session = result.data;
+        if (session) {
+            const age = Date.now() - new Date(session.updatedAt as Date).getTime();
             if (age <= sevenDay) {
                 await db.transaction(async tx => {
                     const maxSessionDate = 30 * oneDay;
                     const expired: Date = Helper.setCurrentDate(maxSessionDate);
                     await tx.update(sessions).set({
-                        staffId: sessionInfo.staffId,
-                        sessionToken: sessionInfo.sessionToken,
+                        staffId: session.staffId,
+                        sessionToken: session.sessionToken,
                         expired,
                     });
-                    await tx.delete(sessions).where(eq(sessions.id, sessionInfo.id));
-                    c.get("setCookie").set(adminSessionTokenName, sessionInfo.sessionToken, Helper.cookieOption);
+                    await tx.delete(sessions).where(eq(sessions.id, session.id));
+                    c.get("setCookie").set(adminSessionTokenName, session.sessionToken, Helper.cookieOption);
                 });
             }
         }

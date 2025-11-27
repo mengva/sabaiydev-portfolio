@@ -29,7 +29,11 @@ export default function AdminLayout({
     isRefetching,
   } = trpc.app.admin.manage.staff.getBySessionToken.useQuery();
   if (isLoading) {
-    return <div></div>
+    return <div className="w-full min-h-screen flex justify-center items-center">
+      <div className="text-2xl!">
+        Loading...
+      </div>
+    </div>
   }
   const data: MyDataDto = response?.data ?? null;
   return (

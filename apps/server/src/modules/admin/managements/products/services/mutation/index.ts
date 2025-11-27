@@ -1,6 +1,6 @@
 import db from "@/api/config/db";
 import type { ZodValidationAddOneProduct, ZodValidationAddOneProductData, ZodValidationEditOneProduct, ZodValidationEditOneProductData } from "@/api/packages/validations/product";
-import { products } from "../../entities";
+import { productImages, products } from "../../entities";
 import { SecureFileUploadServices } from "@/api/utils/secureFileUpload";
 import { HandlerSuccess } from "@/api/utils/handleSuccess";
 import { ManageProductUtils } from "../../utils/product";
@@ -66,15 +66,28 @@ export class ProductManageMutationServices {
         }
     }
 
-    public static async removeOneById(productId: string, cloudId: string) {
+    public static async removeOneById(productId: string) {
         try {
-            const findProduct = await db.query.products.findFirst({
-                where: eq(products.id, productId)
+            const product = await db.query.products.findFirst({
+                where: eq(products.id, productId),
+                with: {
+                    images: true
+                }
             });
-            if (!findProduct) throw new HTTPErrorMessage("Find product not found", "404");
+            
+            if (!product) throw new HTTPErrorMessage("Find product not found", "404");
+            
             await db.transaction(async tx => {
+                
+                if(product?.images?.length > 0){
+                    await Promise.all(
+                        product.images.map(async image => {
+                            await SecureFileUploadServices.destoryCloudinaryFunc(image.cloudinaryId);
+                        })
+                    )
+                }
+                
                 await tx.delete(products).where(eq(products.id, productId));
-                await SecureFileUploadServices.destoryCloudinaryImage(cloudId);
             });
             return HandlerSuccess.success("Removed product by id successfully");
         } catch (error) {

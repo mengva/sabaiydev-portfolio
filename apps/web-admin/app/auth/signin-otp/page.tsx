@@ -93,10 +93,10 @@ export default function SignInWithOTPFormPage() {
   return (
     <div className='w-full min-h-screen flex justify-center items-center'>
       <div className='w-full max-w-md mx-auto'>
-        <h1 className="text-center !font-bold !text-4xl mb-4 bg-gradient-to-r from-purple-500 to-green-600 bg-clip-text text-transparent">Sabaiydev</h1>
+        <h1 className="text-center font-bold! text-4xl! mb-4 bg-gradient-to-r from-purple-500 to-green-600 bg-clip-text text-transparent">Sabaiydev</h1>
         <Card className="w-full">
           <CardHeader>
-            <CardTitle className='!text-2xl text-center'>Sign In with OTP</CardTitle>
+            <CardTitle className='text-2xl! text-center'>Sign In with OTP</CardTitle>
             <CardDescription className='text-center'>Enter your email to receive a one-time password.</CardDescription>
           </CardHeader>
           <CardContent>

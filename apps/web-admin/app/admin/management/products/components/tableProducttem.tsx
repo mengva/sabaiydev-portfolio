@@ -30,6 +30,7 @@ import toast from 'react-hot-toast';
 import trpc from '@/app/trpc/client';
 import { ProductSchema } from '@/admin/packages/schema/product';
 import TableIdComponent from '@/components/tableId';
+import Link from 'next/link';
 
 interface ItemDto {
     product: ProductSchema;
@@ -49,7 +50,7 @@ function TableProductItemComponent({ product, index, filter, myData, refetch, se
     const myRole = myData.role ?? "VIEWER";
     const [openDelete, setOpenDelete] = useState(false);
 
-    const translationProducts = product.translationProducts.find(tr => tr.local === "en");
+    const translationProducts = product?.translationProducts?.find(tr => tr.local === "en");
 
     // Mutations
     const onSuccess = (data: ServerResponseDto) => {
@@ -74,16 +75,8 @@ function TableProductItemComponent({ product, index, filter, myData, refetch, se
         });
     };
 
-    const onDelete = () => {
-        return ["SUPER_ADMIN", "ADMIN"].includes(myRole);
-    }
-
-    const onEdit = () => {
-        return ["SUPER_ADMIN", "ADMIN", "EDITOR"].includes(myRole);
-    }
-
-    const canDelete = onDelete();
-    const canEdit = onEdit();
+    const canDelete = ["SUPER_ADMIN", "ADMIN"].includes(myRole);
+    const canEdit = ["SUPER_ADMIN", "ADMIN", "EDITOR"].includes(myRole);
     const canInteract = canDelete || canEdit;
 
     return (
@@ -101,7 +94,7 @@ function TableProductItemComponent({ product, index, filter, myData, refetch, se
                 <TableCell>
                     <div className="flex items-center gap-3">
                         <div
-                            className={`h-9 w-9 rounded-full flex items-center justify-center text-sm font-medium ${index % 2 === 0 ? 'bg-muted' : 'bg-green-600/50'
+                            className={`h-9 w-9 rounded-full flex items-center justify-center text-sm font-medium ${index % 2 === 0 ? 'bg-muted' : 'bg-purple-600/50'
                                 }`}
                         >
                             {getInitials(translationProducts?.name ?? '')}
@@ -161,7 +154,7 @@ function TableProductItemComponent({ product, index, filter, myData, refetch, se
                                 {canDelete && (
                                     <DropdownMenuItem
                                         onClick={() => setOpenDelete(true)}
-                                        className="text-red-500 hover:!text-red-600 cursor-pointer"
+                                        className="text-red-500 hover:text-red-600! cursor-pointer"
                                     >
                                         <Trash2 className="mr-2 h-4 w-4 text-red-600" />
                                         Delete
@@ -169,17 +162,28 @@ function TableProductItemComponent({ product, index, filter, myData, refetch, se
                                 )}
 
                                 {/* EDIT */}
-                                {canEdit && (
+                                {canEdit && <>
                                     <DropdownMenuItem
                                         onClick={() => {
                                             setOpen(true);
                                         }}
-                                        className="text-sky-500 hover:!text-sky-600 cursor-pointer"
+                                        className="text-sky-500 hover:text-sky-600! cursor-pointer"
                                     >
-                                        <Edit className="mr-2 h-4 w-4 text-sky-500" />
-                                        Edit
+                                        <Link href={`/admin/management/products/${product.id}/edit`} className='flex items-center gap-2'>
+                                            <Edit className="mr-2 h-4 w-4 text-sky-500" />
+                                            Edit
+                                        </Link>
                                     </DropdownMenuItem>
-                                )}
+
+                                    <DropdownMenuItem
+                                        className="text-purple-500 hover:text-purple-600! cursor-pointer"
+                                    >
+                                        <Link href={`/admin/management/products/${product.id}/preview`} className='flex items-center gap-2'>
+                                            <Edit className="mr-2 h-4 w-4 text-purple-500" />
+                                            Preview
+                                        </Link>
+                                    </DropdownMenuItem>
+                                </>}
                             </DropdownMenuContent>
                         </DropdownMenu>
                     ) : (
@@ -197,7 +201,7 @@ function TableProductItemComponent({ product, index, filter, myData, refetch, se
             <AlertDialog open={openDelete} onOpenChange={setOpenDelete}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
-                        <AlertDialogTitle className="!text-xl">
+                        <AlertDialogTitle className="text-xl!">
                             Are you sure you want to delete this product?
                         </AlertDialogTitle>
                         <AlertDialogDescription>
