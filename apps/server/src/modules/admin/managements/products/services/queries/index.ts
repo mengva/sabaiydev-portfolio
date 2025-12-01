@@ -1,14 +1,14 @@
 import db from "@/api/config/db";
 import { products, translationProducts } from "@/api/db";
 import { count, desc, eq } from "drizzle-orm";
-import type { ZodValidationTRPCFilter } from "@/api/packages/validations/constants";
+import type { ZodValidationFilter } from "@/api/packages/validations/constants";
 import { HandlerTRPCError } from "@/api/utils/handleTRPCError";
 import { HandlerSuccess } from "@/api/utils/handleSuccess";
 import { getHTTPError } from "@/api/packages/utils/HttpJsError";
 
 export class ProductManageQueriesServices {
 
-    public static list = async (input: ZodValidationTRPCFilter) => {
+    public static list = async (input: ZodValidationFilter) => {
         try {
             const { limit, page } = input;
             const offset = (page - 1) * limit;
@@ -16,14 +16,16 @@ export class ProductManageQueriesServices {
             // Status filter
             const productActive = eq(products.status, "ACTIVE");
 
-            // 1️⃣ Get paginated product + translation
-            const resultProducts = await db
-                .select()
-                .from(products)
-                .where(productActive)
-                .orderBy(desc(products.createdAt))
-                .limit(limit)
-                .offset(offset);
+            const queryProducts = await db.query.products.findMany({
+                where: productActive,
+                limit,
+                offset,
+                orderBy: desc(products.updatedAt),
+                with: {
+                    translationProducts: true,
+                    images: true
+                }
+            });
 
             // 2️⃣ Count total products (NO JOIN)
             const resultTotal = await db
@@ -37,7 +39,7 @@ export class ProductManageQueriesServices {
             const totalPage = Math.ceil(total / limit);
 
             return HandlerSuccess.success("Product list retrieved successfully", {
-                data: resultProducts,
+                data: queryProducts,
                 pagination: {
                     total,
                     page,
@@ -52,15 +54,17 @@ export class ProductManageQueriesServices {
 
     public static getOne = async (productId: string) => {
         try {
-            const result = await db.select().from(products).where(eq(products.id, productId)).limit(1);
-            const product = result[0];
+            const product = await db.query.products.findFirst({
+                where: eq(products.id, productId),
+                with: {
+                    translationProducts: true,
+                    images: true
+                }
+            })
             if (!product) {
                 throw HandlerTRPCError.TRPCErrorMessage("Find not found", "NOT_FOUND");
             }
-            if (product.status === "INACTIVE") {
-                throw HandlerTRPCError.TRPCErrorMessage("This product have been disabled", "FORBIDDEN");
-            }
-            return HandlerSuccess.success("product retrieved successfully", product);
+            return HandlerSuccess.success("Product retrieved successfully", product);
         } catch (error) {
             throw getHTTPError(error);
         }

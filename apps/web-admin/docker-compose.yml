@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  sabaiydev-web-admin:
+    container_name: sabaiydev-web-admin
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_API_URL=http://localhost:9100
+    depends_on:
+      - server
+      - db
+    networks:
+      - app-network
+
+  sabaiydev-server:
+    container_name: sabaiydev-server
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    ports:
+      - "9100:9100"
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://admin:1234@db:5432/drizzle_dev
+    depends_on:
+      - db
+    networks:
+      - app-network
+
+  db:
+    container_name: sabaiydev-server
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=web_admin
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+volumes:
+  postgres_data_dev:
+
+
+networks:
+  app-network:
+    driver: bridge

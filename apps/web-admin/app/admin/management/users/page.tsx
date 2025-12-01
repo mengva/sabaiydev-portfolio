@@ -39,7 +39,7 @@ import { StaffSchema } from "@/admin/packages/schema/staff";
 import LoadingUserComponent from "./components/loading";
 import TableUserItemComponent from "./components/tableUserItem";
 import { PaginationFilterDto, SearchQueryStaffRoleDto, SearchQueryStaffStatusDto, ServerResponseDto } from "@/admin/packages/types/constants";
-import { SearchQueryStaffRoleArray, SearchQueryStaffStatusArray } from "@/admin/packages/utils/constants/staff";
+import { SearchQueryStaffRoleArray, SearchQueryStaffStatusArray } from "@/admin/packages/utils/constants/variables/staff";
 import AddUserDialogComponent from "./components/addUserDialog";
 import { MyDataContext } from "../../layout";
 import toast from "react-hot-toast";
@@ -55,7 +55,7 @@ interface SearchSelectDto {
     endDate: Date | undefined;
 }
 
-export default function UserManagementPage() {
+export default function UserManagePage() {
     const myDataContext = useContext(MyDataContext);
     if (!myDataContext) return null;
     // === Filters State ===

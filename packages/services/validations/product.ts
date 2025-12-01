@@ -1,5 +1,6 @@
 import z from "zod";
-import { zodValidationFiles, zodValidationUuid } from "./constants";
+import { zodValidationFiles, zodValidationSearchQuery, zodValidationStrDate, zodValidationFilter, zodValidationUuid } from "./constants";
+import { zodValidationSearchQueryProductCategory, zodValidationSearchQueryProductStatus } from "./variables/product";
 
 export const zodValidationTranslationProduct = z.array(z.object({
     name: z.string()
@@ -54,6 +55,14 @@ export const zodValidationEditOneProduct = zodValidationEditOneProductData.exten
     imageFiles: zodValidationFiles
 });
 
+export const zodValidationSearchQueryProduct = zodValidationFilter.extend({
+    query: zodValidationSearchQuery,
+    category: zodValidationSearchQueryProductCategory,
+    status: zodValidationSearchQueryProductStatus,
+    startDate: zodValidationStrDate,
+    endDate: zodValidationStrDate,
+});
+
 export type ZodValidationGetOneProductById = z.infer<typeof zodValidationGetOneProductById>;
 export type ZodValidationTranslationProduct = z.infer<typeof zodValidationTranslationProduct>;
 export type ZodValidationAddOneProduct = z.infer<typeof zodValidationAddOneProduct>;
@@ -61,3 +70,4 @@ export type ZodValidationAddOneProductData = z.infer<typeof zodValidationAddOneP
 export type ZodValidationEditOneProductData = z.infer<typeof zodValidationEditOneProductData>;
 export type ZodValidationEditOneProduct = z.infer<typeof zodValidationEditOneProduct>;
 export type ZodValidationRemoveOneProductById = z.infer<typeof zodValidationRemoveOneProductById>;
+export type ZodValidationSearchQueryProduct = z.infer<typeof zodValidationSearchQueryProduct>;

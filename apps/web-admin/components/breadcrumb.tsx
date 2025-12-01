@@ -9,18 +9,18 @@ import {
     BreadcrumbSeparator,
 } from "@workspace/ui/components/breadcrumb"
 
-export function BreadcrumbComponent({ path }: { path: string }) {
+export function BreadcrumbComponent({ path, title, linkTitle }: { path: string; title: string; linkTitle: string }) {
     return (
         <Breadcrumb>
             <BreadcrumbList>
                 <BreadcrumbItem>
                     <BreadcrumbLink asChild>
-                        <Link href={path}>Product Management</Link>
+                        <Link href={path}>{ linkTitle }</Link>
                     </BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
-                    <BreadcrumbPage>Add</BreadcrumbPage>
+                    <BreadcrumbPage>{ title }</BreadcrumbPage>
                 </BreadcrumbItem>
             </BreadcrumbList>
         </Breadcrumb>

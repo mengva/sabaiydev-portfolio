@@ -1,23 +1,25 @@
 import db from "@/api/config/db";
-import { ManageStaffUtils } from "../../utils/staff";
+import { StaffManageServices } from "../../utils/staff";
 import { staffs } from "@/api/db";
 import { count, desc, eq } from "drizzle-orm";
-import type { ZodValidationTRPCFilter } from "@/api/packages/validations/constants";
+import type { ZodValidationFilter } from "@/api/packages/validations/constants";
 import { HandlerTRPCError } from "@/api/utils/handleTRPCError";
 import { HandlerSuccess } from "@/api/utils/handleSuccess";
 import { getHTTPError } from "@/api/packages/utils/HttpJsError";
 
 export class StaffManageQueriesServices {
 
-    public static list = async (input: ZodValidationTRPCFilter) => {
+    public static list = async (input: ZodValidationFilter) => {
         try {
             const { limit, page } = input;
             const offset = (page - 1) * limit;
+            const adminActive = eq(staffs.status, "ACTIVE");
             // 1️⃣ Get paginated data
             const admins = await db
-                .select(ManageStaffUtils.selectStaffData) // ⬅️ customize this to match `this.option.selectedStaffInfo`
+                .select(StaffManageServices.selectStaffData) // ⬅️ customize this to match `this.option.selectedStaffInfo`
                 .from(staffs)
-                .orderBy(desc(staffs.createdAt))
+                .where(adminActive)
+                .orderBy(desc(staffs.updatedAt))
                 .limit(limit)
                 .offset(offset);
             // 2️⃣ Count total
@@ -43,7 +45,7 @@ export class StaffManageQueriesServices {
     public static getOne = async (staffId: string) => {
         try {
             const result = await db.select({
-                ...ManageStaffUtils.selectStaffData
+                ...StaffManageServices.selectStaffData
             }).from(staffs).where(eq(staffs.id, staffId)).limit(1);
             const admin = result[0];
             if (!admin) {

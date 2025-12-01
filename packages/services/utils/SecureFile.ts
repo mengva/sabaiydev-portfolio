@@ -1,5 +1,5 @@
 import type { FileDto } from "../types/constants";
-import { validateMaxFileSize } from "./constants";
+import { validateMaxFileSize } from "./constants/variables";
 
 export class ValidationSecureFileUploadServices {
 

@@ -2,6 +2,7 @@ import { authTRPCRouter } from "@/api/modules/admin/auth/routes/trpc";
 import { StaffManageTRPCRouter } from "@/api/modules/admin/managements/staff/routes/trpc";
 import { ProductManageTRPCRouter } from "@/api/modules/admin/managements/products/routes/trpc";
 import { router } from "./procedures";
+import { NewsManageTRPCRouter } from "@/api/modules/admin/managements/news/routes/trpc";
 
 export const appRouter = router({
     app: router({
@@ -13,6 +14,7 @@ export const appRouter = router({
             manage: router({
                 staff: StaffManageTRPCRouter,
                 product: ProductManageTRPCRouter,
+                news: NewsManageTRPCRouter
             })
         })
     })

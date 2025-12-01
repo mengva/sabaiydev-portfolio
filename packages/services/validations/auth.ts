@@ -1,5 +1,6 @@
 import z from "zod";
-import { zodValidationEmail, zodValidationFullName, zodValidationOTPCode, zodValidationPassword, zodValidationPermissions, zodValidationPhoneNumber, zodValidationRole, zodValidationSearchQuery, zodValidationSearchQueryPermissions, zodValidationSearchQueryRole, zodValidationSearchQueryStatus, zodValidationStatus, zodValidationStrDate, zodValidationTRPCFilter } from "./constants";
+import { zodValidationEmail, zodValidationFullName, zodValidationOTPCode, zodValidationPassword, zodValidationPhoneNumber, zodValidationSearchQuery, zodValidationStrDate, zodValidationFilter } from "./constants";
+import { zodValidationSearchQueryStaffPermissions, zodValidationSearchQueryStaffRole, zodValidationSearchQueryStaffStatus, zodValidationStaffPermissions, zodValidationStaffRole, zodValidationStaffStatus } from "./variables/staff";
 
 export const zodValidationSignIn = z.object({
     email: zodValidationEmail,
@@ -15,9 +16,9 @@ export const zodValidationSignUp = z.object({
     fullName: zodValidationFullName,
     email: zodValidationEmail,
     password: zodValidationPassword,
-    role: zodValidationRole,
-    status: zodValidationStatus,
-    permissions: zodValidationPermissions
+    role: zodValidationStaffRole,
+    status: zodValidationStaffStatus,
+    permissions: zodValidationStaffPermissions
 });
 
 export const zodValidationVerifiedEmail = z.object({
@@ -38,11 +39,11 @@ export const zodValidationResetPassword = z.object({
     newPassword: zodValidationPassword
 });
 
-export const zodValidationQueryStaff = zodValidationTRPCFilter.extend({
+export const zodValidationQueryStaff = zodValidationFilter.extend({
     search: zodValidationSearchQuery,
-    role: zodValidationSearchQueryRole,
-    status: zodValidationSearchQueryStatus,
-    permissions: zodValidationSearchQueryPermissions,
+    role: zodValidationSearchQueryStaffRole,
+    status: zodValidationSearchQueryStaffStatus,
+    permissions: zodValidationSearchQueryStaffPermissions,
     startDate: zodValidationStrDate,
     endDate: zodValidationStrDate,
 })

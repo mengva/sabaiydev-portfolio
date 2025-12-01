@@ -1,12 +1,12 @@
 import db from "@/api/config/db";
 import GlobalHelper from "@/api/packages/utils/GlobalHelper";
 import { staffs } from "../entities";
-import type { ZodValidationPermissions } from "@/api/packages/validations/constants";
-import type { ZodValidationSearchStaffData } from "@/api/packages/validations/staff";
+import type { ZodValidationStaffPermissions } from "@/api/packages/validations/constants";
+import type { ZodValidationSearchQueryStaff } from "@/api/packages/validations/staff";
 import { and, between, eq, ilike, or, sql } from "drizzle-orm";
 import { getHTTPError, HTTPErrorMessage } from "@/api/packages/utils/HttpJsError";
 
-export class ManageStaffUtils {
+export class StaffManageServices {
     public static selectStaffData = {
         id: staffs.id,
         fullName: staffs.fullName,
@@ -17,9 +17,9 @@ export class ManageStaffUtils {
         createdAt: staffs.createdAt,
         updatedAt: staffs.updatedAt
     }
-    public static async validationAddOne(email: string, permissions: ZodValidationPermissions) {
+    public static async validationAddOne(email: string, permissions: ZodValidationStaffPermissions) {
         try {
-            const newPermissions: ZodValidationPermissions = this.validationPermission(permissions);
+            const newPermissions: ZodValidationStaffPermissions = this.validationPermission(permissions);
             const emailExisting = await db.query.staffs.findFirst({
                 where: (staffs, { eq }) => eq(staffs.email, email),
             });
@@ -30,9 +30,9 @@ export class ManageStaffUtils {
         }
     }
 
-    public static validationPermission(permissions: ZodValidationPermissions) {
+    public static validationPermission(permissions: ZodValidationStaffPermissions) {
         try {
-            const newPermissions: ZodValidationPermissions = GlobalHelper.uniquePermissions(permissions);
+            const newPermissions: ZodValidationStaffPermissions = GlobalHelper.uniquePermissions(permissions);
             if (!newPermissions.length) throw new HTTPErrorMessage("Permissions is required", "403");
             return newPermissions;
         } catch (error) {
@@ -40,7 +40,7 @@ export class ManageStaffUtils {
         }
     }
 
-    public static async searchQuery(input: ZodValidationSearchStaffData) {
+    public static async searchQuery(input: ZodValidationSearchQueryStaff) {
         const { query, role, startDate, endDate, status } = input;
         const conditions: any[] = [];
         if (query) {

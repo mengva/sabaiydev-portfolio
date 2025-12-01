@@ -4,29 +4,30 @@ import type { TRPCCodeError } from "@/api/utils/constants";
 import { HandlerTRPCError } from "@/api/utils/handleTRPCError";
 import { eq } from "drizzle-orm";
 
-interface ProductDto {
+interface StaffErrorMessageDto {
     message: string;
     status: TRPCCodeError
 }
 
-export class ValidationProductRoleAndPerUtils {
+// using by (product, news, faq, career and product) manage
+export class ValidationStaffRoleAndPerUtils {
 
-    public static userNotFound: ProductDto = {
+    public static userNotFound: StaffErrorMessageDto = {
         message: "Find user not found",
         status: "NOT_FOUND"
     }
 
-    public static disabledAccount: ProductDto = {
+    public static disabledAccount: StaffErrorMessageDto = {
         message: "Your account has been disabled",
         status: "FORBIDDEN"
     }
 
-    public static success: ProductDto = {
+    public static success: StaffErrorMessageDto = {
         message: "success",
         status: "BAD_REQUEST"
     }
 
-    public static async canBeRemove(removeByStaffId: string): Promise<ProductDto> {
+    public static async canBeRemove(removeByStaffId: string): Promise<StaffErrorMessageDto> {
         try {
             const staff = await db.query.staffs.findFirst({
                 where: eq(staffs.id, removeByStaffId)
@@ -47,7 +48,7 @@ export class ValidationProductRoleAndPerUtils {
 
             if (!isCanBeRemove) {
                 return {
-                    message: "You have no an permissions to remove this product",
+                    message: "You have no an permissions to remove",
                     status: "FORBIDDEN"
                 }
             }
@@ -57,7 +58,7 @@ export class ValidationProductRoleAndPerUtils {
         }
     }
 
-    public static async canBeAddAndEdit(staffId: string): Promise<ProductDto> {
+    public static async canBeAddAndEdit(staffId: string): Promise<StaffErrorMessageDto> {
         try {
             const staff = await db.query.staffs.findFirst({
                 where: eq(staffs.id, staffId)
@@ -78,7 +79,7 @@ export class ValidationProductRoleAndPerUtils {
 
             if (!isCanBeAddAndEdit) {
                 return {
-                    message: "You have no an permissions to add or edit this product",
+                    message: "You have no an permissions to add or edit",
                     status: "FORBIDDEN"
                 }
             }

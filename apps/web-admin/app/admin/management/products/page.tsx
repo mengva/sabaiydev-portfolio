@@ -41,12 +41,12 @@ import toast from "react-hot-toast";
 import { ErrorHandler } from "@/admin/packages/utils/HandleError";
 import GlobalHelper from "@/admin/packages/utils/GlobalHelper";
 import { PaginationComponent } from "@/components/pagination";
-import LoadingProductComponent from "./components/loading";
 import TableProductItemComponent from "./components/tableProducttem";
 import { ProductSchema } from "@/admin/packages/schema/product";
-import { SearchQueryProductCategoryArray, SearchQueryProductStatusArray } from "@/admin/packages/utils/constants/product";
+import { SearchQueryProductCategoryArray, SearchQueryProductStatusArray } from "@/admin/packages/utils/constants/variables/product";
 import { SearchQueryProductCategoryDto, SearchQueryProductStatusDto } from "@/admin/packages/types/product";
 import Link from "next/link";
+import ListLoadingComponent from "@/components/listLoading";
 
 interface SearchSelectDto {
     query: string;
@@ -56,7 +56,7 @@ interface SearchSelectDto {
     endDate: Date | undefined;
 }
 
-function ProductPage() {
+function ProductManagePage() {
     const myDataContext = useContext(MyDataContext);
     if (!myDataContext) return null;
     const [myData, setMyData] = useState(myDataContext.data as MyDataDto);
@@ -93,9 +93,7 @@ function ProductPage() {
     useEffect(() => {
         if (response) {
             const result = response?.data;
-            console.log("result", result);
             const resultProducts = result?.data ?? []; // the array
-            console.log("resultProducts", resultProducts);
             const pagination: PaginationFilterDto = result?.pagination; // pagination info
             setProducts(resultProducts);
             setPaginationFilter(pagination);
@@ -127,6 +125,22 @@ function ProductPage() {
             toast.error(error.message);
         }
     });
+
+    const onSearch = () => {
+        try {
+            const date = convertDate(startDate, endDate);
+            searchQueryMutation.mutate({
+                ...filter,
+                query: search.trim(),
+                category: category ?? "DEFAULT",
+                status: status ?? "DEFAULT",
+                startDate: date.startDate,
+                endDate: date.endDate,
+            });
+        } catch (error) {
+            ErrorHandler.handleClientError(error);
+        }
+    }
 
     const onSelectSearch = ({
         query,
@@ -204,7 +218,7 @@ function ProductPage() {
                                 }}
                                 className="pl-10"
                                 onKeyDown={(e) => {
-                                    if (e.key === "Enter") { };
+                                    if (e.key === "Enter") onSearch();
                                 }}
                             />
                         </div>
@@ -335,7 +349,7 @@ function ProductPage() {
                 <CardContent>
                     {
                         (isLoading || searchQueryMutation.isLoading) ? (
-                            <LoadingProductComponent />
+                            <ListLoadingComponent />
                         ) :
                             <>
                                 <div className="rounded-md border">
@@ -379,4 +393,4 @@ function ProductPage() {
     )
 }
 
-export default ProductPage
+export default ProductManagePage

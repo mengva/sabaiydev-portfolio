@@ -6,7 +6,7 @@ import type { AuthSignInDto, AuthSignInWithOTPAndEmailDto, AuthSignUpDto } from 
 import { AuthEnumMessage } from "./authEnumMessage";
 import type { StaffSchema } from "@/api/packages/schema/staff";
 import type { Context as HonoContext } from "hono"
-import { adminSessionTokenName } from "@/api/packages/utils/constants/auth";
+import { adminSessionTokenName } from "@/api/packages/utils/constants/variables/auth";
 import GlobalHelper from "@/api/packages/utils/GlobalHelper";
 import { HandlerSuccess } from "@/api/utils/handleSuccess";
 import { sessions } from "../entities";

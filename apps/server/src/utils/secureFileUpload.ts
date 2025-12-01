@@ -48,15 +48,14 @@ export interface ImageFileDto {
 
 export class SecureFileUploadServices {
 
-    private static async validationFileAndUploadFunc({ file, isPDF }: { file: FileDto; isPDF: boolean }): Promise<ResponseFileDto> {
+    private static async validationFileAndUploadFunc(file: FileDto, callback: (file: FileDto) => Promise<CLOUDINARY_DTO | any>): Promise<ResponseFileDto> {
         try {
-            const validation = ValidationSecureFileUploadServices.validationFile(file);
-            console.log("validation", validation)
-            if (!validation.valid) {
-                throw new Error(validation.error);
+            const validationFile = ValidationSecureFileUploadServices.validationFile(file);
+            if (!validationFile.valid) {
+                throw new Error(validationFile.error);
             }
-            const result = isPDF ? await this.uploadPDFFileCloudinaryFunc(file) : await this.uploadImageCloudinaryFunc(file);
-            if (!result) throw new Error(`Falied to uploaded ${isPDF ? 'PDF file' : 'file'}`);
+            const result: CLOUDINARY_DTO = await callback(file);
+            if (!result) throw new Error(`Falied to uploaded File`);
             return {
                 imageUrl: result.secure_url,
                 size: +result.bytes,
@@ -70,16 +69,16 @@ export class SecureFileUploadServices {
         }
     }
 
-    public static async uploadCloudinaryImageFiles({ files }: ImageFileDto) {
+    public static async uploadCloudinaryImageFiles(files: FileDto[]) {
         try {
             if (!files.length) return [];
 
-            const uploadResults = await Promise.all(
+            const resultFiles = await Promise.all(
                 files.map(async (file) => {
-                    return await this.validationFileAndUploadFunc({ file, isPDF: false });
+                    return await this.validationFileAndUploadFunc(file, this.uploadImageCloudinaryFunc);
                 })
             );
-            return uploadResults;
+            return resultFiles;
         } catch (error) {
             throw HandlerTRPCError.TRPCError(error);
         }
@@ -89,8 +88,8 @@ export class SecureFileUploadServices {
         try {
             if (!file) return undefined;
 
-            const uploadResult = await this.validationFileAndUploadFunc({ file, isPDF: false });
-            return uploadResult;
+            const resultFile = await this.validationFileAndUploadFunc(file, this.uploadImageCloudinaryFunc);
+            return resultFile;
         } catch (error) {
             throw HandlerTRPCError.TRPCError(error);
         }
@@ -100,8 +99,8 @@ export class SecureFileUploadServices {
         try {
             if (!file) return undefined;
 
-            const uploadResult = await this.validationFileAndUploadFunc({ file, isPDF: true });
-            return uploadResult;
+            const resultFile = await this.validationFileAndUploadFunc(file, this.uploadPDFFileCloudinaryFunc);
+            return resultFile;
         } catch (error) {
             throw HandlerTRPCError.TRPCError(error);
         }
@@ -111,20 +110,20 @@ export class SecureFileUploadServices {
         try {
             if (!files.length) return [];
 
-            const uploadResults = await Promise.all(
+            const resultFiles = await Promise.all(
                 files.map(async (file) => {
-                    return await this.validationFileAndUploadFunc({ file, isPDF: true });
+                    return await this.validationFileAndUploadFunc(file, this.uploadPDFFileCloudinaryFunc);
                 })
             );
-            return uploadResults;
+            return resultFiles;
         } catch (error) {
             throw HandlerTRPCError.TRPCError(error);
         }
     }
 
-    public static async uploadImageCloudinaryFunc(file: File | any) {
+    public static async uploadImageCloudinaryFunc(file: FileDto) {
         const result = await cloudinary.uploader.upload(file.fileData, {
-            folder: 'sabaiydev',
+            folder: 'portfolio-sabaiydev',
             public_id: `${Date.now()}-${file.fileName.split('.')[0]}`,
             resource_type: "image",
             allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
@@ -134,9 +133,9 @@ export class SecureFileUploadServices {
         return result;
     }
 
-    public static async uploadPDFFileCloudinaryFunc(file: File | any) {
+    public static async uploadPDFFileCloudinaryFunc(file: FileDto) {
         const result = await cloudinary.uploader.upload(file.fileData, {
-            folder: 'sabaiydev',
+            folder: 'portfolio-sabaiydev',
             public_id: `${Date.now()}-${file.fileName.split('.')[0]}`,
             resource_type: "raw",
             allowed_formats: ['pdf', 'doc', 'docx'],
@@ -146,11 +145,11 @@ export class SecureFileUploadServices {
         return result;
     }
 
-    public static async destoryCloudinaryFunc(cloudinaryId: string) {
+    public static async destoryCloudinaryFunc(cloudinaryId: string, resourceType: 'image' | 'raw' = 'image') {
         try {
             const result = await cloudinary.uploader.destroy(
                 cloudinaryId,
-                { resource_type: 'sabaiydev' }
+                { resource_type: resourceType }
             );
             return result;
         } catch (error) {

@@ -4,11 +4,11 @@ import type { Tx } from "@/api/types/constants";
 import { SecureFileUploadServices } from "@/api/utils/secureFileUpload";
 import type { FileDto } from "@/api/packages/types/constants";
 import db from "@/api/config/db";
-import type { ZodValidationEditOneProductData } from "@/api/packages/validations/product";
-import { eq } from "drizzle-orm";
+import type { ZodValidationEditOneProductData, ZodValidationSearchQueryProduct } from "@/api/packages/validations/product";
+import { and, between, eq, ilike, or } from "drizzle-orm";
 import { getHTTPError, HTTPErrorMessage } from "@/api/packages/utils/HttpJsError";
 
-interface AddOneProductUtilsDto {
+interface AddOneProductDto {
     translations: TranslationProductDto[];
     data: {
         addByStaffId: string;
@@ -31,8 +31,8 @@ interface ProductUploadFileDto {
     tx: Tx;
 }
 
-export class ManageProductUtils {
-    public static async addOneProduct({ tx, data, translations }: AddOneProductUtilsDto): Promise<string> {
+export class ProductManageServices {
+    public static async addOneProduct({ tx, data, translations }: AddOneProductDto): Promise<string> {
         try {
             const newProduct = await tx.insert(products).values(data).returning({
                 id: products.id
@@ -48,7 +48,7 @@ export class ManageProductUtils {
 
     public static async productUploadFiles({ files, productId, tx }: ProductUploadFileDto) {
         try {
-            const resultFiles = await SecureFileUploadServices.uploadCloudinaryImageFiles({ files });
+            const resultFiles = await SecureFileUploadServices.uploadCloudinaryImageFiles(files);
             await tx.insert(productImages).values(
                 resultFiles.map(file => ({
                     ...file,
@@ -63,10 +63,10 @@ export class ManageProductUtils {
     public static async editProductDataById(input: ZodValidationEditOneProductData) {
         try {
             const { targetProductId, updatedByStaffId, translations, ...data } = input;
-            const findProduct = await db.query.products.findFirst({
+            const product = await db.query.products.findFirst({
                 where: eq(products.id, targetProductId)
             });
-            if (!findProduct || findProduct === undefined) {
+            if (!product || product === undefined) {
                 throw new HTTPErrorMessage("Find product not found", "404");
             }
             await db.transaction(async tx => {
@@ -97,5 +97,30 @@ export class ManageProductUtils {
         } catch (error) {
             throw getHTTPError(error);
         }
+    }
+
+    public static async searchQuery(input: ZodValidationSearchQueryProduct) {
+        const { query, category, startDate, endDate, status } = input;
+        const conditions: any[] = [];
+        if (query) {
+            conditions.push(
+                or(
+                    ilike(translationProducts.name, `%${query}%`),
+                    ilike(translationProducts.description, `%${query}%`),
+                    ilike(translationProducts.longDescription, `%${query}%`)
+                )
+            );
+        }
+        if (category && category !== "DEFAULT") {
+            conditions.push(eq(products.category, category));
+        }
+        if (status && status !== "DEFAULT") {
+            conditions.push(eq(products.status, status));
+        }
+        // Date range
+        if (startDate && endDate) {
+            conditions.push(between(products.createdAt, new Date(startDate), new Date(endDate)));
+        }
+        return and(...conditions);
     }
 }

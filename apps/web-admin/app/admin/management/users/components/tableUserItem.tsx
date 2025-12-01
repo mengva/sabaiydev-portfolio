@@ -162,7 +162,7 @@ function TableUserItemComponent({ user, index, filter, myData, refetch, setOpen,
                                 {canDelete && (
                                     <DropdownMenuItem
                                         onClick={() => setOpenDelete(true)}
-                                        className="text-red-500 hover:!text-red-600 cursor-pointer"
+                                        className="text-red-500 hover:text-red-600! cursor-pointer"
                                     >
                                         <Trash2 className="mr-2 h-4 w-4 text-red-600" />
                                         Delete
@@ -176,7 +176,7 @@ function TableUserItemComponent({ user, index, filter, myData, refetch, setOpen,
                                             setOpen(true);
                                             setEditById(user.id);
                                         }}
-                                        className="text-sky-500 hover:!text-sky-600 cursor-pointer"
+                                        className="text-sky-500 hover:text-sky-600! cursor-pointer"
                                     >
                                         <Edit className="mr-2 h-4 w-4 text-sky-500" />
                                         Edit
@@ -199,7 +199,7 @@ function TableUserItemComponent({ user, index, filter, myData, refetch, setOpen,
             <AlertDialog open={openDelete} onOpenChange={setOpenDelete}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
-                        <AlertDialogTitle className="!text-xl">
+                        <AlertDialogTitle className="text-xl!">
                             Are you sure you want to delete this user?
                         </AlertDialogTitle>
                         <AlertDialogDescription>

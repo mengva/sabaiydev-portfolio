@@ -7,7 +7,7 @@ import type { ZodValidationAddOneStaff, ZodValidationEditMyData, ZodValidationEd
 import { getHTTPError, HTTPErrorMessage } from "@/api/packages/utils/HttpJsError";
 import type { StatusCodeErrorDto } from "@/api/utils/constants";
 
-export class ValidationStaffRoleAndPerUtils {
+export class ValidationStaffRoleAndPerServices {
 
     public static permissions = (
         userPermissions: StaffPermissionDto[],
@@ -178,12 +178,12 @@ export class ValidationStaffRoleAndPerUtils {
             });
             if (!myData) throw new HTTPErrorMessage("Find not found", "403");
             const myRole = myData.role;
-            const isValidationRoleAndPer = Boolean(
+            const isValidationStaffRoleAndPer = Boolean(
                 (myRole === "ADMIN" && !["ADMIN", "EDITOR", "VIEWER"].includes(role)) ||
                 (myRole === "EDITOR" && !["EDITOR", "VIEWER"].includes(role)) ||
                 (myRole === "VIEWER" && !["VIEWER"].includes(role)) || false
             )
-            if (isValidationRoleAndPer) {
+            if (isValidationStaffRoleAndPer) {
                 throw new HTTPErrorMessage("Invalid edit my role and permissions", "403");
             }
             return myData;

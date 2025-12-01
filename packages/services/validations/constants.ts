@@ -1,5 +1,4 @@
 import z from "zod"
-import { SearchQueryStaffPermissionDto, SearchQueryStaffRoleDto, SearchQueryStaffStatusDto } from "../types/constants";
 
 // variable const
 export const zodValidationStr = z.string().min(2, "String should be 2 characters").nonempty("String is required");
@@ -25,14 +24,6 @@ export const zodValidationStrDate = z.string().default("");
 export const zodValidationDate = z.string().date("Invalid date formatter").nonempty("Date is required");
 export const zodValidationFullName = z.string().nonempty("FullName is required");
 export const zodValidationOrderBy = z.enum(['desc', 'asc']).default("desc");
-export const zodValidationRole = z.enum(["SUPER_ADMIN", "ADMIN", "EDITOR", "VIEWER"]);
-export const zodValidationStatus = z.enum(["ACTIVE", "INACTIVE"]);
-export const zodValidationPermissions = z.array(z.enum(["READ", "WRITE", "CREATE", "DELETE", "UPDATE", "MANAGE"]));
-
-export const zodValidationSearchQueryRole = z.enum(["DEFAULT", "SUPER_ADMIN", "ADMIN", "EDITOR", "VIEWER"]).default("DEFAULT" as SearchQueryStaffRoleDto);
-export const zodValidationSearchQueryStatus = z.enum(["DEFAULT", "ACTIVE", "INACTIVE"]).default("DEFAULT" as SearchQueryStaffStatusDto);
-export const zodValidationSearchQueryPermissions = z.array(z.enum(["DEFAULT", "READ", "WRITE", "CREATE", "DELETE", "UPDATE", "MANAGE"])).default(["DEFAULT"] as SearchQueryStaffPermissionDto[]);
-
 
 // file zod
 export const zodValidationFile = z.object({
@@ -50,7 +41,7 @@ export const zodValidationFile = z.object({
 export const zodValidationFiles = z.array(zodValidationFile);
 
 // filter query
-export const zodValidationTRPCFilter = z.object({
+export const zodValidationFilter = z.object({
     page: z.number().default(1),
     limit: z.number().max(100).default(20)
 });
@@ -60,20 +51,12 @@ export type ZodValidationStr = z.infer<typeof zodValidationStr>;
 export type ZodValidationUuid = z.infer<typeof zodValidationUuid>;
 export type ZodValidationFullName = z.infer<typeof zodValidationFullName>;
 
-export type ZodValidationRole = z.infer<typeof zodValidationRole>;
-export type ZodValidationStatus = z.infer<typeof zodValidationStatus>;
-export type ZodValidationPermissions = z.infer<typeof zodValidationPermissions>;
-
-export type ZodValidationSearchQueryRole = z.infer<typeof zodValidationSearchQueryRole>;
-export type ZodValidationSearchQueryStatus = z.infer<typeof zodValidationSearchQueryStatus>;
-export type ZodValidationSearchQueryPermissions = z.infer<typeof zodValidationSearchQueryPermissions>;
-
 export type ZodValidationEmail = z.infer<typeof zodValidationEmail>;
 export type ZodValidationOTPCode = z.infer<typeof zodValidationOTPCode>;
 export type ZodValidationPhoneNumber = z.infer<typeof zodValidationPhoneNumber>;
 
 export type ZodValidationPassword = z.infer<typeof zodValidationPassword>;
-export type ZodValidationTRPCFilter = z.infer<typeof zodValidationTRPCFilter>;
+export type ZodValidationFilter = z.infer<typeof zodValidationFilter>;
 export type ZodValidationSearchQuery = z.infer<typeof zodValidationSearchQuery>;
 export type ZodValidationStrDate = z.infer<typeof zodValidationStrDate>;
 export type ZodValidationDate = z.infer<typeof zodValidationDate>;

@@ -14,11 +14,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@workspace/ui/componen
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@workspace/ui/components/form";
 import { HiMiniXMark } from "react-icons/hi2";
 import { zodValidationAddOneProduct, ZodValidationAddOneProduct } from "@/admin/packages/validations/product";
-import { ProductCategoryArray, ProductStatusArray } from "@/admin/packages/utils/constants/product";
+import { ProductCategoryArray, ProductStatusArray } from "@/admin/packages/utils/constants/variables/product";
 import { MyDataContext } from "@/app/admin/layout";
 import { BreadcrumbComponent } from "@/components/breadcrumb";
 import Link from "next/link";
-import { AllowedImageFileType, LocalArray } from "@/admin/packages/utils/constants";
+import { AllowedImageFileType, LocalArray } from "@/admin/packages/utils/constants/variables";
 import { UploadFileServices } from "@/admin/packages/utils/ClientUploadFile";
 import toast from "react-hot-toast";
 import { ErrorHandler } from "@/admin/packages/utils/HandleError";
@@ -26,7 +26,7 @@ import { ZodValidationFiles } from "@/admin/packages/validations/constants";
 import trpc from "@/app/trpc/client";
 import { ServerResponseDto } from "@/admin/packages/types/constants";
 
-export default function AddProductFormPage() {
+export default function ProductManageAddFormPage() {
 
     const myDataContext = useContext(MyDataContext);
     if (!myDataContext) return null;
@@ -138,10 +138,12 @@ export default function AddProductFormPage() {
     };
 
     const removeImage = (index: number) => {
-        const currentFiles = form.getValues("imageFiles") || [];
-        setImageFiles(prev => prev.filter((_, i) => i !== index));
-        form.setValue("imageFiles", currentFiles.filter((_, i) => i !== index));
+        const currentFiles = (form.getValues("imageFiles") || imageFiles).filter((_, i) => i !== index);
+        setImageFiles(currentFiles);
+        form.setValue("imageFiles", currentFiles);
     };
+
+    const isLoading = Boolean(addOneMutation.isPending || addOneDataMutation.isPending);
 
     return (
         <>
@@ -151,7 +153,7 @@ export default function AddProductFormPage() {
                         <ArrowLeft />
                     </Button>
                 </Link>
-                <BreadcrumbComponent path='/admin/management/products' />
+                <BreadcrumbComponent path='/admin/management/products' title="Add" linkTitle="Product Management"/>
             </div>
             <Card>
                 <CardHeader>
@@ -201,7 +203,7 @@ export default function AddProductFormPage() {
                                                         <button
                                                             type="button"
                                                             onClick={() => removeImage(idx)}
-                                                            className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition cursor-pointer"
+                                                            className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full transition cursor-pointer"
                                                         >
                                                             <HiMiniXMark className="w-4 h-4" />
                                                         </button>
@@ -432,8 +434,8 @@ export default function AddProductFormPage() {
                                 </Tabs>
                             </div>
 
-                            <Button type="submit" size="lg" className="cursor-pointer w-full">
-                                {(addOneMutation.isPending || addOneDataMutation.isPending) ? "Adding Product..." : "Add Product"}
+                            <Button type="submit" size="lg" className="cursor-pointer w-full" disabled={isLoading}>
+                                {isLoading ? "Adding Product..." : "Add Product"}
                             </Button>
                         </form>
                     </Form>

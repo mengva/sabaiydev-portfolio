@@ -1,10 +1,10 @@
 import db from "@/api/config/db";
 import { addAndEditStaffs, staffs } from "@/api/db";
-import type { ZodValidationAddOneStaff, ZodValidationSearchStaffData, ZodValidationEditMyData, ZodValidationEditStaff } from "@/api/packages/validations/staff";
+import type { ZodValidationAddOneStaff, ZodValidationSearchQueryStaff, ZodValidationEditMyData, ZodValidationEditStaff } from "@/api/packages/validations/staff";
 import { Helper } from "@/api/utils/helper";
-import { ManageStaffUtils } from "../../utils/staff";
+import { StaffManageServices } from "../../utils/staff";
 import { count, desc, eq, ne } from "drizzle-orm";
-import type { ZodValidationPermissions } from "@/api/packages/validations/constants";
+import type { ZodValidationStaffPermissions } from "@/api/packages/validations/constants";
 import { HandlerSuccess } from "@/api/utils/handleSuccess";
 import { getHTTPError, HTTPError } from "@/api/packages/utils/HttpJsError";
 
@@ -13,7 +13,7 @@ export class StaffManageMutationServices {
     public static async addOne(input: ZodValidationAddOneStaff) {
         try {
             const { permissions, addByStaffId, email, ...data } = input;
-            const newPermissions: ZodValidationPermissions = await ManageStaffUtils.validationAddOne(email, permissions);
+            const newPermissions: ZodValidationStaffPermissions = await StaffManageServices.validationAddOne(email, permissions);
             await db.transaction(async tx => {
                 const hastPassword = await Helper.bcryptHast(data.password);
                 const newStaff = await tx.insert(staffs).values({
@@ -40,7 +40,7 @@ export class StaffManageMutationServices {
     public static async editById(input: ZodValidationEditStaff) {
         try {
             const { permissions, updatedByStaffId, targetStaffId, ...data } = input;
-            const newPermissions: ZodValidationPermissions = ManageStaffUtils.validationPermission(permissions);
+            const newPermissions: ZodValidationStaffPermissions = StaffManageServices.validationPermission(permissions);
             await db.transaction(async tx => {
                 await tx.update(staffs).set({
                     ...data,
@@ -59,20 +59,20 @@ export class StaffManageMutationServices {
     public static async editMyDataById(input: ZodValidationEditMyData) {
         try {
             const { updatedByStaffId, targetStaffId, permissions, ...data } = input;
-            const newPermissions: ZodValidationPermissions = ManageStaffUtils.validationPermission(permissions);
+            const newPermissions: ZodValidationStaffPermissions = StaffManageServices.validationPermission(permissions);
             const response = await db.transaction(async tx => {
                 let updateStaff = null;
                 if (["SUPER_ADMIN", "ADMIN"].includes(data.role)) {
                     updateStaff = await tx.update(staffs).set({
                         ...data,
                         permissions: newPermissions
-                    }).where(eq(staffs.id, targetStaffId)).returning(ManageStaffUtils.selectStaffData);
+                    }).where(eq(staffs.id, targetStaffId)).returning(StaffManageServices.selectStaffData);
                 } else {
                     updateStaff = await tx.update(staffs).set({
                         role: data.role,
                         status: data.status,
                         permissions: newPermissions
-                    }).where(eq(staffs.id, targetStaffId)).returning(ManageStaffUtils.selectStaffData);
+                    }).where(eq(staffs.id, targetStaffId)).returning(StaffManageServices.selectStaffData);
                 }
                 await tx.update(addAndEditStaffs).set({
                     updatedByStaffId
@@ -85,11 +85,11 @@ export class StaffManageMutationServices {
         }
     }
 
-    public static async searchQuery(input: ZodValidationSearchStaffData) {
+    public static async searchQuery(input: ZodValidationSearchQueryStaff) {
         try {
             const { page, limit } = input;
             const offset = (page - 1) * limit;
-            const where = await ManageStaffUtils.searchQuery(input);
+            const where = await StaffManageServices.searchQuery(input);
             // count total
             const totalResult = await db
                 .select({ total: count() })
@@ -98,7 +98,7 @@ export class StaffManageMutationServices {
             const total = totalResult[0]?.total ?? 1;
             // query staff data
             const results = await db
-                .select(ManageStaffUtils.selectStaffData)
+                .select(StaffManageServices.selectStaffData)
                 .from(staffs)
                 .where(where)
                 .orderBy(desc(staffs.createdAt))

@@ -1,10 +1,10 @@
 import db from "@/api/config/db";
-import type { ZodValidationAddOneProduct, ZodValidationAddOneProductData, ZodValidationEditOneProduct, ZodValidationEditOneProductData } from "@/api/packages/validations/product";
-import { productImages, products } from "../../entities";
+import type { ZodValidationAddOneProduct, ZodValidationAddOneProductData, ZodValidationEditOneProduct, ZodValidationEditOneProductData, ZodValidationSearchQueryProduct } from "@/api/packages/validations/product";
+import { productImages, products, translationProducts } from "../../entities";
 import { SecureFileUploadServices } from "@/api/utils/secureFileUpload";
 import { HandlerSuccess } from "@/api/utils/handleSuccess";
-import { ManageProductUtils } from "../../utils/product";
-import { eq } from "drizzle-orm";
+import { ProductManageServices } from "../../utils/product";
+import { count, desc, eq } from "drizzle-orm";
 import { getHTTPError, HTTPErrorMessage } from "@/api/packages/utils/HttpJsError";
 
 export class ProductManageMutationServices {
@@ -12,9 +12,9 @@ export class ProductManageMutationServices {
         try {
             const { imageFiles, translations, ...data } = input;
             await db.transaction(async tx => {
-                const productId = await ManageProductUtils.addOneProduct({ tx, data, translations });
+                const productId = await ProductManageServices.addOneProduct({ tx, data, translations });
                 if (!productId || productId === undefined) throw new HTTPErrorMessage("ProductId is required", "403");
-                await ManageProductUtils.productUploadFiles({ files: imageFiles, productId, tx });
+                await ProductManageServices.productUploadFiles({ files: imageFiles, productId, tx });
             });
             return HandlerSuccess.success("Add one product successfully");
         } catch (error) {
@@ -26,7 +26,7 @@ export class ProductManageMutationServices {
         try {
             const { translations, ...data } = input;
             await db.transaction(async tx => {
-                await ManageProductUtils.addOneProduct({
+                await ProductManageServices.addOneProduct({
                     tx, data, translations
                 });
             });
@@ -40,8 +40,8 @@ export class ProductManageMutationServices {
         try {
             const { imageFiles, targetProductId } = input;
             await db.transaction(async tx => {
-                await ManageProductUtils.editProductDataById(input);
-                await ManageProductUtils.productUploadFiles({ files: imageFiles, productId: targetProductId, tx });
+                await ProductManageServices.editProductDataById(input);
+                await ProductManageServices.productUploadFiles({ files: imageFiles, productId: targetProductId, tx });
             });
             return HandlerSuccess.success("Edit product by id successfully");
         } catch (error) {
@@ -51,7 +51,7 @@ export class ProductManageMutationServices {
 
     public static async editDataById(input: ZodValidationEditOneProductData) {
         try {
-            await ManageProductUtils.editProductDataById(input);
+            await ProductManageServices.editProductDataById(input);
             return HandlerSuccess.success("Edit product data by id successfully");
         } catch (error) {
             throw getHTTPError(error);
@@ -74,22 +74,60 @@ export class ProductManageMutationServices {
                     images: true
                 }
             });
-            
+
             if (!product) throw new HTTPErrorMessage("Find product not found", "404");
-            
+
             await db.transaction(async tx => {
-                
-                if(product?.images?.length > 0){
+
+                if (product?.images?.length > 0) {
                     await Promise.all(
                         product.images.map(async image => {
+                            // const resourceType = image.type.includes("")
                             await SecureFileUploadServices.destoryCloudinaryFunc(image.cloudinaryId);
                         })
                     )
                 }
-                
+
                 await tx.delete(products).where(eq(products.id, productId));
             });
             return HandlerSuccess.success("Removed product by id successfully");
+        } catch (error) {
+            throw getHTTPError(error);
+        }
+    }
+
+    public static async searchQuery(input: ZodValidationSearchQueryProduct) {
+        try {
+            const { page, limit } = input;
+            const offset = (page - 1) * limit;
+            const where = await ProductManageServices.searchQuery(input);
+            // count total
+            const totalResult = await db
+                .select({ total: count() })
+                .from(products)
+                .where(where);
+            const total = totalResult[0]?.total ?? 1;
+            const resultProducts = await db.query.products.findMany({
+                where,
+                limit,
+                offset,
+                orderBy: desc(products.updatedAt),
+                with: {
+                    translationProducts: {
+                        where: eq(products.id, translationProducts.productId)
+                    }
+                }
+            })
+            const totalPage = Math.ceil(Number(total) / limit) || 1;
+            return HandlerSuccess.success("Queries Product successfully", {
+                data: resultProducts,
+                pagination: {
+                    total,
+                    page,
+                    totalPage,
+                    limit,
+                },
+            });
         } catch (error) {
             throw getHTTPError(error);
         }

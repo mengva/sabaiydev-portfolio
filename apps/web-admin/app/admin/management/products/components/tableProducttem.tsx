@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     TableCell,
     TableRow,
@@ -25,12 +25,13 @@ import {
     AlertDialogTitle,
 } from '@workspace/ui/components/alert-dialog';
 import { Edit, MoreHorizontal, Trash2 } from 'lucide-react';
-import { FilterDto, ServerResponseDto, MyDataDto } from '@/admin/packages/types/constants';
+import { FilterDto, ServerResponseDto, MyDataDto, StaffRoleDto } from '@/admin/packages/types/constants';
 import toast from 'react-hot-toast';
 import trpc from '@/app/trpc/client';
 import { ProductSchema } from '@/admin/packages/schema/product';
 import TableIdComponent from '@/components/tableId';
 import Link from 'next/link';
+import { TranslationProductDto } from '@/admin/packages/types/product';
 
 interface ItemDto {
     product: ProductSchema;
@@ -43,14 +44,25 @@ interface ItemDto {
 
 // Helper: Get initials
 const getInitials = (name: string) =>
-    name.split(' ').map(n => n[0]).join('').toUpperCase();
+    name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
 
 function TableProductItemComponent({ product, index, filter, myData, refetch, setOpen }: ItemDto) {
 
-    const myRole = myData.role ?? "VIEWER";
     const [openDelete, setOpenDelete] = useState(false);
+    const [myRole, setMyRole] = useState("VIEWER" as StaffRoleDto);
+    const [translations, setTranslations] = useState({} as TranslationProductDto);
+    const [technologies, setTechnologies] = useState([] as string[]);
 
-    const translationProducts = product?.translationProducts?.find(tr => tr.local === "en");
+    useEffect(() => {
+        if (product && myData) {
+            setMyRole(myData.role);
+            const translation = product?.translationProducts?.find(tr => tr.local === "en");
+            if (translation) {
+                setTranslations(translation);
+            }
+            setTechnologies(product.technologies);
+        }
+    }, [product, myData]);
 
     // Mutations
     const onSuccess = (data: ServerResponseDto) => {
@@ -76,7 +88,7 @@ function TableProductItemComponent({ product, index, filter, myData, refetch, se
     };
 
     const canDelete = ["SUPER_ADMIN", "ADMIN"].includes(myRole);
-    const canEdit = ["SUPER_ADMIN", "ADMIN", "EDITOR"].includes(myRole);
+    const canEdit = !(["VIEWER"].includes(myRole));
     const canInteract = canDelete || canEdit;
 
     return (
@@ -97,11 +109,11 @@ function TableProductItemComponent({ product, index, filter, myData, refetch, se
                             className={`h-9 w-9 rounded-full flex items-center justify-center text-sm font-medium ${index % 2 === 0 ? 'bg-muted' : 'bg-purple-600/50'
                                 }`}
                         >
-                            {getInitials(translationProducts?.name ?? '')}
+                            {getInitials(translations?.name ?? '')}
                         </div>
 
                         <div>
-                            <p className="font-medium">{translationProducts?.name ?? ''}</p>
+                            <p className="font-medium">{translations?.name ?? ''}</p>
                         </div>
                     </div>
                 </TableCell>
@@ -126,11 +138,19 @@ function TableProductItemComponent({ product, index, filter, myData, refetch, se
                 {/* Permissions */}
                 <TableCell>
                     <div className="flex gap-1">
-                        {product.technologies.map((p, i) => (
-                            <Badge key={i} variant="secondary" className="text-xs capitalize">
-                                {p}
+                        {
+                            technologies.slice(0, 3).map((p, i) => (
+                                <Badge key={i} variant="secondary" className="text-xs capitalize">
+                                    {p}
+                                </Badge>
+                            ))
+                        }
+                        {
+                            technologies.slice(3).length > 0 &&
+                            <Badge variant="secondary" className="text-xs capitalize">
+                                +{technologies.slice(3).length}
                             </Badge>
-                        ))}
+                        }
                     </div>
                 </TableCell>
 
@@ -163,26 +183,26 @@ function TableProductItemComponent({ product, index, filter, myData, refetch, se
 
                                 {/* EDIT */}
                                 {canEdit && <>
-                                    <DropdownMenuItem
-                                        onClick={() => {
-                                            setOpen(true);
-                                        }}
-                                        className="text-sky-500 hover:text-sky-600! cursor-pointer"
-                                    >
-                                        <Link href={`/admin/management/products/${product.id}/edit`} className='flex items-center gap-2'>
+                                    <Link href={`/admin/management/products/edit?id=${product.id}`}>
+                                        <DropdownMenuItem
+                                            onClick={() => {
+                                                setOpen(true);
+                                            }}
+                                            className="text-sky-500 hover:text-sky-600! cursor-pointer"
+                                        >
                                             <Edit className="mr-2 h-4 w-4 text-sky-500" />
                                             Edit
-                                        </Link>
-                                    </DropdownMenuItem>
+                                        </DropdownMenuItem>
+                                    </Link>
 
-                                    <DropdownMenuItem
-                                        className="text-purple-500 hover:text-purple-600! cursor-pointer"
-                                    >
-                                        <Link href={`/admin/management/products/${product.id}/preview`} className='flex items-center gap-2'>
+                                    {/* <Link href={`/admin/management/products/preview?id=${product.id}`}>
+                                        <DropdownMenuItem
+                                            className="text-purple-500 hover:text-purple-600! cursor-pointer"
+                                        >
                                             <Edit className="mr-2 h-4 w-4 text-purple-500" />
                                             Preview
-                                        </Link>
-                                    </DropdownMenuItem>
+                                        </DropdownMenuItem>
+                                    </Link> */}
                                 </>}
                             </DropdownMenuContent>
                         </DropdownMenu>
@@ -206,7 +226,7 @@ function TableProductItemComponent({ product, index, filter, myData, refetch, se
                         </AlertDialogTitle>
                         <AlertDialogDescription>
                             This action cannot be undone. It will permanently remove{' '}
-                            <span className="font-medium text-red-600">{translationProducts?.name ?? ''}</span> from
+                            <span className="font-medium text-red-600">{translations?.name ?? ''}</span> from
                             the system.
                         </AlertDialogDescription>
                     </AlertDialogHeader>

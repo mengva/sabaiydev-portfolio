@@ -1,7 +1,7 @@
 import type { FileDto } from "../types/constants";
-import { validateMaxFileSize } from "./constants";
 import { ValidationSecureFileUploadServices } from "./SecureFile";
 import { ErrorHandler } from "./HandleError";
+import { validateMaxFileSize } from "./constants/variables";
 
 interface UploadFileDto {
     message: string;
@@ -42,9 +42,9 @@ export class UploadFileServices {
             file: undefined
         };
 
-        const validFile = file.size <= validateMaxFileSize;
+        const validFile = file.size > validateMaxFileSize;
 
-        if (!validFile) {
+        if (validFile) {
             return {
                 message: "Can't uploaded file size > 10MB",
                 file: undefined

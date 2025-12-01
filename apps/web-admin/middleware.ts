@@ -1,4 +1,4 @@
-import { adminSessionTokenName } from "@/admin/packages/utils/constants/auth";
+import { adminSessionTokenName } from "@/admin/packages/utils/constants/variables/auth";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 

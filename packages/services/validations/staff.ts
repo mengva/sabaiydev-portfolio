@@ -1,5 +1,6 @@
 import z from "zod";
-import { zodValidationEmail, zodValidationTRPCFilter, zodValidationFullName, zodValidationPassword, zodValidationPermissions, zodValidationRole, zodValidationSearchQuery, zodValidationSearchQueryPermissions, zodValidationSearchQueryRole, zodValidationSearchQueryStatus, zodValidationStatus, zodValidationStrDate, zodValidationUuid } from "./constants";
+import { zodValidationEmail, zodValidationFilter, zodValidationFullName, zodValidationPassword, zodValidationSearchQuery, zodValidationStrDate, zodValidationUuid } from "./constants";
+import { zodValidationSearchQueryStaffRole, zodValidationSearchQueryStaffStatus, zodValidationStaffPermissions, zodValidationStaffRole, zodValidationStaffStatus } from "./variables/staff";
 
 // rest api
 
@@ -13,9 +14,9 @@ export const zodValidationRestApiAddOneStaff = z.object({
     fullName: zodValidationFullName,
     email: zodValidationEmail,
     password: zodValidationPassword,
-    role: zodValidationRole,
-    status: zodValidationStatus,
-    permissions: zodValidationPermissions
+    role: zodValidationStaffRole,
+    status: zodValidationStaffStatus,
+    permissions: zodValidationStaffPermissions
 });
 
 // udpate staff param
@@ -26,9 +27,9 @@ export const zodValidationRestApiEditStaffParam = z.object({
 
 // update staff body data
 export const zodValidationRestApiEditStaff = z.object({
-    role: zodValidationRole,
-    status: zodValidationStatus,
-    permissions: zodValidationPermissions
+    role: zodValidationStaffRole,
+    status: zodValidationStaffStatus,
+    permissions: zodValidationStaffPermissions
 });
 
 export const zodValidationRestApiEditMyDataParam = z.object({
@@ -39,9 +40,9 @@ export const zodValidationRestApiEditMyDataParam = z.object({
 // update my body data
 export const zodValidationRestApiEditMyData = z.object({
     email: zodValidationEmail,
-    role: zodValidationRole,
-    status: zodValidationStatus,
-    permissions: zodValidationPermissions
+    role: zodValidationStaffRole,
+    status: zodValidationStaffStatus,
+    permissions: zodValidationStaffPermissions
 });
 
 // trpc or rest api
@@ -55,9 +56,9 @@ export const zodValidationAddOneStaff = zodValidationRestApiAddOneStaff.extend({
 export const zodValidationEditStaff = zodValidationRestApiEditStaff.extend({
     targetStaffId: zodValidationUuid,
     updatedByStaffId: zodValidationUuid,
-    role: zodValidationRole,
-    status: zodValidationStatus,
-    permissions: zodValidationPermissions
+    role: zodValidationStaffRole,
+    status: zodValidationStaffStatus,
+    permissions: zodValidationStaffPermissions
 });
 
 // update my data
@@ -78,10 +79,10 @@ export const zodValidationRemoveOneStaffById = z.object({
 });
 
 // query or search staff by this condition
-export const zodValidationSearchStaffData = zodValidationTRPCFilter.extend({
+export const zodValidationSearchQueryStaff = zodValidationFilter.extend({
     query: zodValidationSearchQuery,
-    role: zodValidationSearchQueryRole,
-    status: zodValidationSearchQueryStatus,
+    role: zodValidationSearchQueryStaffRole,
+    status: zodValidationSearchQueryStaffStatus,
     startDate: zodValidationStrDate,
     endDate: zodValidationStrDate,
 });
@@ -103,6 +104,6 @@ export type ZodValidationRestApiEditMyDataParam = z.infer<typeof zodValidationRe
 export type ZodValidationEditMyData = z.infer<typeof zodValidationEditMyData>;
 export type ZodValidationAddOneStaff = z.infer<typeof zodValidationAddOneStaff>;
 export type ZodValidationEditStaff = z.infer<typeof zodValidationEditStaff>;
-export type ZodValidationSearchStaffData = z.infer<typeof zodValidationSearchStaffData>;
+export type ZodValidationSearchQueryStaff = z.infer<typeof zodValidationSearchQueryStaff>;
 export type ZodValidationGetOneStaffById = z.infer<typeof zodValidationGetOneStaffById>;
 export type ZodValidationRemoveOneStaffById = z.infer<typeof zodValidationRemoveOneStaffById>;

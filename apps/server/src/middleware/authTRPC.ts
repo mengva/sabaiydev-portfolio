@@ -3,7 +3,7 @@ import { SecureSessionManagerServices } from "../utils/secureSession";
 import { Helper } from "../utils/helper";
 import { AuthEnumMessage } from "@/api/modules/admin/auth/utils/authEnumMessage";
 import { RateLimiterMiddleware } from "./rateLimiterMiddleware";
-import { adminSessionTokenName } from "@/api/packages/utils/constants/auth";
+import { adminSessionTokenName } from "@/api/packages/utils/constants/variables/auth";
 import { HandlerTRPCError } from "@/api/utils/handleTRPCError";
 import type { MyContext } from "../server/trpc/context";
 import { DOMAndSanitizedServices } from "@/api/packages/utils/DOMAndSanitize";

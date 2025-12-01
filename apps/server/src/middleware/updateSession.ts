@@ -1,5 +1,5 @@
 import db from "@/api/config/db";
-import { adminSessionTokenName } from "@/api/packages/utils/constants/auth";
+import { adminSessionTokenName } from "@/api/packages/utils/constants/variables/auth";
 import { Helper } from "@/api/utils/helper";
 import { SecureSessionManagerServices } from "@/api/utils/secureSession";
 import { eq } from "drizzle-orm";

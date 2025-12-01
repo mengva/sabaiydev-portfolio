@@ -1,6 +1,6 @@
 
 import moment from "moment"
-import type { ZodValidationPermissions } from "../validations/constants";
+import type { ZodValidationStaffPermissions } from "../validations/constants";
 
 class GlobalHelper {
 
@@ -8,8 +8,8 @@ class GlobalHelper {
         return JSON.parse(JSON.stringify(data));
     }
 
-    public static uniquePermissions(permissions: ZodValidationPermissions) {
-        return [...new Set(permissions)] as ZodValidationPermissions;
+    public static uniquePermissions(permissions: ZodValidationStaffPermissions) {
+        return [...new Set(permissions)] as ZodValidationStaffPermissions;
     }
 
     public static getPaginationRange(current: number, total: number) {

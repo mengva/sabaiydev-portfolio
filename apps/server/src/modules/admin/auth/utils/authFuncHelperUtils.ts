@@ -12,7 +12,7 @@ import { getHTTPError, HTTPErrorMessage } from "@/api/packages/utils/HttpJsError
 import { AuthEnumMessage } from "./authEnumMessage";
 import type { Context as HonoContext } from "hono"
 import { RateLimiterMiddleware } from "@/api/middleware/rateLimiterMiddleware";
-import { adminSessionTokenName } from "@/api/packages/utils/constants/auth";
+import { adminSessionTokenName } from "@/api/packages/utils/constants/variables/auth";
 
 export interface GenerateAuthSessionDto {
     sessionToken: string;

@@ -1,7 +1,7 @@
 import { StaffSchema } from '@/admin/packages/schema/staff';
 import { ServerResponseDto, StaffPermissionDto, StaffRoleDto, MyDataDto } from '@/admin/packages/types/constants';
 import { UserValidRolePermissions } from '@/admin/packages/utils/constants';
-import { StaffRoleArray, StaffStatusArray } from '@/admin/packages/utils/constants/auth';
+import { StaffRoleArray, StaffStatusArray } from '@/admin/packages/utils/constants/variables/auth';
 import { zodValidationAddOneStaff, ZodValidationAddOneStaff } from '@/admin/packages/validations/staff';
 import trpc from '@/app/trpc/client';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -210,7 +210,10 @@ function AddUserDialogComponent({
     const onSubmit = (data: ZodValidationAddOneStaff) => {
         if (!data) return;
 
-        if (!editById) return addOneUserMutation.mutate(data);
+        if (!editById) {
+            addOneUserMutation.mutate(data);
+            return;
+        }
 
         const editUserData = {
             role: data.role,
@@ -222,10 +225,11 @@ function AddUserDialogComponent({
 
         // edit my account
         if (isEditMe) {
-            return editMyDataMutation.mutate({
+            editMyDataMutation.mutate({
                 email: data.email,
                 ...editUserData
             });
+            return;
         }
         // edit other account
         editOneUserMutation.mutate(editUserData);

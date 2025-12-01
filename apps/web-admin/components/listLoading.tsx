@@ -1,7 +1,7 @@
 import { Skeleton } from '@workspace/ui/components/skeleton'
 import React from 'react'
 
-function LoadingProductComponent() {
+function ListLoadingComponent() {
     return (
         <div className="space-y-3">
             {Array.from({ length: 5 }).map((_, i) => (
@@ -21,4 +21,4 @@ function LoadingProductComponent() {
     )
 }
 
-export default LoadingProductComponent
+export default ListLoadingComponent;

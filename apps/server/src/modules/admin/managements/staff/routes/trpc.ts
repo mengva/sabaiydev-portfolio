@@ -1,15 +1,15 @@
-import { zodValidationAddOneStaff, zodValidationGetOneStaffById, zodValidationRemoveOneStaffById, zodValidationSearchStaffData, zodValidationEditMyData, zodValidationEditStaff, type ZodValidationAddOneStaff, type ZodValidationGetOneStaffById, type ZodValidationRemoveOneStaffById, type ZodValidationSearchStaffData, type ZodValidationEditMyData, type ZodValidationEditStaff } from "@/api/packages/validations/staff";
+import { zodValidationAddOneStaff, zodValidationGetOneStaffById, zodValidationRemoveOneStaffById, zodValidationSearchQueryStaff, zodValidationEditMyData, zodValidationEditStaff, type ZodValidationAddOneStaff, type ZodValidationGetOneStaffById, type ZodValidationRemoveOneStaffById, type ZodValidationSearchQueryStaff, type ZodValidationEditMyData, type ZodValidationEditStaff } from "@/api/packages/validations/staff";
 import { publicProcedure, router } from "@/api/server/trpc/procedures";
 import { StaffManageMutationServices } from "../services/mutation/staff";
 import { AuthTRPCMiddleware } from "@/api/middleware/authTRPC";
 import { StaffManageQueriesServices } from "../services/queries/staff";
-import { zodValidationTRPCFilter, type ZodValidationTRPCFilter } from "@/api/packages/validations/constants";
+import { zodValidationFilter, type ZodValidationFilter } from "@/api/packages/validations/constants";
 import { HandlerTRPCError } from "@/api/utils/handleTRPCError";
-import { ValidationStaffRoleAndPerUtils } from "../utils/validateRoleAndPer";
+import { ValidationStaffRoleAndPerServices } from "../utils/validateRoleAndPer";
 
 export const StaffManageTRPCRouter = router({
-    list: publicProcedure.input(zodValidationTRPCFilter).use(AuthTRPCMiddleware.authSanitizedBody).query(async ({ ctx }) => {
-        const filter: ZodValidationTRPCFilter = ctx.honoContext.get("body");
+    list: publicProcedure.input(zodValidationFilter).use(AuthTRPCMiddleware.authSanitizedBody).query(async ({ ctx }) => {
+        const filter: ZodValidationFilter = ctx.honoContext.get("body");
         return await StaffManageQueriesServices.list(filter);
     }),
     getOne: publicProcedure.input(zodValidationGetOneStaffById).use(AuthTRPCMiddleware.authSanitizedBody).query(async ({ ctx }) => {
@@ -23,7 +23,7 @@ export const StaffManageTRPCRouter = router({
     addOne: publicProcedure.input(zodValidationAddOneStaff).use(AuthTRPCMiddleware.authSanitizedBody).mutation(async ({ ctx }) => {
         try {
             const body: ZodValidationAddOneStaff = ctx.honoContext.get("body");
-            await ValidationStaffRoleAndPerUtils.addOneUser(body);
+            await ValidationStaffRoleAndPerServices.addOneUser(body);
             const response = await StaffManageMutationServices.addOne(body);
             return response;
         } catch (error) {
@@ -33,7 +33,7 @@ export const StaffManageTRPCRouter = router({
     editById: publicProcedure.input(zodValidationEditStaff).use(AuthTRPCMiddleware.authSanitizedBody).mutation(async ({ ctx }) => {
         try {
             const body: ZodValidationEditStaff = ctx.honoContext.get("body");
-            await ValidationStaffRoleAndPerUtils.editOneUserById(body);
+            await ValidationStaffRoleAndPerServices.editOneUserById(body);
             const response = await StaffManageMutationServices.editById(body);
             return response;
         } catch (error) {
@@ -43,7 +43,7 @@ export const StaffManageTRPCRouter = router({
     editMyDataById: publicProcedure.input(zodValidationEditMyData).use(AuthTRPCMiddleware.authSanitizedBody).mutation(async ({ ctx }) => {
         try {
             const body: ZodValidationEditMyData = ctx.honoContext.get("body");
-            await ValidationStaffRoleAndPerUtils.editMyData(body);
+            await ValidationStaffRoleAndPerServices.editMyData(body);
             const response = await StaffManageMutationServices.editMyDataById(body);
             return response;
         } catch (error) {
@@ -52,11 +52,11 @@ export const StaffManageTRPCRouter = router({
     }),
     removeOneById: publicProcedure.input(zodValidationRemoveOneStaffById).use(AuthTRPCMiddleware.authSanitizedBody).mutation(async ({ ctx }) => {
         const params: ZodValidationRemoveOneStaffById = ctx.honoContext.get("body");
-        await ValidationStaffRoleAndPerUtils.removeOneById(params);
+        await ValidationStaffRoleAndPerServices.removeOneById(params);
         const response = await StaffManageMutationServices.removeOneById(params.targetStaffId);
         return response;
     }),
-    searchQuery: publicProcedure.input(zodValidationSearchStaffData).use(AuthTRPCMiddleware.authSession).mutation(async ({ ctx, input }) => {
+    searchQuery: publicProcedure.input(zodValidationSearchQueryStaff).use(AuthTRPCMiddleware.authSession).mutation(async ({ ctx, input }) => {
         const response = await StaffManageMutationServices.searchQuery(input);
         return response;
     })

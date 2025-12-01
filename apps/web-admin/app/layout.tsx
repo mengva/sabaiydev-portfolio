@@ -32,13 +32,13 @@ export default function RootLayout({
           enableSystem
           enableColorScheme
         >
-          <div id="web" className="w-full h-full fixed inset-0 overflow-y-auto">
+          <div id="web" className="w-full h-screen fixed inset-0 overflow-y-auto">
             <TRPCProvider>
               <Providers>
-                <div>
+                <>
                   {children}
                   <Toaster position="bottom-right" />
-                </div>
+                </>
               </Providers>
             </TRPCProvider>
           </div>
