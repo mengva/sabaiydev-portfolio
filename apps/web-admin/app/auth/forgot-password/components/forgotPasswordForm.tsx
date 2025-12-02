@@ -14,7 +14,7 @@ import { zodValidationEmail, zodValidationPhoneNumber } from "@/admin/packages/v
 import trpc from "@/app/trpc/client";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import CookieHelper from "@/admin/packages/utils/Cookie";
+import CookieHelper from "@/admin/packages/utils/cookie";
 import { ServerResponseDto } from "@/admin/packages/types/constants";
 
 type VerifiedEmailDto = "EMAIL" | "PHONE_NUMBER";

@@ -1,5 +1,5 @@
 import db from "@/api/config/db";
-import { getHTTPError, HTTPErrorMessage } from "@/api/packages/utils/HttpJsError";
+import { getHTTPError, HTTPErrorMessage } from "@/api/packages/utils/httpJsError";
 import { HandlerSuccess } from "@/api/utils/handleSuccess";
 import { count, desc, eq } from "drizzle-orm";
 import { news, newsImages, translationNews } from "../../entities";

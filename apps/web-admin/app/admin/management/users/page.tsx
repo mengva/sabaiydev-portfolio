@@ -43,8 +43,8 @@ import { SearchQueryStaffRoleArray, SearchQueryStaffStatusArray } from "@/admin/
 import AddUserDialogComponent from "./components/addUserDialog";
 import { MyDataContext } from "../../layout";
 import toast from "react-hot-toast";
-import { ErrorHandler } from "@/admin/packages/utils/HandleError";
-import GlobalHelper from "@/admin/packages/utils/GlobalHelper";
+import { ErrorHandler } from "@/admin/packages/utils/handleError";
+import GlobalHelper from "@/admin/packages/utils/globalHelper";
 import { PaginationComponent } from "@/components/pagination";
 
 interface SearchSelectDto {

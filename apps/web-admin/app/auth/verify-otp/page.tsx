@@ -7,7 +7,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@workspace/ui/components/input";
 import { Button } from "@workspace/ui/components/button";
 import Link from "next/link";
-import CookieHelper from "@/admin/packages/utils/Cookie";
+import CookieHelper from "@/admin/packages/utils/cookie";
 import trpc from "@/app/trpc/client";
 import toast from "react-hot-toast";
 import { zodValidationEmail } from "@/admin/packages/validations/constants";

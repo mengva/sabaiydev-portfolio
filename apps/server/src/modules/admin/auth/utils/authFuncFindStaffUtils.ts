@@ -4,7 +4,7 @@ import { AuthEnumMessage } from "./authEnumMessage";
 import type { ServerErrorDto } from "@/api/packages/types/constants";
 import { eq, and } from "drizzle-orm";
 import { staffs } from "@/api/db";
-import { getHTTPError, HTTPErrorMessage } from "@/api/packages/utils/HttpJsError";
+import { getHTTPError, HTTPErrorMessage } from "@/api/packages/utils/httpJsError";
 import type { AuthSignInDto } from "@/api/packages/types/auth";
 import type { StaffSchema, StaffVerificationSchema } from "@/api/packages/schema/staff";
 import { AuthFuncHelperServices } from "./authFuncHelperUtils";

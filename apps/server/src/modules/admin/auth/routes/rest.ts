@@ -4,7 +4,7 @@ import { ZodValidateRestApi } from '@/api/utils/zodValidateRestApi';
 import { AuthRestMiddleware } from '@/api/middleware/authREST';
 import type { ServerErrorDto } from '@/api/packages/types/constants';
 import { HandlerTRPCError } from '@/api/utils/handleTRPCError';
-import { DOMAndSanitizedServices } from '@/api/packages/utils/DOMAndSanitize';
+import { DOMAndSanitizedServices } from '@/api/packages/utils/domAndSanitize';
 import { AuthFuncHelperServices } from '../utils/authFuncHelperUtils';
 import { AuthFuncUtils } from '../utils/AuthFuncUtils';
 

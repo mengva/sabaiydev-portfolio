@@ -6,7 +6,7 @@ import { RateLimiterMiddleware } from "./rateLimiterMiddleware";
 import { adminSessionTokenName } from "@/api/packages/utils/constants/variables/auth";
 import { HandlerTRPCError } from "@/api/utils/handleTRPCError";
 import type { MyContext } from "../server/trpc/context";
-import { DOMAndSanitizedServices } from "@/api/packages/utils/DOMAndSanitize";
+import { DOMAndSanitizedServices } from "@/api/packages/utils/domAndSanitize";
 
 export class AuthTRPCMiddleware {
 

@@ -1,6 +1,6 @@
 
 import moment from "moment"
-import type { ZodValidationStaffPermissions } from "../validations/constants";
+import { ZodValidationStaffPermissions } from "../validations/variables/staff";
 
 class GlobalHelper {
 

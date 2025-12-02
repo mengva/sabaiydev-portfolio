@@ -7,7 +7,7 @@ import {
 } from "@workspace/ui/components/table";
 import { Badge } from '@workspace/ui/components/badge';
 import { StaffSchema } from '@/admin/packages/schema/staff';
-import GlobalHelper from '@/admin/packages/utils/GlobalHelper';
+import GlobalHelper from '@/admin/packages/utils/globalHelper';
 import {
     DropdownMenu,
     DropdownMenuContent,

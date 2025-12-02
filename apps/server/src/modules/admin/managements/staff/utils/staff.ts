@@ -1,10 +1,10 @@
 import db from "@/api/config/db";
-import GlobalHelper from "@/api/packages/utils/GlobalHelper";
+import GlobalHelper from "@/api/packages/utils/globalHelper";
 import { staffs } from "../entities";
 import type { ZodValidationStaffPermissions } from "@/api/packages/validations/constants";
 import type { ZodValidationSearchQueryStaff } from "@/api/packages/validations/staff";
 import { and, between, eq, ilike, or, sql } from "drizzle-orm";
-import { getHTTPError, HTTPErrorMessage } from "@/api/packages/utils/HttpJsError";
+import { getHTTPError, HTTPErrorMessage } from "@/api/packages/utils/httpJsError";
 
 export class StaffManageServices {
     public static selectStaffData = {

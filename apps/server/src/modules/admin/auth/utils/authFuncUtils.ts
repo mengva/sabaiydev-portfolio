@@ -7,11 +7,11 @@ import { AuthEnumMessage } from "./authEnumMessage";
 import type { StaffSchema } from "@/api/packages/schema/staff";
 import type { Context as HonoContext } from "hono"
 import { adminSessionTokenName } from "@/api/packages/utils/constants/variables/auth";
-import GlobalHelper from "@/api/packages/utils/GlobalHelper";
+import GlobalHelper from "@/api/packages/utils/globalHelper";
 import { HandlerSuccess } from "@/api/utils/handleSuccess";
 import { sessions } from "../entities";
 import { staffs } from "@/api/db";
-import { getHTTPError, HTTPErrorMessage } from "@/api/packages/utils/HttpJsError";
+import { getHTTPError, HTTPErrorMessage } from "@/api/packages/utils/httpJsError";
 import { AuthFuncFindStaffUtils } from "./authFuncFindStaffUtils";
 import db from "@/api/config/db";
 import type { MyContext } from "@/api/server/trpc/context";

@@ -5,7 +5,7 @@ import { SecureFileUploadServices } from "@/api/utils/secureFileUpload";
 import { HandlerSuccess } from "@/api/utils/handleSuccess";
 import { ProductManageServices } from "../../utils/product";
 import { count, desc, eq } from "drizzle-orm";
-import { getHTTPError, HTTPErrorMessage } from "@/api/packages/utils/HttpJsError";
+import { getHTTPError, HTTPErrorMessage } from "@/api/packages/utils/httpJsError";
 
 export class ProductManageMutationServices {
     public static async addOne(input: ZodValidationAddOneProduct) {

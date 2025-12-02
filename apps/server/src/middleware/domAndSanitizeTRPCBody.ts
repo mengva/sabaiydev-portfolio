@@ -1,4 +1,4 @@
-import { DOMAndSanitizedServices } from "@/api/packages/utils/DOMAndSanitize";
+import { DOMAndSanitizedServices } from "@/api/packages/utils/domAndSanitize";
 import { t } from "../server/trpc/procedures";
 import { HandlerTRPCError } from "../utils/handleTRPCError";
 

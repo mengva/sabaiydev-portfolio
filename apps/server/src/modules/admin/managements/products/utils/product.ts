@@ -6,7 +6,7 @@ import type { FileDto } from "@/api/packages/types/constants";
 import db from "@/api/config/db";
 import type { ZodValidationEditOneProductData, ZodValidationSearchQueryProduct } from "@/api/packages/validations/product";
 import { and, between, eq, ilike, or } from "drizzle-orm";
-import { getHTTPError, HTTPErrorMessage } from "@/api/packages/utils/HttpJsError";
+import { getHTTPError, HTTPErrorMessage } from "@/api/packages/utils/httpJsError";
 
 interface AddOneProductDto {
     translations: TranslationProductDto[];

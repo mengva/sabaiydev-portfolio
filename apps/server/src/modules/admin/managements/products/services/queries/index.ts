@@ -4,7 +4,7 @@ import { count, desc, eq } from "drizzle-orm";
 import type { ZodValidationFilter } from "@/api/packages/validations/constants";
 import { HandlerTRPCError } from "@/api/utils/handleTRPCError";
 import { HandlerSuccess } from "@/api/utils/handleSuccess";
-import { getHTTPError } from "@/api/packages/utils/HttpJsError";
+import { getHTTPError } from "@/api/packages/utils/httpJsError";
 
 export class ProductManageQueriesServices {
 

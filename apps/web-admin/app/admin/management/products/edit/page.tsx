@@ -25,9 +25,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { ProductSchema } from "@/admin/packages/schema/product";
 import { HiMiniXMark } from "react-icons/hi2";
 import { ZodValidationFiles, zodValidationUuid } from "@/admin/packages/validations/constants";
-import { UploadFileServices } from "@/admin/packages/utils/ClientUploadFile";
+import { UploadFileServices } from "@/admin/packages/utils/clientUploadFile";
 import toast from "react-hot-toast";
-import { ErrorHandler } from "@/admin/packages/utils/HandleError";
+import { ErrorHandler } from "@/admin/packages/utils/handleError";
 
 function EditOneProductPage() {
     // Call ALL hooks unconditionally at the top - BEFORE any early returns

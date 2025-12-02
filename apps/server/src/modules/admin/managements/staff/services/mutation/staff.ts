@@ -6,7 +6,7 @@ import { StaffManageServices } from "../../utils/staff";
 import { count, desc, eq, ne } from "drizzle-orm";
 import type { ZodValidationStaffPermissions } from "@/api/packages/validations/constants";
 import { HandlerSuccess } from "@/api/utils/handleSuccess";
-import { getHTTPError, HTTPError } from "@/api/packages/utils/HttpJsError";
+import { getHTTPError, HTTPError } from "@/api/packages/utils/httpJsError";
 
 export class StaffManageMutationServices {
 

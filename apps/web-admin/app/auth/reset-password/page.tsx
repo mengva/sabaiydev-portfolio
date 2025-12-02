@@ -1,7 +1,7 @@
 "use client"
 
 import { ServerResponseDto } from "@/admin/packages/types/constants";
-import CookieHelper from "@/admin/packages/utils/Cookie";
+import CookieHelper from "@/admin/packages/utils/cookie";
 import { zodValidationEmail, zodValidationPassword } from "@/admin/packages/validations/constants";
 import trpc from "@/app/trpc/client";
 import { zodResolver } from "@hookform/resolvers/zod";

@@ -1,5 +1,5 @@
 import db from "@/api/config/db";
-import { getHTTPError } from "@/api/packages/utils/HttpJsError";
+import { getHTTPError } from "@/api/packages/utils/httpJsError";
 import type { ZodValidationFilter } from "@/api/packages/validations/constants";
 import { HandlerSuccess } from "@/api/utils/handleSuccess";
 import { HandlerTRPCError } from "@/api/utils/handleTRPCError";

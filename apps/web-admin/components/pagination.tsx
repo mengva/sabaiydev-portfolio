@@ -1,5 +1,5 @@
 import { FilterDto, PaginationFilterDto } from "@/admin/packages/types/constants";
-import GlobalHelper from "@/admin/packages/utils/GlobalHelper";
+import GlobalHelper from "@/admin/packages/utils/globalHelper";
 import {
     Pagination,
     PaginationContent,

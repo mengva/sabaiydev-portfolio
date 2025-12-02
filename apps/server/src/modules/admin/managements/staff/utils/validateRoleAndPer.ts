@@ -4,7 +4,7 @@ import type { StaffPermissionDto, StaffRoleDto } from "@/api/packages/types/cons
 import { eq } from "drizzle-orm";
 import { CheckedRolePermissions, UserValidRolePermissions } from "@/api/packages/utils/constants";
 import type { ZodValidationAddOneStaff, ZodValidationEditMyData, ZodValidationEditStaff } from "@/api/packages/validations/staff";
-import { getHTTPError, HTTPErrorMessage } from "@/api/packages/utils/HttpJsError";
+import { getHTTPError, HTTPErrorMessage } from "@/api/packages/utils/httpJsError";
 import type { StatusCodeErrorDto } from "@/api/utils/constants";
 
 export class ValidationStaffRoleAndPerServices {

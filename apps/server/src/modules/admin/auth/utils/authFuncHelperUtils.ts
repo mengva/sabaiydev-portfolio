@@ -2,13 +2,13 @@ import db from "@/api/config/db";
 import { env } from "@/api/config/env";
 import type { StaffSchema, StaffVerificationSchema } from "@/api/packages/schema/staff";
 import type { ServerErrorDto } from "@/api/packages/types/constants";
-import CookieHelper from "@/api/packages/utils/Cookie";
+import CookieHelper from "@/api/packages/utils/cookie";
 import { Helper } from "@/api/utils/helper";
 import { SecureSessionManagerServices } from "@/api/utils/secureSession";
 import { and, eq, or } from "drizzle-orm";
 import { sessions, verifications } from "../entities";
 import { staffs } from "@/api/db";
-import { getHTTPError, HTTPErrorMessage } from "@/api/packages/utils/HttpJsError";
+import { getHTTPError, HTTPErrorMessage } from "@/api/packages/utils/httpJsError";
 import { AuthEnumMessage } from "./authEnumMessage";
 import type { Context as HonoContext } from "hono"
 import { RateLimiterMiddleware } from "@/api/middleware/rateLimiterMiddleware";

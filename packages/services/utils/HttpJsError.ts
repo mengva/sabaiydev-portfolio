@@ -1,6 +1,6 @@
 import { StatusCodeErrorDto } from "../../../apps/server/src/utils/constants";
 import type { ServerErrorDto } from "../types/constants";
-import { ErrorHandler } from "./HandleError";
+import { ErrorHandler } from "./handleError";
 
 export class HTTPError extends Error {
     data?: any;

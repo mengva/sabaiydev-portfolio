@@ -4,7 +4,7 @@ import type { Context as HonoContext } from "hono"
 import { HTTPException } from "hono/http-exception";
 import type { HTTPResponseError } from "hono/types";
 import type { StatusCodeErrorDto } from "./constants";
-import { ErrorHandler } from "@/api/packages/utils/HandleError";
+import { ErrorHandler } from "@/api/packages/utils/handleError";
 
 export class HandlerHonoError {
     public static onError(err: Error | HTTPResponseError, c: HonoContext) {

@@ -1,6 +1,6 @@
 import type { FileDto } from "../types/constants";
-import { ValidationSecureFileUploadServices } from "./SecureFile";
-import { ErrorHandler } from "./HandleError";
+import { ValidationSecureFileUploadServices } from "./secureFile";
+import { ErrorHandler } from "./handleError";
 import { validateMaxFileSize } from "./constants/variables";
 
 interface UploadFileDto {
