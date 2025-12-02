@@ -52,11 +52,21 @@ export class DOMPurifyServices {
         if (obj === null || obj === undefined || !obj) {
             return ''; // or '' depending on your needs
         }
+        
+        const keys: string[] = Object.keys(obj);
+        const imageFileKeys: string[] = ["fileName", "fileType", "fileData", "size"];
+        const isValidImageFile = Boolean(keys && keys.length && imageFileKeys.every(key => imageFileKeys.includes(key)) && keys.length === imageFileKeys.length);
+
+        if (isValidImageFile) {
+            return obj;
+        }
+        
         // Handle arrays
         if (Array.isArray(obj)) {
             return obj.map(item => this.domSanitizedObject(item));
         }
-        
+
+
         // Handle objects
         if (typeof obj === 'object') {
             const sanitized: Record<string, unknown> = {};

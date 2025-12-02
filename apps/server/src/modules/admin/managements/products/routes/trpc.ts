@@ -29,7 +29,7 @@ export const ProductManageTRPCRouter = router({
 
             const canBeAdd = await ValidationStaffRoleAndPerUtils.canBeAddAndEdit(body.addByStaffId);
 
-            if (canBeAdd.message !== "success") {
+            if (canBeAdd.error) {
                 throw HandlerTRPCError.TRPCErrorMessage(canBeAdd.message, canBeAdd.status);
             }
 
@@ -44,7 +44,7 @@ export const ProductManageTRPCRouter = router({
 
             const canBeAdd = await ValidationStaffRoleAndPerUtils.canBeAddAndEdit(body.addByStaffId);
 
-            if (canBeAdd.message !== "success") {
+            if (canBeAdd.error) {
                 throw HandlerTRPCError.TRPCErrorMessage(canBeAdd.message, canBeAdd.status);
             }
 
@@ -59,7 +59,7 @@ export const ProductManageTRPCRouter = router({
 
             const canBeEdit = await ValidationStaffRoleAndPerUtils.canBeAddAndEdit(body.updatedByStaffId);
 
-            if (canBeEdit.message !== "success") {
+            if (canBeEdit.error) {
                 throw HandlerTRPCError.TRPCErrorMessage(canBeEdit.message, canBeEdit.status);
             }
 
@@ -74,7 +74,7 @@ export const ProductManageTRPCRouter = router({
 
             const canBeEdit = await ValidationStaffRoleAndPerUtils.canBeAddAndEdit(body.updatedByStaffId);
 
-            if (canBeEdit.message !== "success") {
+            if (canBeEdit.error) {
                 throw HandlerTRPCError.TRPCErrorMessage(canBeEdit.message, canBeEdit.status);
             }
             return await ProductManageMutationServices.editDataById(body);
@@ -94,7 +94,7 @@ export const ProductManageTRPCRouter = router({
         try {
             const canBeRemove = await ValidationStaffRoleAndPerUtils.canBeRemove(input.removeByStaffId);
 
-            if (canBeRemove.message !== "success") {
+            if (canBeRemove.error) {
                 throw HandlerTRPCError.TRPCErrorMessage(canBeRemove.message, canBeRemove.status);
             }
             return await ProductManageMutationServices.removeOneById(input.targetProductId);

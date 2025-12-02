@@ -3,7 +3,7 @@ import { zodValidationFilter, type ZodValidationFilter } from "@/api/packages/va
 import { publicProcedure, router } from "@/api/server/trpc/procedures";
 import { NewsManageQueriesServices } from "../services/queries";
 import { HandlerTRPCError } from "@/api/utils/handleTRPCError";
-import { zodValidationAddOneNews, zodValidationAddOneNewsData, zodValidationEditOneNewsById, zodValidationEditOneNewsDataById, zodValidationGetOneNewsById, zodValidationRemoveOneNewsById, zodValidationSearchQueryNews, type ZodValidationAddOneNews, type ZodValidationEditOneNewsById, type ZodValidationEditOneNewsDataById, type ZodValidationSearchQueryNews } from "@/api/packages/validations/news";
+import { zodValidationAddOneNews, zodValidationAddOneNewsData, zodValidationEditOneNewsById, zodValidationEditOneNewsDataById, zodValidationGetOneNewsById, zodValidationRemoveOneNewsById, zodValidationRemoveOneNewsImageById, zodValidationSearchQueryNews, type ZodValidationAddOneNews, type ZodValidationEditOneNewsById, type ZodValidationEditOneNewsDataById, type ZodValidationSearchQueryNews } from "@/api/packages/validations/news";
 import { ValidationStaffRoleAndPerUtils } from "@/api/utils/validateStaffRoleAndPermission";
 import { NewsManageMutationServices } from "../services/mutation";
 
@@ -29,7 +29,7 @@ export const NewsManageTRPCRouter = router({
 
             const canBeAdd = await ValidationStaffRoleAndPerUtils.canBeAddAndEdit(body.staffId);
 
-            if (canBeAdd.message !== "success") {
+            if (canBeAdd.error) {
                 throw HandlerTRPCError.TRPCErrorMessage(canBeAdd.message, canBeAdd.status);
             }
 
@@ -44,7 +44,7 @@ export const NewsManageTRPCRouter = router({
 
             const canBeAdd = await ValidationStaffRoleAndPerUtils.canBeAddAndEdit(body.staffId);
 
-            if (canBeAdd.message !== "success") {
+            if (canBeAdd.error) {
                 throw HandlerTRPCError.TRPCErrorMessage(canBeAdd.message, canBeAdd.status);
             }
 
@@ -59,7 +59,7 @@ export const NewsManageTRPCRouter = router({
 
             const canBeEdit = await ValidationStaffRoleAndPerUtils.canBeAddAndEdit(body.updatedByStaffId);
 
-            if (canBeEdit.message !== "success") {
+            if (canBeEdit.error) {
                 throw HandlerTRPCError.TRPCErrorMessage(canBeEdit.message, canBeEdit.status);
             }
 
@@ -74,7 +74,7 @@ export const NewsManageTRPCRouter = router({
 
             const canBeEdit = await ValidationStaffRoleAndPerUtils.canBeAddAndEdit(body.updatedByStaffId);
 
-            if (canBeEdit.message !== "success") {
+            if (canBeEdit.error) {
                 throw HandlerTRPCError.TRPCErrorMessage(canBeEdit.message, canBeEdit.status);
             }
             return await NewsManageMutationServices.editDataById(body);
@@ -90,16 +90,28 @@ export const NewsManageTRPCRouter = router({
             throw HandlerTRPCError.TRPCError(error);
         }
     }),
-    removeOneById: publicProcedure.input(zodValidationRemoveOneNewsById).use(AuthTRPCMiddleware.authSession).mutation(async ({ ctx, input }) => {
+    removeOneById: publicProcedure.input(zodValidationRemoveOneNewsById).use(AuthTRPCMiddleware.authSession).mutation(async ({ input }) => {
         try {
             const canBeRemove = await ValidationStaffRoleAndPerUtils.canBeRemove(input.removeByStaffId);
 
-            if (canBeRemove.message !== "success") {
+            if (canBeRemove.error) {
                 throw HandlerTRPCError.TRPCErrorMessage(canBeRemove.message, canBeRemove.status);
             }
             return await NewsManageMutationServices.removeOneById(input.newsId);
         } catch (error) {
             throw HandlerTRPCError.TRPCError(error);
         }
+    }),
+    removeImageById: publicProcedure.input(zodValidationRemoveOneNewsImageById).use(AuthTRPCMiddleware.authSession).mutation(async ({ input }) => {
+        try {
+            const canBeRemove = await ValidationStaffRoleAndPerUtils.canBeRemove(input.removeByStaffId);
+
+            if (canBeRemove.error) {
+                throw HandlerTRPCError.TRPCErrorMessage(canBeRemove.message, canBeRemove.status);
+            }
+            return await NewsManageMutationServices.editImageById(input.imageId);
+        } catch (error) {
+            throw HandlerTRPCError.TRPCError(error);
+        }
     })
-})
+});

@@ -51,6 +51,11 @@ export const zodValidationRemoveOneNewsById = z.object({
     newsId: zodValidationUuid
 });
 
+export const zodValidationRemoveOneNewsImageById = z.object({
+    removeByStaffId: zodValidationUuid,
+    imageId: zodValidationUuid
+});
+
 export type ZodValidationGetOneNewsById = z.infer<typeof zodValidationGetOneNewsById>;
 export type ZodValidationSearchQueryNews = z.infer<typeof zodValidationSearchQueryNews>;
 
@@ -61,3 +66,4 @@ export type ZodValidationEditOneNewsById = z.infer<typeof zodValidationEditOneNe
 export type ZodValidationEditOneNewsDataById = z.infer<typeof zodValidationEditOneNewsDataById>;
 
 export type ZodValidationRemoveOneNewsById = z.infer<typeof zodValidationRemoveOneNewsById>;
+export type ZodValidationRemoveOneNewsImageById = z.infer<typeof zodValidationRemoveOneNewsImageById>;

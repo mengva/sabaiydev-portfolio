@@ -22,10 +22,21 @@ export class SecureSanitizeServices {
 
     public static sanitizedArrayOrObject(data: any): any {
         if (!data) return '';
+        
+        const keys: string[] = Object.keys(data);
+        const imageFileKeys: string[] = ["fileName", "fileType", "fileData", "size"];
+        const isValidImageFile = Boolean(keys && keys.length && imageFileKeys.every(key => imageFileKeys.includes(key)) && keys.length === imageFileKeys.length);
+
+        if (isValidImageFile) {
+            return data;
+        }
+
         if (Array.isArray(data) && data.length) {
             return data.map(item => this.sanitizedArrayOrObject(item));
         }
-        if (typeof data === 'object') {
+
+
+        if (typeof data === 'object' && Object.keys(data).length) {
             for (const key in data) {
                 if (Object.prototype.hasOwnProperty.call(data, key)) {
                     data[key] = this.sanitizedArrayOrObject(data[key]);
@@ -33,12 +44,14 @@ export class SecureSanitizeServices {
             }
             return data;
         }
+
         if (typeof data === "string") {
             // Check if it's a valid date string
             const str = this.sanitizedString(data, 1000);
             // if (!str) throw new Error("Not allowed");
             return str || '';
         }
+
         return data;
     }
 }

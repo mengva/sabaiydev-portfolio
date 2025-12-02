@@ -175,7 +175,7 @@ function EditOneProductPage() {
 
             const cleanFiles = await UploadFileServices.uploadFiles(arrayFiles);
 
-            if (cleanFiles.message !== "success" && cleanFiles.files.length === 0) {
+            if (cleanFiles.error) {
                 toast.error(cleanFiles.message);
                 return;
             }
@@ -264,7 +264,7 @@ function EditOneProductPage() {
                             </div>
 
                             {
-                                product?.images?.length > 0 && (
+                                product?.images && product?.images?.length > 0 && (
                                     <Card className="mt-4">
                                         <CardContent className="grid 2xl:grid-cols-8 xl:grid-cols-6 lg:grid-cols-4 sm:grid-cols-2 gap-4">
                                             {product.images.map((src, idx) => (
@@ -500,7 +500,7 @@ function EditOneProductPage() {
                             </div>
 
                             <Button type="submit" size="lg" className="cursor-pointer w-full" disabled={isPending}>
-                                {isPending ? "Editing Product" : "Edit Product"}
+                                {isPending ? "Editing..." : "Edit Product"}
                             </Button>
                         </form>
                     </Form>

@@ -6,11 +6,13 @@ import { validateMaxFileSize } from "./constants/variables";
 interface UploadFileDto {
     message: string;
     file: FileDto | undefined;
+    error: boolean;
 }
 
 interface UploadFilesDto {
     message: string;
     files: FileDto[];
+    error: boolean;
 }
 
 export class UploadFileServices {
@@ -39,7 +41,8 @@ export class UploadFileServices {
 
         if (!file) return {
             message: "File is required",
-            file: undefined
+            file: undefined,
+            error: true,
         };
 
         const validFile = file.size > validateMaxFileSize;
@@ -47,7 +50,8 @@ export class UploadFileServices {
         if (validFile) {
             return {
                 message: "Can't uploaded file size > 10MB",
-                file: undefined
+                file: undefined,
+                error: true,
             };
         }
 
@@ -57,14 +61,16 @@ export class UploadFileServices {
         if (validationFormattedFile.error) {
             return {
                 message: validationFormattedFile.error || "Invalid file formatted",
-                file: undefined
+                file: undefined,
+                error: true,
             };
         }
 
         const res = await this.uploadFileFunc(file);
         return {
-            message: "success",
-            file: res
+            message: "",
+            file: res,
+            error: false,
         }
     }
 
@@ -72,7 +78,8 @@ export class UploadFileServices {
         try {
             if (files.length === 0) return {
                 message: "Files is required",
-                files: []
+                files: [],
+                error: true,
             }
 
             // check max file size
@@ -89,13 +96,15 @@ export class UploadFileServices {
             if (findErrorMessage) {
                 return {
                     message: findErrorMessage.error || "Invalid file formatted",
-                    files: []
+                    files: [],
+                    error: true,
                 };
             }
 
             return {
-                message: "success",
-                files: resultFiles as FileDto[]
+                message: "",
+                files: resultFiles as FileDto[],
+                error: false
             }
         } catch (error) {
             const message = ErrorHandler.getErrorMessage(error);

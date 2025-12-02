@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     TableCell,
     TableRow,
@@ -52,6 +52,16 @@ function TableNewsItemComponent({ newsItem, index, filter, myData, refetch, setO
     const [myRole, setMyRole] = useState("VIEWER" as StaffRoleDto);
     const [translations, setTranslations] = useState({} as TranslationNewsDto);
 
+    useEffect(() => {
+        if (newsItem && myData) {
+            setMyRole(myData.role);
+            const translation = newsItem?.translationNews?.find(tr => tr.local === "en");
+            if (translation) {
+                setTranslations(translation);
+            }
+        }
+    }, [newsItem, myData]);
+
     // Mutations
     const onSuccess = (data: ServerResponseDto) => {
         if (data?.success) {
@@ -70,7 +80,7 @@ function TableNewsItemComponent({ newsItem, index, filter, myData, refetch, setO
 
     const handleDelete = () => {
         removeStaffByIdMutation.mutate({
-            targetNewsId: newsItem.id,
+            newsId: newsItem.id,
             removeByStaffId: myData.id,
         });
     };
@@ -97,7 +107,7 @@ function TableNewsItemComponent({ newsItem, index, filter, myData, refetch, setO
                             className={`h-9 w-9 rounded-full flex items-center justify-center text-sm font-medium ${index % 2 === 0 ? 'bg-muted' : 'bg-purple-600/50'
                                 }`}
                         >
-                            {getInitials(translations?.title ?? '')}
+                            {getInitials(translations.title ?? '')}
                         </div>
 
                         <div>

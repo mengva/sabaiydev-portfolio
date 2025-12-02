@@ -28,6 +28,7 @@ export class SecureSessionManagerServices {
         if (!sessionToken || !signature) {
             return {
                 message: "SessionToken and signature is required",
+                error: true
             }
         }
 
@@ -36,6 +37,7 @@ export class SecureSessionManagerServices {
         if (signature !== expectedSignature) {
             return {
                 message: "Invalid signatire",
+                error: true
             }
         }
 
@@ -47,26 +49,30 @@ export class SecureSessionManagerServices {
                 staff: true
             }
         });
-        if (!sessionInfo){
+        if (!sessionInfo) {
             return {
                 message: "Find not found",
+                error: true
             }
         }
         // check if sessionToken is valid but ipAddress or userAgent invalid
-        if (sessionInfo.userAgent !== userAgent){
+        if (sessionInfo.userAgent !== userAgent) {
             return {
                 message: "Invalid user system",
+                error: true
             }
         }
 
-        if(sessionInfo.staff.status !== "ACTIVE"){
+        if (sessionInfo.staff.status !== "ACTIVE") {
             return {
                 message: AuthEnumMessage.disabledAccount,
+                error: true
             }
         }
         return {
-            message: "success",
-            data: sessionInfo
+            message: "",
+            data: sessionInfo,
+            error: false
         };
     }
 }

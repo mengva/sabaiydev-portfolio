@@ -75,7 +75,7 @@ export class SecureFileUploadServices {
 
             const resultFiles = await Promise.all(
                 files.map(async (file) => {
-                    return await this.validationFileAndUploadFunc(file, this.uploadImageCloudinaryFunc);
+                    return await this.validationFileAndUploadFunc(file, this.uploadCloudinaryImageFunc);
                 })
             );
             return resultFiles;
@@ -88,7 +88,7 @@ export class SecureFileUploadServices {
         try {
             if (!file) return undefined;
 
-            const resultFile = await this.validationFileAndUploadFunc(file, this.uploadImageCloudinaryFunc);
+            const resultFile = await this.validationFileAndUploadFunc(file, this.uploadCloudinaryImageFunc);
             return resultFile;
         } catch (error) {
             throw HandlerTRPCError.TRPCError(error);
@@ -99,7 +99,7 @@ export class SecureFileUploadServices {
         try {
             if (!file) return undefined;
 
-            const resultFile = await this.validationFileAndUploadFunc(file, this.uploadPDFFileCloudinaryFunc);
+            const resultFile = await this.validationFileAndUploadFunc(file, this.uploadCloudinaryPDFFileFunc);
             return resultFile;
         } catch (error) {
             throw HandlerTRPCError.TRPCError(error);
@@ -112,7 +112,7 @@ export class SecureFileUploadServices {
 
             const resultFiles = await Promise.all(
                 files.map(async (file) => {
-                    return await this.validationFileAndUploadFunc(file, this.uploadPDFFileCloudinaryFunc);
+                    return await this.validationFileAndUploadFunc(file, this.uploadCloudinaryPDFFileFunc);
                 })
             );
             return resultFiles;
@@ -121,7 +121,7 @@ export class SecureFileUploadServices {
         }
     }
 
-    public static async uploadImageCloudinaryFunc(file: FileDto) {
+    public static async uploadCloudinaryImageFunc(file: FileDto) {
         const result = await cloudinary.uploader.upload(file.fileData, {
             folder: 'portfolio-sabaiydev',
             public_id: `${Date.now()}-${file.fileName.split('.')[0]}`,
@@ -133,7 +133,7 @@ export class SecureFileUploadServices {
         return result;
     }
 
-    public static async uploadPDFFileCloudinaryFunc(file: FileDto) {
+    public static async uploadCloudinaryPDFFileFunc(file: FileDto) {
         const result = await cloudinary.uploader.upload(file.fileData, {
             folder: 'portfolio-sabaiydev',
             public_id: `${Date.now()}-${file.fileName.split('.')[0]}`,

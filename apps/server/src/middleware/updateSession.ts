@@ -6,6 +6,7 @@ import { eq } from "drizzle-orm";
 import { createMiddleware } from "hono/factory";
 import { sessions } from "../modules/admin/auth/entities";
 import { HandlerTRPCError } from "../utils/handleTRPCError";
+
 export const updatedSession = createMiddleware(async (c, next) => {
     try {
         const oneDay = 24 * 60 * 60 * 1000;
@@ -16,7 +17,7 @@ export const updatedSession = createMiddleware(async (c, next) => {
             return;
         }
         const result = await SecureSessionManagerServices.verifySession(sessionToken, c);
-        if (result?.message !== "success") {
+        if (result.error) {
             throw HandlerTRPCError.TRPCErrorMessage(result?.message, "FORBIDDEN");
         }
         const session = result.data;

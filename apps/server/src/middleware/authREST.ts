@@ -21,7 +21,7 @@ export class AuthRestMiddleware {
             throw new HTTPException(401, { message: AuthEnumMessage.unauthorized });
         }
         const result = await SecureSessionManagerServices.verifySession(sessionToken, c);
-        if (result?.message !== "success") {
+        if (result.error) {
             throw new HTTPException(403, { message: result.message });
         }
         const session = result.data;
@@ -60,7 +60,7 @@ export class AuthRestMiddleware {
             return await next();
         }
         const result = await SecureSessionManagerServices.verifySession(sessionToken, c);
-        if (result?.message !== "success") {
+        if (result.error) {
             throw new HTTPException(403, { message: result.message });
         }
         const session = result.data;

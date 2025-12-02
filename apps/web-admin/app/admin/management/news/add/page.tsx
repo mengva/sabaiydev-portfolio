@@ -24,6 +24,8 @@ import { ErrorHandler } from "@/admin/packages/utils/HandleError";
 import { ZodValidationFiles } from "@/admin/packages/validations/constants";
 import { zodValidationAddOneNews, ZodValidationAddOneNews } from '@/admin/packages/validations/news';
 import { NewsCategoryArray, NewsStatusArray } from '@/admin/packages/utils/constants/variables/news';
+import trpc from '@/app/trpc/client';
+import { ServerResponseDto } from '@/admin/packages/types/constants';
 
 function NewsManageAddFormPage() {
 
@@ -65,11 +67,51 @@ function NewsManageAddFormPage() {
         },
     });
 
+    const onResetForm = () => {
+        setImageFiles([]);
+        form.reset({
+            staffId: myData.id ?? "",
+            status: "PUBLISHED",
+            category: "CLOUD",
+            imageFiles: [],
+            translations: [
+                { title: "", local: "en", description: "", content: "" },
+                { title: "", local: "lo", description: "", content: "" },
+                { title: "", local: "th", description: "", content: "" },
+            ],
+        });
+    }
+
+    const addMutation = {
+        onSuccess: (data: ServerResponseDto) => {
+            if (data && data.success) {
+                onResetForm();
+                toast.success(data.message);
+            }
+        },
+        onError: (error: Error) => {
+            toast.error(error.message);
+        }
+    }
+
+    const addOneDataMutation = trpc.app.admin.manage.news.addOneData.useMutation(addMutation);
+
+    const addOneMutation = trpc.app.admin.manage.news.addOne.useMutation(addMutation);
+
     const onSubmit = (data: ZodValidationAddOneNews) => {
+        // check data is empty
         if (!data) return;
 
-        console.log("data news", data);
-    }
+        const { imageFiles, ...newData } = data;
+
+        if (!imageFiles.length || imageFiles.length === 0) {
+            addOneDataMutation.mutate(newData);
+            return;
+        }
+
+        addOneMutation.mutate(data);
+    };
+
 
     const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         try {
@@ -80,7 +122,7 @@ function NewsManageAddFormPage() {
 
             const cleanFiles = await UploadFileServices.uploadFiles(arrayFiles);
 
-            if (cleanFiles.message !== "success" && cleanFiles.files.length === 0) {
+            if (cleanFiles.error) {
                 toast.error(cleanFiles.message);
                 return;
             }
@@ -99,7 +141,7 @@ function NewsManageAddFormPage() {
         form.setValue("imageFiles", currentFiles);
     };
 
-    const isLoading = false;
+    const isLoading = addOneDataMutation.isPending || addOneMutation.isPending;
 
     return (
         <>
@@ -151,22 +193,25 @@ function NewsManageAddFormPage() {
 
                                 {
                                     imageFiles.length > 0 && (
-                                        <Card className="mt-4">
-                                            <CardContent className="grid 2xl:grid-cols-8 xl:grid-cols-6 lg:grid-cols-4 sm:grid-cols-2 gap-4">
-                                                {imageFiles.map((src, idx) => (
-                                                    <div key={idx} className="relative group">
-                                                        <img src={src.fileData} alt="preview" className="w-full aspect-5/4 object-cover rounded-lg border" />
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => removeImage(idx)}
-                                                            className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full transition cursor-pointer"
-                                                        >
-                                                            <HiMiniXMark className="w-4 h-4" />
-                                                        </button>
-                                                    </div>
-                                                ))}
-                                            </CardContent>
-                                        </Card>
+                                        <div className="mt-4">
+                                            <Label>Selected Images</Label>
+                                            <Card className="mt-4">
+                                                <CardContent className="grid 2xl:grid-cols-8 xl:grid-cols-6 lg:grid-cols-4 sm:grid-cols-2 gap-4">
+                                                    {imageFiles.map((src, idx) => (
+                                                        <div key={idx} className="relative group">
+                                                            <img src={src.fileData} alt="preview" className="w-full aspect-5/4 object-cover rounded-lg border" />
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => removeImage(idx)}
+                                                                className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full transition cursor-pointer"
+                                                            >
+                                                                <HiMiniXMark className="w-4 h-4" />
+                                                            </button>
+                                                        </div>
+                                                    ))}
+                                                </CardContent>
+                                            </Card>
+                                        </div>
                                     )
                                 }
                             </div>

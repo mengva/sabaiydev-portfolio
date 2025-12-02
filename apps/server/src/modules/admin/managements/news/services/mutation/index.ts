@@ -2,7 +2,7 @@ import db from "@/api/config/db";
 import { getHTTPError, HTTPErrorMessage } from "@/api/packages/utils/HttpJsError";
 import { HandlerSuccess } from "@/api/utils/handleSuccess";
 import { count, desc, eq } from "drizzle-orm";
-import { news, translationNews } from "../../entities";
+import { news, newsImages, translationNews } from "../../entities";
 import type { ZodValidationAddOneNews, ZodValidationAddOneNewsData, ZodValidationEditOneNewsById, ZodValidationEditOneNewsDataById, ZodValidationSearchQueryNews } from "@/api/packages/validations/news";
 import { NewsManageServices } from "../../utils/news";
 import { SecureFileUploadServices } from "@/api/utils/secureFileUpload";
@@ -58,8 +58,21 @@ export class NewsManageMutationServices {
         }
     }
 
-    public static async editImageById() {
+    public static async editImageById(imageId: string) {
         try {
+            // implement later if needed
+            const imageData = await db.query.newsImages.findFirst({
+                where: eq(news.id, imageId)
+            });
+
+            if (!imageData) throw new HTTPErrorMessage("Find news image not found", "404");
+
+            await db.transaction(async tx => {
+                await tx.delete(newsImages).where(eq(newsImages.id, imageId));
+                await SecureFileUploadServices.destoryCloudinaryFunc(imageData.cloudinaryId);
+            });
+
+            return HandlerSuccess.success("Removed news image by id successfully");
 
         } catch (error) {
             throw getHTTPError(error);

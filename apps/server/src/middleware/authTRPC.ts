@@ -20,7 +20,7 @@ export class AuthTRPCMiddleware {
         const sessionToken = c.get("getCookie").get(adminSessionTokenName) || authHeader?.replace("Bearer ", "");
         if (!sessionToken || sessionToken === undefined) throw HandlerTRPCError.TRPCErrorMessage(AuthEnumMessage.unauthorized, "UNAUTHORIZED");
         const result = await SecureSessionManagerServices.verifySession(sessionToken, c);
-        if (result?.message !== "success") {
+        if (result.error) {
             throw HandlerTRPCError.TRPCErrorMessage(result?.message, "FORBIDDEN");
         }
         const session = result.data;
@@ -55,7 +55,7 @@ export class AuthTRPCMiddleware {
         const sessionToken = c.get("getCookie").get(adminSessionTokenName) || authHeader?.replace("Bearer ", "");
         if (sessionToken) {
             const result = await SecureSessionManagerServices.verifySession(sessionToken, c);
-            if (result?.message !== "success") {
+            if (result.error) {
                 throw HandlerTRPCError.TRPCErrorMessage(result?.message, "FORBIDDEN");
             }
             const session = result.data;

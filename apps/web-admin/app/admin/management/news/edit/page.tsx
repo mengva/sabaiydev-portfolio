@@ -1,5 +1,6 @@
-'use client';
+'use client'
 
+import React, { useEffect } from 'react'
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useContext, useRef, useState } from "react";
@@ -13,8 +14,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@work
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@workspace/ui/components/tabs";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@workspace/ui/components/form";
 import { HiMiniXMark } from "react-icons/hi2";
-import { zodValidationAddOneProduct, ZodValidationAddOneProduct } from "@/admin/packages/validations/product";
-import { ProductCategoryArray, ProductStatusArray } from "@/admin/packages/utils/constants/variables/product";
 import { MyDataContext } from "@/app/admin/layout";
 import { BreadcrumbComponent } from "@/components/breadcrumb";
 import Link from "next/link";
@@ -22,66 +21,95 @@ import { AllowedImageFileType, LocalArray } from "@/admin/packages/utils/constan
 import { UploadFileServices } from "@/admin/packages/utils/ClientUploadFile";
 import toast from "react-hot-toast";
 import { ErrorHandler } from "@/admin/packages/utils/HandleError";
-import { ZodValidationFiles } from "@/admin/packages/validations/constants";
-import trpc from "@/app/trpc/client";
-import { ServerResponseDto } from "@/admin/packages/types/constants";
+import { ZodValidationFiles, zodValidationUuid } from "@/admin/packages/validations/constants";
+import { NewsCategoryArray, NewsStatusArray } from '@/admin/packages/utils/constants/variables/news';
+import trpc from '@/app/trpc/client';
+import { ServerResponseDto } from '@/admin/packages/types/constants';
+import { useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
+import { zodValidationEditOneNewsById, ZodValidationEditOneNewsById } from '@/admin/packages/validations/news';
+import LoadingComponent from '@/components/loading';
+import { NewsSchema } from '@/admin/packages/schema/news';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@workspace/ui/components/dialog';
+import { set } from 'zod/v4';
 
-export default function ProductManageAddFormPage() {
+function NewsManageAddFormPage() {
 
     const myDataContext = useContext(MyDataContext);
     if (!myDataContext) return null;
 
+    const searchParams = useSearchParams();
+
     const [myData, setMyData] = useState(myDataContext.data);
     const inputFiles = useRef<HTMLInputElement | null>(null);
     const [imageFiles, setImageFiles] = useState([] as ZodValidationFiles);
+    const [newsId, setNewsId] = useState<string>("");
+    const [newsData, setNewsData] = useState<NewsSchema | null>(null);
+    const router = useRouter();
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [removeImageId, setRemoveImageId] = useState<string | null>(null);
 
-    const form = useForm<ZodValidationAddOneProduct>({
-        resolver: zodResolver(zodValidationAddOneProduct),
+    const form = useForm<ZodValidationEditOneNewsById>({
+        resolver: zodResolver(zodValidationEditOneNewsById),
         defaultValues: {
-            addByStaffId: myData.id ?? "",
-            technologies: ["react", "nextjs", "tailwind"],
-            status: "ACTIVE",
-            category: "MEDIA",
+            updatedByStaffId: myData.id ?? "",
+            newsId: "",
+            status: "PUBLISHED",
+            category: "CLOUD",
             // demo image object - cast to match your ZodValidationFiles type
             imageFiles: [],
             translations: [
-                {
-                    name: "Demo Product (EN)",
-                    local: "en",
-                    description: "Short demo description in English.",
-                    longDescription: "This is a longer demo description for the product in English.",
-                    features: ["Fast performance", "Responsive design"],
-                },
-                {
-                    name: "ສິນຄ້າຕົວຢ່າງ (LO)",
-                    local: "lo",
-                    description: "ຄຳອະທິບາຍສັ້ນໃນພາສາລາວ",
-                    longDescription: "ຄຳອະທິບາຍຍາວເພີ່ມເຕີມ",
-                    features: ["ປວດໄວ", "ອອບຊັ່ນຮອບດ້ວຍ"],
-                },
-                {
-                    name: "สินค้าเดโม (TH)",
-                    local: "th",
-                    description: "คำอธิบายสั้น ๆ เป็นภาษาไทย",
-                    longDescription: "คำอธิบายยาวสำหรับผลิตภัณฑ์ตัวอย่างเป็นภาษาไทย",
-                    features: ["ประสิทธิภาพสูง", "ออกแบบตอบสนอง"],
-                },
+                { title: "", local: "en", description: "", content: "" },
+                { title: "", local: "lo", description: "", content: "" },
+                { title: "", local: "th", description: "", content: "" },
             ],
         },
     });
 
+    // Get newsId from searchParams
+    useEffect(() => {
+        const id = searchParams.get("id");
+        if (id) {
+            const validationId = zodValidationUuid.safeParse(id);
+            if (!validationId?.success) {
+                router.push("/admin/management/news");
+                return;
+            }
+            setNewsId(id);
+        }
+    }, [searchParams]);
+
+    // Update myData from context
+    useEffect(() => {
+        if (myDataContext?.data) {
+            setMyData(myDataContext.data);
+        }
+    }, [myDataContext]);
+
+    // Fetch product - moved after all useState calls
+    const {
+        data: response,
+        isLoading,
+        refetch,
+        isRefetching,
+    } = trpc.app.admin.manage.news.getOne.useQuery(
+        { newsId: newsId || "" },
+        {
+            enabled: !!newsId,
+            refetchOnWindowFocus: false,
+            keepPreviousData: false,
+        },
+    );
+
     const onResetForm = () => {
-        setImageFiles([]);
         form.reset({
-            addByStaffId: myData.id ?? "",
-            technologies: [],
-            status: "ACTIVE",
-            category: "MEDIA",
+            status: "PUBLISHED",
+            category: "CLOUD",
             imageFiles: [],
             translations: [
-                { name: "", local: "en", description: "", longDescription: "", features: [""] },
-                { name: "", local: "lo", description: "", longDescription: "", features: [""] },
-                { name: "", local: "th", description: "", longDescription: "", features: [""] },
+                { title: "", local: "en", description: "", content: "" },
+                { title: "", local: "lo", description: "", content: "" },
+                { title: "", local: "th", description: "", content: "" },
             ],
         });
     }
@@ -98,22 +126,64 @@ export default function ProductManageAddFormPage() {
         }
     }
 
-    const addOneDataMutation = trpc.app.admin.manage.product.addOneData.useMutation(addMutation);
+    const editOneDataMutation = trpc.app.admin.manage.news.editDataById.useMutation(addMutation);
 
-    const addOneMutation = trpc.app.admin.manage.product.addOne.useMutation(addMutation);
+    const editOneMutation = trpc.app.admin.manage.news.editById.useMutation(addMutation);
 
-    const onSubmit = (data: ZodValidationAddOneProduct) => {
+    const deleteImageMutation = trpc.app.admin.manage.news.removeImageById.useMutation();
+
+    // Load product data into form when response arrives
+    useEffect(() => {
+        if (response?.data && myData && form && newsId) {
+            const newsResultData = response.data as NewsSchema;
+            setNewsData(newsResultData);
+            const translations = newsResultData.translationNews.map(tr => ({
+                title: tr.title,
+                local: tr.local,
+                description: tr.description,
+                content: tr.content,
+            }));
+            form.reset({
+                status: newsResultData.status,
+                category: newsResultData.category,
+                translations,
+                imageFiles: [],
+                newsId,
+                updatedByStaffId: myData.id || '',
+            } as ZodValidationEditOneNewsById);// Force Select components to update after reset
+
+            setTimeout(() => {
+                form.setValue("status", newsResultData.status, { shouldDirty: true });
+                form.setValue("category", newsResultData.category, { shouldDirty: true });
+            }, 0);
+        }
+    }, [response?.data, myData?.id, form, newsId]);
+
+    // Now we can have early returns - all hooks are already called
+    if (!myDataContext || !myDataContext.data) {
+        return <LoadingComponent />;
+    }
+
+    if (!newsId || !myData) {
+        return <LoadingComponent />;
+    }
+
+    if (isLoading && !response) {
+        return <LoadingComponent />;
+    }
+
+    const onSubmit = (data: ZodValidationEditOneNewsById) => {
         // check data is empty
         if (!data) return;
 
         const { imageFiles, ...newData } = data;
 
         if (!imageFiles.length || imageFiles.length === 0) {
-            addOneDataMutation.mutate(newData);
+            editOneDataMutation.mutate(newData);
             return;
         }
 
-        addOneMutation.mutate(data);
+        editOneMutation.mutate(data);
     };
 
     const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -144,26 +214,42 @@ export default function ProductManageAddFormPage() {
         form.setValue("imageFiles", currentFiles);
     };
 
-    const isLoading = Boolean(addOneMutation.isPending || addOneDataMutation.isPending);
+    const handleRemoveImage = async () => {
+        if (!removeImageId || !myData?.id) return;
+        try {
+            const response = await deleteImageMutation.mutateAsync({ imageId: removeImageId, removeByStaffId: myData.id || '' });
+            if (response && response.success) {
+                toast.success(response.message);
+                refetch();
+                setRemoveImageId(null);
+                setIsDialogOpen(false);
+            }
+        } catch (error) {
+            const message = ErrorHandler.getErrorMessage(error);
+            toast.error(message || "Failed to remove image");
+        }
+    };
+
+    const isLoadingEdit = editOneDataMutation.isPending || editOneMutation.isPending;
 
     return (
         <>
             <div className='mb-4 flex items-center justify-start gap-x-4'>
-                <Link href={'/admin/management/products'}>
+                <Link href={'/admin/management/news'}>
                     <Button className="cursor-pointer">
                         <ArrowLeft />
                     </Button>
                 </Link>
-                <BreadcrumbComponent path='/admin/management/products' title="Add" linkTitle="Product Management" />
+                <BreadcrumbComponent path='/admin/management/news' title="Edit" linkTitle='News Management' />
             </div>
             <Card>
                 <CardHeader>
                     <CardTitle className="text-2xl flex items-center gap-2">
                         <Globe className="w-6 h-6" />
-                        Add New Product
+                        Edit News
                     </CardTitle>
                     <CardDescription>
-                        Fill in product details with multilingual support
+                        Fill in News details with multilingual support
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -173,10 +259,7 @@ export default function ProductManageAddFormPage() {
                             {/* Image Upload */}
                             <div>
                                 <div>
-                                    {/* <div className="sm:mt-6">
-                                        <Button type="button" variant={"destructive"} onClick={() => form.setValue("imageFiles", [])} className="cursor-pointer w-full">Delete All File Select</Button>
-                                    </div> */}
-                                    <Label>Product Images</Label>
+                                    <Label>News Images</Label>
                                     <Card className="mt-2 grid place-items-center">
                                         <CardContent onClick={() => inputFiles.current?.click()} className="lg:min-w-xl w-[80%] border-dotted border-4 p-4 dark:border-slate-600 cursor-pointer h-48 grid place-items-center rounded-xl">
                                             <Input
@@ -217,6 +300,56 @@ export default function ProductManageAddFormPage() {
                                         </div>
                                     )
                                 }
+
+                                {
+                                    newsData?.images && newsData?.images?.length > 0 && (
+                                        <div className="mt-4">
+                                            <Label>Existing Images</Label>
+                                            <Card className="mt-4">
+                                                <CardContent className="grid 2xl:grid-cols-8 xl:grid-cols-6 lg:grid-cols-4 sm:grid-cols-2 gap-4">
+                                                    {newsData.images.map((image, idx) => (
+                                                        <div key={idx} className="relative group">
+                                                            <img src={image.imageUrl} alt="preview" className="w-full aspect-5/4 object-cover rounded-lg border" />
+                                                            <button
+                                                                type="button"
+                                                                className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full transition cursor-pointer"
+                                                                onClick={() => {
+                                                                    setIsDialogOpen(true);
+                                                                    setRemoveImageId(image.id);
+                                                                }}
+                                                            >
+                                                                <HiMiniXMark className="w-4 h-4" />
+                                                            </button>
+                                                        </div>
+                                                    ))}
+                                                </CardContent>
+                                            </Card>
+                                        </div>
+                                    )
+                                }
+
+                                {/* Confirmation Dialog */}
+                                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                                    <DialogContent className="sm:max-w-md">
+                                        <DialogHeader>
+                                            <DialogTitle>Remove Image</DialogTitle>
+                                            <DialogDescription>
+                                                Are you sure you want to remove this image?
+                                            </DialogDescription>
+                                        </DialogHeader>
+                                        <DialogFooter className="flex gap-2">
+                                            <Button className='cursor-pointer' variant="outline" onClick={() => {
+                                                setIsDialogOpen(false);
+                                                setRemoveImageId(null);
+                                            }}>
+                                                Cancel
+                                            </Button>
+                                            <Button className='cursor-pointer' variant="destructive" onClick={handleRemoveImage} disabled={deleteImageMutation.isPending}>
+                                                {deleteImageMutation.isPending ? "Removing..." : "Remove Image"}
+                                            </Button>
+                                        </DialogFooter>
+                                    </DialogContent>
+                                </Dialog>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -236,7 +369,7 @@ export default function ProductManageAddFormPage() {
                                                 </FormControl>
                                                 <SelectContent>
                                                     {
-                                                        ProductStatusArray.map((status, index) => (
+                                                        NewsStatusArray.map((status, index) => (
                                                             <SelectItem key={index} value={status}>{status}</SelectItem>
                                                         ))
                                                     }
@@ -262,7 +395,7 @@ export default function ProductManageAddFormPage() {
                                                 </FormControl>
                                                 <SelectContent>
                                                     {
-                                                        ProductCategoryArray.map((category, index) => (
+                                                        NewsCategoryArray.map((category, index) => (
                                                             <SelectItem key={index} value={category}>{category}</SelectItem>
                                                         ))
                                                     }
@@ -273,62 +406,6 @@ export default function ProductManageAddFormPage() {
                                     )}
                                 />
                             </div>
-
-                            {/* Technologies Multi-Select */}
-                            {/* Technologies Dynamic List */}
-                            <div>
-                                <FormLabel className="text-lg font-semibold">Technologies Used</FormLabel>
-
-                                {form.watch("technologies")?.map((_, techIdx) => (
-                                    <div key={techIdx} className="flex gap-2 mt-2">
-                                        <FormField
-                                            control={form.control}
-                                            name={`technologies.${techIdx}`}
-                                            render={({ field }) => (
-                                                <FormItem className="flex-1">
-                                                    <FormControl>
-                                                        <Input placeholder="e.g. React" {...field} />
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-
-                                        <Button
-                                            type="button"
-                                            variant="destructive"
-                                            className="cursor-pointer"
-                                            size="icon"
-                                            onClick={() => {
-                                                const techs = form.getValues("technologies").filter((_, i) => i !== techIdx);
-                                                form.setValue(
-                                                    "technologies",
-                                                    techs as string[] | any
-                                                );
-                                            }}
-                                        >
-                                            <Trash2 className="w-4 h-4" />
-                                        </Button>
-                                    </div>
-                                ))}
-
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    size="sm"
-                                    className="mt-3"
-                                    onClick={() => {
-                                        form.setValue("technologies", [
-                                            ...form.getValues("technologies"),
-                                            ""
-                                        ]);
-                                    }}
-                                >
-                                    <Plus className="w-4 h-4 mr-2" /> Add Technology
-                                </Button>
-                            </div>
-
-
 
                             {/* Translations Tabs */}
                             <div>
@@ -344,12 +421,12 @@ export default function ProductManageAddFormPage() {
                                         <TabsContent key={lang} value={lang} className="space-y-4 mt-6">
                                             <FormField
                                                 control={form.control}
-                                                name={`translations.${langIdx}.name`}
+                                                name={`translations.${langIdx}.title`}
                                                 render={({ field }) => (
                                                     <FormItem>
-                                                        <FormLabel>Product Name ({lang.toUpperCase()})</FormLabel>
+                                                        <FormLabel>News Title ({lang.toUpperCase()})</FormLabel>
                                                         <FormControl>
-                                                            <Input placeholder={`Product name in ${lang}`} {...field} />
+                                                            <Input placeholder={`News title in ${lang}`} {...field} />
                                                         </FormControl>
                                                         <FormMessage />
                                                     </FormItem>
@@ -361,9 +438,9 @@ export default function ProductManageAddFormPage() {
                                                 name={`translations.${langIdx}.description`}
                                                 render={({ field }) => (
                                                     <FormItem>
-                                                        <FormLabel>Short Description</FormLabel>
+                                                        <FormLabel>Description</FormLabel>
                                                         <FormControl>
-                                                            <Textarea rows={3} placeholder="Brief description..." {...field} />
+                                                            <Textarea rows={3} placeholder="description..." {...field} />
                                                         </FormControl>
                                                         <FormMessage />
                                                     </FormItem>
@@ -372,79 +449,32 @@ export default function ProductManageAddFormPage() {
 
                                             <FormField
                                                 control={form.control}
-                                                name={`translations.${langIdx}.longDescription`}
+                                                name={`translations.${langIdx}.content`}
                                                 render={({ field }) => (
                                                     <FormItem>
-                                                        <FormLabel>Detailed Description</FormLabel>
+                                                        <FormLabel>Content</FormLabel>
                                                         <FormControl>
-                                                            <Textarea rows={6} placeholder="Full product details..." {...field} />
+                                                            <Textarea rows={6} placeholder="Full news content..." {...field} />
                                                         </FormControl>
                                                         <FormMessage />
                                                     </FormItem>
                                                 )}
                                             />
 
-                                            {/* Features Array */}
-                                            <div>
-                                                <FormLabel>Key Features</FormLabel>
-                                                {form.watch(`translations.${langIdx}.features`)?.map((_, featureIdx) => (
-                                                    <div key={featureIdx} className="flex gap-2 mt-2">
-                                                        <FormField
-                                                            control={form.control}
-                                                            name={`translations.${langIdx}.features.${featureIdx}`}
-                                                            render={({ field }) => (
-                                                                <FormItem className="flex-1">
-                                                                    <FormControl>
-                                                                        <Input placeholder="e.g. Fast performance" {...field} />
-                                                                    </FormControl>
-                                                                    <FormMessage />
-                                                                </FormItem>
-                                                            )}
-                                                        />
-                                                        <Button
-                                                            type="button"
-                                                            variant="destructive"
-                                                            className="cursor-pointer"
-                                                            size="icon"
-                                                            onClick={() => {
-                                                                const features = form.getValues(`translations.${langIdx}.features`);
-                                                                form.setValue(
-                                                                    `translations.${langIdx}.features`,
-                                                                    features.filter((_: any, i: number) => i !== featureIdx)
-                                                                );
-                                                            }}
-                                                        >
-                                                            <Trash2 className="w-4 h-4" />
-                                                        </Button>
-                                                    </div>
-                                                ))}
-                                                <Button
-                                                    type="button"
-                                                    variant="outline"
-                                                    size="sm"
-                                                    className="mt-3"
-                                                    onClick={() => {
-                                                        form.setValue(`translations.${langIdx}.features`, [
-                                                            ...form.getValues(`translations.${langIdx}.features`),
-                                                            "",
-                                                        ]);
-                                                    }}
-                                                >
-                                                    <Plus className="w-4 h-4 mr-2" /> Add Feature
-                                                </Button>
-                                            </div>
                                         </TabsContent>
                                     ))}
                                 </Tabs>
                             </div>
 
-                            <Button type="submit" size="lg" className="cursor-pointer w-full" disabled={isLoading}>
-                                {isLoading ? "Adding Product..." : "Add Product"}
+                            <Button type="submit" size="lg" className="cursor-pointer w-full" disabled={isLoadingEdit}>
+                                {isLoadingEdit ? "Editing..." : "Edit News"}
                             </Button>
                         </form>
                     </Form>
                 </CardContent>
             </Card>
         </>
-    );
+    )
 }
+
+export default NewsManageAddFormPage;

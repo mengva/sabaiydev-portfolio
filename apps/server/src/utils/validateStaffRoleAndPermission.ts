@@ -6,7 +6,8 @@ import { eq } from "drizzle-orm";
 
 interface StaffErrorMessageDto {
     message: string;
-    status: TRPCCodeError
+    status: TRPCCodeError;
+    error: boolean;
 }
 
 // using by (product, news, faq, career and product) manage
@@ -14,17 +15,20 @@ export class ValidationStaffRoleAndPerUtils {
 
     public static userNotFound: StaffErrorMessageDto = {
         message: "Find user not found",
-        status: "NOT_FOUND"
+        status: "NOT_FOUND",
+        error: true
     }
 
     public static disabledAccount: StaffErrorMessageDto = {
         message: "Your account has been disabled",
-        status: "FORBIDDEN"
+        status: "FORBIDDEN",
+        error: true
     }
 
     public static success: StaffErrorMessageDto = {
-        message: "success",
-        status: "BAD_REQUEST"
+        message: "",
+        status: "BAD_REQUEST",
+        error: false
     }
 
     public static async canBeRemove(removeByStaffId: string): Promise<StaffErrorMessageDto> {
@@ -49,7 +53,8 @@ export class ValidationStaffRoleAndPerUtils {
             if (!isCanBeRemove) {
                 return {
                     message: "You have no an permissions to remove",
-                    status: "FORBIDDEN"
+                    status: "FORBIDDEN",
+                    error: true
                 }
             }
             return this.success;
@@ -80,7 +85,8 @@ export class ValidationStaffRoleAndPerUtils {
             if (!isCanBeAddAndEdit) {
                 return {
                     message: "You have no an permissions to add or edit",
-                    status: "FORBIDDEN"
+                    status: "FORBIDDEN",
+                    error: true
                 }
             }
             return this.success;
