@@ -51,6 +51,11 @@ export const zodValidationRemoveOneProductById = z.object({
     removeByStaffId: zodValidationUuid
 });
 
+export const zodValidationRemoveOneProductImageById = z.object({
+    imageId: zodValidationUuid,
+    removeByStaffId: zodValidationUuid
+});
+
 export const zodValidationEditOneProduct = zodValidationEditOneProductData.extend({
     imageFiles: zodValidationFiles
 });
@@ -70,4 +75,5 @@ export type ZodValidationAddOneProductData = z.infer<typeof zodValidationAddOneP
 export type ZodValidationEditOneProductData = z.infer<typeof zodValidationEditOneProductData>;
 export type ZodValidationEditOneProduct = z.infer<typeof zodValidationEditOneProduct>;
 export type ZodValidationRemoveOneProductById = z.infer<typeof zodValidationRemoveOneProductById>;
+export type ZodValidationRemoveOneProductImageById = z.infer<typeof zodValidationRemoveOneProductImageById>;
 export type ZodValidationSearchQueryProduct = z.infer<typeof zodValidationSearchQueryProduct>;

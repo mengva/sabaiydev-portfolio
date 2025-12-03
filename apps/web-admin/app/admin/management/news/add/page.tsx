@@ -4,7 +4,7 @@ import React from 'react'
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useContext, useRef, useState } from "react";
-import { Plus, Trash2, Globe, ArrowLeft, Upload } from "lucide-react";
+import { Globe, ArrowLeft, Upload } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";

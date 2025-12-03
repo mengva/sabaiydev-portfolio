@@ -439,7 +439,7 @@ export default function ProductManageAddFormPage() {
                             </div>
 
                             <Button type="submit" size="lg" className="cursor-pointer w-full" disabled={isLoading}>
-                                {isLoading ? "Adding Product..." : "Add Product"}
+                                {isLoading ? "Adding..." : "Add Product"}
                             </Button>
                         </form>
                     </Form>

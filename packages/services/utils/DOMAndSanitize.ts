@@ -1,5 +1,5 @@
-import { DOMPurifyServices } from "./DOMPurify";
-import { SecureSanitizeServices } from "./Sanitize";
+import { DOMPurifyServices } from "./domPurify";
+import { SecureSanitizeServices } from "./sanitize";
 
 export class DOMAndSanitizedServices {
     public static domAndSanitizeObject(obj: unknown) {

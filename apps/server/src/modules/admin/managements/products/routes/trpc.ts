@@ -1,5 +1,5 @@
 import { AuthTRPCMiddleware } from "@/api/middleware/authTRPC";
-import { zodValidationAddOneProduct, zodValidationAddOneProductData, zodValidationGetOneProductById, zodValidationRemoveOneProductById, zodValidationEditOneProduct, zodValidationEditOneProductData, type ZodValidationAddOneProduct, type ZodValidationAddOneProductData, type ZodValidationGetOneProductById, type ZodValidationRemoveOneProductById, type ZodValidationEditOneProduct, type ZodValidationEditOneProductData, zodValidationSearchQueryProduct, type ZodValidationSearchQueryProduct } from "@/api/packages/validations/product";
+import { zodValidationAddOneProduct, zodValidationAddOneProductData, zodValidationGetOneProductById, zodValidationRemoveOneProductById, zodValidationEditOneProduct, zodValidationEditOneProductData, type ZodValidationAddOneProduct, type ZodValidationAddOneProductData, type ZodValidationGetOneProductById, type ZodValidationRemoveOneProductById, type ZodValidationEditOneProduct, type ZodValidationEditOneProductData, zodValidationSearchQueryProduct, type ZodValidationSearchQueryProduct, zodValidationRemoveOneProductImageById } from "@/api/packages/validations/product";
 import { publicProcedure, router } from "@/api/server/trpc/procedures";
 import { HandlerTRPCError } from "@/api/utils/handleTRPCError";
 import { ProductManageMutationServices } from "../services/mutation";
@@ -98,6 +98,19 @@ export const ProductManageTRPCRouter = router({
                 throw HandlerTRPCError.TRPCErrorMessage(canBeRemove.message, canBeRemove.status);
             }
             return await ProductManageMutationServices.removeOneById(input.targetProductId);
+        } catch (error) {
+            throw HandlerTRPCError.TRPCError(error);
+        }
+    }),
+    removeImageById: publicProcedure.input(zodValidationRemoveOneProductImageById).use(AuthTRPCMiddleware.authSession).mutation(async ({ ctx, input }) => {
+        try {
+            const canBeRemove = await ValidationStaffRoleAndPerUtils.canBeRemove(input.removeByStaffId);
+
+            if (canBeRemove.error) {
+                throw HandlerTRPCError.TRPCErrorMessage(canBeRemove.message, canBeRemove.status);
+            }
+
+            return await ProductManageMutationServices.removeImageById(input.imageId);
         } catch (error) {
             throw HandlerTRPCError.TRPCError(error);
         }

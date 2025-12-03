@@ -58,7 +58,7 @@ export class NewsManageMutationServices {
         }
     }
 
-    public static async editImageById(imageId: string) {
+    public static async removeImageById(imageId: string) {
         try {
             // implement later if needed
             const imageData = await db.query.newsImages.findFirst({
@@ -120,7 +120,7 @@ export class NewsManageMutationServices {
                 .from(news)
                 .where(where);
             const total = totalResult[0]?.total ?? 1;
-            const resultProducts = await db.query.news.findMany({
+            const resultNews = await db.query.news.findMany({
                 where,
                 limit,
                 offset,
@@ -133,7 +133,7 @@ export class NewsManageMutationServices {
             })
             const totalPage = Math.ceil(Number(total) / limit) || 1;
             return HandlerSuccess.success("Queries news successfully", {
-                data: resultProducts,
+                data: resultNews,
                 pagination: {
                     total,
                     page,

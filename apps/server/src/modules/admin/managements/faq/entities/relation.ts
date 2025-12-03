@@ -15,7 +15,7 @@ export const faqRelations = relations(faq, ({ one, many }) => ({
 }));
 
 export const translationFaqRelations = relations(translationFaq, ({ one }) => ({
-    product: one(faq, {
+    faq: one(faq, {
         fields: [translationFaq.faqId],
         references: [faq.id],
     }),

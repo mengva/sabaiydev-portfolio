@@ -66,6 +66,28 @@ export class ProductManageMutationServices {
         }
     }
 
+    public static async removeImageById(imageId: string) {
+        try {
+            // implement later if needed
+            const imageData = await db.query.productImages.findFirst({
+                where: eq(productImages.id, imageId)
+            });
+
+            if (!imageData) throw new HTTPErrorMessage("Find product image not found", "404");
+
+            await db.transaction(async tx => {
+                await tx.delete(productImages).where(eq(productImages.id, imageId));
+                await SecureFileUploadServices.destoryCloudinaryFunc(imageData.cloudinaryId);
+            });
+
+            return HandlerSuccess.success("Removed product image by id successfully");
+
+        } catch (error) {
+            throw getHTTPError(error);
+        }
+    }
+
+
     public static async removeOneById(productId: string) {
         try {
             const product = await db.query.products.findFirst({

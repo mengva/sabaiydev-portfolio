@@ -91,6 +91,12 @@ function ProductManagePage() {
     });
 
     useEffect(() => {
+        if (refetch) {
+            refetch();
+        }
+    }, [refetch]);
+
+    useEffect(() => {
         if (response) {
             const result = response?.data;
             const resultProducts = result?.data ?? []; // the array
@@ -209,7 +215,7 @@ function ProductManagePage() {
                             <Input
                                 placeholder="Search by name..."
                                 value={search}
-                                onChange={(e) => setSearch(e.target.value.trim())}
+                                onChange={(e) => setSearch(e.target.value)}
                                 onInput={e => {
                                     const value = (e.target as HTMLInputElement).value.toLowerCase()
                                     if (!value) {

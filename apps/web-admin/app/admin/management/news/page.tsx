@@ -45,7 +45,7 @@ import Link from "next/link";
 import ListLoadingComponent from "@/components/listLoading";
 import TableNewsItemComponent from "./components/tableNewItem";
 import { SearchQueryNewsCategoryDto, SearchQueryNewsStatusDto } from "@/admin/packages/types/news";
-import { SearchQueryNewsStatusArray } from "@/admin/packages/utils/constants/variables/news";
+import { SearchQueryNewsCategoryArray, SearchQueryNewsStatusArray } from "@/admin/packages/utils/constants/variables/news";
 import { NewsSchema } from "@/admin/packages/schema/news";
 
 interface SearchSelectDto {
@@ -77,7 +77,7 @@ function NewManagePage() {
     const [status, setStatus] = useState<SearchQueryNewsStatusDto>("DEFAULT");
     const [startDate, setStartDate] = useState<Date | undefined>();
     const [endDate, setEndDate] = useState<Date | undefined>();
-    const [news, setnews] = useState([] as NewsSchema[]);
+    const [news, setNews] = useState([] as NewsSchema[]);
 
     // === tRPC Query ===
     const {
@@ -91,11 +91,17 @@ function NewManagePage() {
     });
 
     useEffect(() => {
+        if (refetch) {
+            refetch();
+        }
+    }, [refetch]);
+
+    useEffect(() => {
         if (response) {
             const result = response?.data;
             const resultnews = result?.data ?? []; // the array
             const pagination: PaginationFilterDto = result?.pagination; // pagination info
-            setnews(resultnews);
+            setNews(resultnews);
             setPaginationFilter(pagination);
         }
     }, [response]);
@@ -116,7 +122,7 @@ function NewManagePage() {
                 const searchQueryPagination = result?.pagination;
                 const searchQueryData = result?.data;
                 if (searchQueryData && searchQueryPagination) {
-                    setnews(searchQueryData);
+                    setNews(searchQueryData);
                     setPaginationFilter(searchQueryPagination);
                 }
             }
@@ -202,14 +208,14 @@ function NewManagePage() {
                     <CardDescription>Refine your news list</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
                         {/* Search */}
                         <div className="relative">
                             <Search onClick={() => { }} className="absolute left-3 top-3 h-4 w-4 text-muted-foreground cursor-pointer" />
                             <Input
                                 placeholder="Search by title..."
                                 value={search}
-                                onChange={(e) => setSearch(e.target.value.trim())}
+                                onChange={(e) => setSearch(e.target.value)}
                                 onInput={e => {
                                     const value = (e.target as HTMLInputElement).value.toLowerCase()
                                     if (!value) {
@@ -243,6 +249,28 @@ function NewManagePage() {
                                 ))}
                             </SelectContent>
                         </Select>
+
+                        {/* Category */}
+                        <Select value={category} onValueChange={(c) => {
+                            setCategory(c as SearchQueryNewsCategoryDto);
+                            onSelectSearch({
+                                query: search ?? '',
+                                category: c as SearchQueryNewsCategoryDto,
+                                status: status ?? "DEFAULT",
+                                startDate,
+                                endDate
+                            });
+                        }}>
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Select status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {SearchQueryNewsCategoryArray.map((c, index) => (
+                                    <SelectItem key={index} value={c}>{c === "DEFAULT" ? "All Category" : c}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+
                         <Popover>
                             <PopoverTrigger asChild>
                                 <Button

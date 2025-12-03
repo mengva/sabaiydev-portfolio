@@ -199,7 +199,7 @@ export default function UserManagePage() {
                             <Input
                                 placeholder="Search by fullName or email..."
                                 value={search}
-                                onChange={(e) => setSearch(e.target.value.trim())}
+                                onChange={(e) => setSearch(e.target.value)}
                                 onInput={e => {
                                     const value = (e.target as HTMLInputElement).value.toLowerCase()
                                     if (!value) {

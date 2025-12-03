@@ -28,8 +28,9 @@ import { ZodValidationFiles, zodValidationUuid } from "@/admin/packages/validati
 import { UploadFileServices } from "@/admin/packages/utils/clientUploadFile";
 import toast from "react-hot-toast";
 import { ErrorHandler } from "@/admin/packages/utils/handleError";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@workspace/ui/components/dialog";
 
-function EditOneProductPage() {
+function ProductManageEditPage() {
     // Call ALL hooks unconditionally at the top - BEFORE any early returns
     const myDataContext = useContext(MyDataContext);
     const searchParams = useSearchParams();
@@ -38,6 +39,9 @@ function EditOneProductPage() {
     const [product, setProduct] = useState({} as ProductSchema);
     const inputFiles = useRef<HTMLInputElement | null>(null);
     const [imageFiles, setImageFiles] = useState([] as ZodValidationFiles);
+    const [removeImageId, setRemoveImageId] = useState<string | null>(null);
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+
     const router = useRouter();
 
     const form = useForm<ZodValidationEditOneProduct>({
@@ -109,6 +113,8 @@ function EditOneProductPage() {
 
     const editOneMutation = trpc.app.admin.manage.product.editById.useMutation(editMutation);
 
+    const removeImageMutation = trpc.app.admin.manage.product.removeImageById.useMutation();
+
     // Load product data into form when response arrives
     useEffect(() => {
         if (response?.data && myData && form && productId) {
@@ -130,7 +136,7 @@ function EditOneProductPage() {
                 targetProductId: productId,
                 updatedByStaffId: myData.id || '',
             } as ZodValidationEditOneProduct);// Force Select components to update after reset
-            
+
             setTimeout(() => {
                 form.setValue("status", productData.status, { shouldDirty: true });
                 form.setValue("category", productData.category, { shouldDirty: true });
@@ -194,6 +200,22 @@ function EditOneProductPage() {
         form.setValue("imageFiles", currentFiles);
     };
 
+    const handleRemoveImage = async () => {
+        if (!removeImageId || !myData?.id) return;
+        try {
+            const response = await removeImageMutation.mutateAsync({ imageId: removeImageId, removeByStaffId: myData.id || '' });
+            if (response && response.success) {
+                toast.success(response.message);
+                refetch();
+                setRemoveImageId(null);
+                setIsDialogOpen(false);
+            }
+        } catch (error) {
+            const message = ErrorHandler.getErrorMessage(error);
+            toast.error(message || "Failed to remove image");
+        }
+    };
+
     const isPending = Boolean(editOneMutation.isPending || editOneDataMutation.isPending);
 
     return (
@@ -204,7 +226,7 @@ function EditOneProductPage() {
                         <ArrowLeft />
                     </Button>
                 </Link>
-                <BreadcrumbComponent path='/admin/management/products' title="Edit" linkTitle="Product Management"/>
+                <BreadcrumbComponent path='/admin/management/products' title="Edit" linkTitle="Product Management" />
             </div>
             <Card>
                 <CardHeader>
@@ -222,29 +244,31 @@ function EditOneProductPage() {
 
                             {/* Image Upload */}
                             <div>
-                                <div>
-                                    <Label>Product Images</Label>
-                                    <Card className="mt-2 grid place-items-center">
-                                        <CardContent onClick={() => inputFiles.current?.click()} className="lg:min-w-xl w-[80%] border-dotted border-4 p-4 dark:border-slate-600 cursor-pointer h-48 grid place-items-center rounded-xl">
-                                            <Input
-                                                ref={inputFiles}
-                                                type="file"
-                                                multiple
-                                                accept={AllowedImageFileType}
-                                                onChange={handleImageChange}
-                                                className="sr-only"
-                                            />
-                                            <div className="w-16 h-16 rounded-full border grid place-items-center">
-                                                <Upload />
-                                            </div>
-                                        </CardContent>
-                                    </Card>
-                                </div>
+                                <Label>Product Images</Label>
+                                <Card className="mt-2 grid place-items-center">
+                                    <CardContent onClick={() => inputFiles.current?.click()} className="lg:min-w-xl w-[80%] border-dotted border-4 p-4 dark:border-slate-600 cursor-pointer h-48 grid place-items-center rounded-xl">
+                                        <Input
+                                            ref={inputFiles}
+                                            type="file"
+                                            multiple
+                                            accept={AllowedImageFileType}
+                                            onChange={handleImageChange}
+                                            className="sr-only"
+                                        />
+                                        <div className="w-16 h-16 rounded-full border grid place-items-center">
+                                            <Upload />
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            </div>
 
-                                {
-                                    imageFiles.length > 0 && (
-                                        <Card className="mt-4">
+                            {
+                                imageFiles.length > 0 && (
+                                    <div className="mt-4">
+                                        <Label>Selected Images</Label>
+                                        <Card className="mt-2">
                                             <CardContent className="grid 2xl:grid-cols-8 xl:grid-cols-6 lg:grid-cols-4 sm:grid-cols-2 gap-4">
+
                                                 {imageFiles.map((src, idx) => (
                                                     <div key={idx} className="relative group">
                                                         <img src={src.fileData} alt="preview" className="w-full aspect-5/4 object-cover rounded-lg border" />
@@ -259,29 +283,59 @@ function EditOneProductPage() {
                                                 ))}
                                             </CardContent>
                                         </Card>
-                                    )
-                                }
-                            </div>
+                                    </div>
+                                )
+                            }
 
                             {
                                 product?.images && product?.images?.length > 0 && (
-                                    <Card className="mt-4">
-                                        <CardContent className="grid 2xl:grid-cols-8 xl:grid-cols-6 lg:grid-cols-4 sm:grid-cols-2 gap-4">
-                                            {product.images.map((src, idx) => (
-                                                <div key={idx} className="relative group">
-                                                    <img src={src.imageUrl} alt="preview" className="w-full aspect-5/4 object-cover rounded-lg border" />
-                                                    <button
-                                                        type="button"
-                                                        className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full transition cursor-pointer"
-                                                    >
-                                                        <HiMiniXMark className="w-4 h-4" />
-                                                    </button>
-                                                </div>
-                                            ))}
-                                        </CardContent>
-                                    </Card>
+                                    <div>
+                                        <Label>Existing Images</Label>
+                                        <Card className="mt-2">
+                                            <CardContent className="grid 2xl:grid-cols-8 xl:grid-cols-6 lg:grid-cols-4 sm:grid-cols-2 gap-4">
+                                                {product.images.map((image, idx) => (
+                                                    <div key={idx} className="relative group">
+                                                        <img src={image.imageUrl} alt="preview" className="w-full aspect-5/4 object-cover rounded-lg border" />
+                                                        <button
+                                                            type="button"
+                                                            className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full transition cursor-pointer"
+                                                            onClick={() => {
+                                                                setIsDialogOpen(true);
+                                                                setRemoveImageId(image.id);
+                                                            }}
+                                                        >
+                                                            <HiMiniXMark className="w-4 h-4" />
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                            </CardContent>
+                                        </Card>
+                                    </div>
                                 )
                             }
+
+                            {/* Confirmation Dialog */}
+                            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                                <DialogContent className="sm:max-w-md">
+                                    <DialogHeader>
+                                        <DialogTitle>Remove Image</DialogTitle>
+                                        <DialogDescription>
+                                            Are you sure you want to remove this image?
+                                        </DialogDescription>
+                                    </DialogHeader>
+                                    <DialogFooter className="flex gap-2">
+                                        <Button className='cursor-pointer' variant="outline" onClick={() => {
+                                            setIsDialogOpen(false);
+                                            setRemoveImageId(null);
+                                        }}>
+                                            Cancel
+                                        </Button>
+                                        <Button className='cursor-pointer' variant="destructive" onClick={handleRemoveImage} disabled={removeImageMutation.isPending}>
+                                            {removeImageMutation.isPending ? "Removing..." : "Remove Image"}
+                                        </Button>
+                                    </DialogFooter>
+                                </DialogContent>
+                            </Dialog>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
@@ -505,9 +559,9 @@ function EditOneProductPage() {
                         </form>
                     </Form>
                 </CardContent>
-            </Card>
+            </Card >
         </>
     )
 }
 
-export default EditOneProductPage
+export default ProductManageEditPage

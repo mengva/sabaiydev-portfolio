@@ -109,7 +109,7 @@ export const NewsManageTRPCRouter = router({
             if (canBeRemove.error) {
                 throw HandlerTRPCError.TRPCErrorMessage(canBeRemove.message, canBeRemove.status);
             }
-            return await NewsManageMutationServices.editImageById(input.imageId);
+            return await NewsManageMutationServices.removeImageById(input.imageId);
         } catch (error) {
             throw HandlerTRPCError.TRPCError(error);
         }

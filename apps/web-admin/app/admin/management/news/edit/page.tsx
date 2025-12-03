@@ -33,7 +33,7 @@ import { NewsSchema } from '@/admin/packages/schema/news';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@workspace/ui/components/dialog';
 import { set } from 'zod/v4';
 
-function NewsManageAddFormPage() {
+function NewsManageEditFormPage() {
 
     const myDataContext = useContext(MyDataContext);
     if (!myDataContext) return null;
@@ -258,99 +258,97 @@ function NewsManageAddFormPage() {
 
                             {/* Image Upload */}
                             <div>
-                                <div>
-                                    <Label>News Images</Label>
-                                    <Card className="mt-2 grid place-items-center">
-                                        <CardContent onClick={() => inputFiles.current?.click()} className="lg:min-w-xl w-[80%] border-dotted border-4 p-4 dark:border-slate-600 cursor-pointer h-48 grid place-items-center rounded-xl">
-                                            <Input
-                                                ref={inputFiles}
-                                                type="file"
-                                                multiple
-                                                accept={AllowedImageFileType}
-                                                onChange={handleImageChange}
-                                                className="sr-only"
-                                            />
-                                            <div className="w-16 h-16 rounded-full border grid place-items-center">
-                                                <Upload />
-                                            </div>
-                                        </CardContent>
-                                    </Card>
-                                </div>
-
-                                {
-                                    imageFiles.length > 0 && (
-                                        <div className="mt-4">
-                                            <Label>Selected Images</Label>
-                                            <Card className="mt-4">
-                                                <CardContent className="grid 2xl:grid-cols-8 xl:grid-cols-6 lg:grid-cols-4 sm:grid-cols-2 gap-4">
-                                                    {imageFiles.map((src, idx) => (
-                                                        <div key={idx} className="relative group">
-                                                            <img src={src.fileData} alt="preview" className="w-full aspect-5/4 object-cover rounded-lg border" />
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => removeImage(idx)}
-                                                                className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full transition cursor-pointer"
-                                                            >
-                                                                <HiMiniXMark className="w-4 h-4" />
-                                                            </button>
-                                                        </div>
-                                                    ))}
-                                                </CardContent>
-                                            </Card>
+                                <Label>News Images</Label>
+                                <Card className="mt-2 grid place-items-center">
+                                    <CardContent onClick={() => inputFiles.current?.click()} className="lg:min-w-xl w-[80%] border-dotted border-4 p-4 dark:border-slate-600 cursor-pointer h-48 grid place-items-center rounded-xl">
+                                        <Input
+                                            ref={inputFiles}
+                                            type="file"
+                                            multiple
+                                            accept={AllowedImageFileType}
+                                            onChange={handleImageChange}
+                                            className="sr-only"
+                                        />
+                                        <div className="w-16 h-16 rounded-full border grid place-items-center">
+                                            <Upload />
                                         </div>
-                                    )
-                                }
-
-                                {
-                                    newsData?.images && newsData?.images?.length > 0 && (
-                                        <div className="mt-4">
-                                            <Label>Existing Images</Label>
-                                            <Card className="mt-4">
-                                                <CardContent className="grid 2xl:grid-cols-8 xl:grid-cols-6 lg:grid-cols-4 sm:grid-cols-2 gap-4">
-                                                    {newsData.images.map((image, idx) => (
-                                                        <div key={idx} className="relative group">
-                                                            <img src={image.imageUrl} alt="preview" className="w-full aspect-5/4 object-cover rounded-lg border" />
-                                                            <button
-                                                                type="button"
-                                                                className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full transition cursor-pointer"
-                                                                onClick={() => {
-                                                                    setIsDialogOpen(true);
-                                                                    setRemoveImageId(image.id);
-                                                                }}
-                                                            >
-                                                                <HiMiniXMark className="w-4 h-4" />
-                                                            </button>
-                                                        </div>
-                                                    ))}
-                                                </CardContent>
-                                            </Card>
-                                        </div>
-                                    )
-                                }
-
-                                {/* Confirmation Dialog */}
-                                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                                    <DialogContent className="sm:max-w-md">
-                                        <DialogHeader>
-                                            <DialogTitle>Remove Image</DialogTitle>
-                                            <DialogDescription>
-                                                Are you sure you want to remove this image?
-                                            </DialogDescription>
-                                        </DialogHeader>
-                                        <DialogFooter className="flex gap-2">
-                                            <Button className='cursor-pointer' variant="outline" onClick={() => {
-                                                setIsDialogOpen(false);
-                                                setRemoveImageId(null);
-                                            }}>
-                                                Cancel
-                                            </Button>
-                                            <Button className='cursor-pointer' variant="destructive" onClick={handleRemoveImage} disabled={deleteImageMutation.isPending}>
-                                                {deleteImageMutation.isPending ? "Removing..." : "Remove Image"}
-                                            </Button>
-                                        </DialogFooter>
-                                    </DialogContent>
-                                </Dialog>
+                                    </CardContent>
+                                </Card>
                             </div>
+
+                            {
+                                imageFiles.length > 0 && (
+                                    <div className="mt-4">
+                                        <Label>Selected Images</Label>
+                                        <Card className="mt-4">
+                                            <CardContent className="grid 2xl:grid-cols-8 xl:grid-cols-6 lg:grid-cols-4 sm:grid-cols-2 gap-4">
+                                                {imageFiles.map((src, idx) => (
+                                                    <div key={idx} className="relative group">
+                                                        <img src={src.fileData} alt="preview" className="w-full aspect-5/4 object-cover rounded-lg border" />
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => removeImage(idx)}
+                                                            className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full transition cursor-pointer"
+                                                        >
+                                                            <HiMiniXMark className="w-4 h-4" />
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                            </CardContent>
+                                        </Card>
+                                    </div>
+                                )
+                            }
+
+                            {
+                                newsData?.images && newsData?.images?.length > 0 && (
+                                    <div className="mt-4">
+                                        <Label>Existing Images</Label>
+                                        <Card className="mt-4">
+                                            <CardContent className="grid 2xl:grid-cols-8 xl:grid-cols-6 lg:grid-cols-4 sm:grid-cols-2 gap-4">
+                                                {newsData.images.map((image, idx) => (
+                                                    <div key={idx} className="relative group">
+                                                        <img src={image.imageUrl} alt="preview" className="w-full aspect-5/4 object-cover rounded-lg border" />
+                                                        <button
+                                                            type="button"
+                                                            className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full transition cursor-pointer"
+                                                            onClick={() => {
+                                                                setIsDialogOpen(true);
+                                                                setRemoveImageId(image.id);
+                                                            }}
+                                                        >
+                                                            <HiMiniXMark className="w-4 h-4" />
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                            </CardContent>
+                                        </Card>
+                                    </div>
+                                )
+                            }
+
+                            {/* Confirmation Dialog */}
+                            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                                <DialogContent className="sm:max-w-md">
+                                    <DialogHeader>
+                                        <DialogTitle>Remove Image</DialogTitle>
+                                        <DialogDescription>
+                                            Are you sure you want to remove this image?
+                                        </DialogDescription>
+                                    </DialogHeader>
+                                    <DialogFooter className="flex gap-2">
+                                        <Button className='cursor-pointer' variant="outline" onClick={() => {
+                                            setIsDialogOpen(false);
+                                            setRemoveImageId(null);
+                                        }}>
+                                            Cancel
+                                        </Button>
+                                        <Button className='cursor-pointer' variant="destructive" onClick={handleRemoveImage} disabled={deleteImageMutation.isPending}>
+                                            {deleteImageMutation.isPending ? "Removing..." : "Remove Image"}
+                                        </Button>
+                                    </DialogFooter>
+                                </DialogContent>
+                            </Dialog>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
@@ -477,4 +475,4 @@ function NewsManageAddFormPage() {
     )
 }
 
-export default NewsManageAddFormPage;
+export default NewsManageEditFormPage;

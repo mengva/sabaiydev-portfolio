@@ -8,7 +8,7 @@ export class SecureSanitizeServices {
         if (typeof str !== 'string') return '';
         return str
             .trim()
-            .replace(/[<></>'"&]/g, '') // Remove potential XSS chars
+            .replace(/[<><>'"&]/g, '') // Remove potential XSS chars
             .substring(0, maxLength);
     }
 
@@ -22,7 +22,7 @@ export class SecureSanitizeServices {
 
     public static sanitizedArrayOrObject(data: any): any {
         if (!data) return '';
-        
+
         const keys: string[] = Object.keys(data);
         const imageFileKeys: string[] = ["fileName", "fileType", "fileData", "size"];
         const isValidImageFile = Boolean(keys && keys.length && imageFileKeys.every(key => imageFileKeys.includes(key)) && keys.length === imageFileKeys.length);
