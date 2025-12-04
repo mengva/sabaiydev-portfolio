@@ -316,7 +316,7 @@ export default function ProductManageAddFormPage() {
                                     type="button"
                                     variant="outline"
                                     size="sm"
-                                    className="mt-3"
+                                    className="mt-3 cursor-pointer"
                                     onClick={() => {
                                         form.setValue("technologies", [
                                             ...form.getValues("technologies"),
@@ -422,7 +422,7 @@ export default function ProductManageAddFormPage() {
                                                     type="button"
                                                     variant="outline"
                                                     size="sm"
-                                                    className="mt-3"
+                                                    className="mt-3 cursor-pointer"
                                                     onClick={() => {
                                                         form.setValue(`translations.${langIdx}.features`, [
                                                             ...form.getValues(`translations.${langIdx}.features`),

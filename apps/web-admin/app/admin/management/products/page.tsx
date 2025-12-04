@@ -91,12 +91,6 @@ function ProductManagePage() {
     });
 
     useEffect(() => {
-        if (refetch) {
-            refetch();
-        }
-    }, [refetch]);
-
-    useEffect(() => {
         if (response) {
             const result = response?.data;
             const resultProducts = result?.data ?? []; // the array

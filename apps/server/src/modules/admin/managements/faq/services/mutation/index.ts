@@ -4,7 +4,7 @@ import type { ZodValidationAddOneFaqData, ZodValidationEditOneFaqData, ZodValida
 import { HandlerSuccess } from "@/server/utils/handleSuccess";
 import { count, desc, eq } from "drizzle-orm";
 import { FaqManageServices } from "../../utils/faq";
-import { faq, translationFaq } from "../../entities";
+import { faq } from "../../entities";
 
 export class FaqManageMutationServices {
     public static async addOne(input: ZodValidationAddOneFaqData) {
@@ -61,9 +61,7 @@ export class FaqManageMutationServices {
                 offset,
                 orderBy: desc(faq.updatedAt),
                 with: {
-                    translationFaq: {
-                        where: eq(faq.id, translationFaq.faqId)
-                    }
+                    translationFaq: true,
                 }
             });
             const totalPage = Math.ceil(Number(total) / limit) || 1;

@@ -2,7 +2,7 @@ import db from "@/server/config/db";
 import { getHTTPError, HTTPErrorMessage } from "@/server/packages/utils/httpJsError";
 import { HandlerSuccess } from "@/server/utils/handleSuccess";
 import { count, desc, eq } from "drizzle-orm";
-import { news, newsImages, translationNews } from "../../entities";
+import { news, newsImages } from "../../entities";
 import type { ZodValidationAddOneNews, ZodValidationAddOneNewsData, ZodValidationEditOneNewsById, ZodValidationEditOneNewsDataById, ZodValidationSearchQueryNews } from "@/server/packages/validations/news";
 import { NewsManageServices } from "../../utils/news";
 import { SecureFileUploadServices } from "@/server/utils/secureFileUpload";
@@ -126,9 +126,7 @@ export class NewsManageMutationServices {
                 offset,
                 orderBy: desc(news.updatedAt),
                 with: {
-                    translationNews: {
-                        where: eq(news.id, translationNews.newsId)
-                    }
+                    translationNews: true
                 }
             })
             const totalPage = Math.ceil(Number(total) / limit) || 1;

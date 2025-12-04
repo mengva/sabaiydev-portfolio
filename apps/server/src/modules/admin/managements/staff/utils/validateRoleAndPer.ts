@@ -38,12 +38,14 @@ export class ValidationStaffRoleAndPerServices {
             if (isValidRoleAndPer) {
                 return {
                     message: "Invalid user role and permissions",
-                    code: "403"
+                    code: "403",
+                    error: true
                 }
             }
             return {
-                message: "success",
-                code: "200"
+                message: "",
+                code: "200",
+                error: false
             }
         } catch (error) {
             throw getHTTPError(error);
@@ -53,7 +55,7 @@ export class ValidationStaffRoleAndPerServices {
     public static async addOneUser({ addByStaffId, ...data }: ZodValidationAddOneStaff) {
         try {
             const valid = await this.roleAndPermissions(data.role, data.permissions);
-            if (valid.code !== "200") {
+            if (valid.error) {
                 throw new HTTPErrorMessage(valid.message, valid.code as StatusCodeErrorDto);
             }
 
@@ -90,7 +92,7 @@ export class ValidationStaffRoleAndPerServices {
             if (isValidMe) throw new HTTPErrorMessage("Invalid edit my data", "403");
 
             const valid = await this.roleAndPermissions(data.role, data.permissions);
-            if (valid.code !== "200") {
+            if (valid.error) {
                 throw new HTTPErrorMessage(valid.message, valid.code as StatusCodeErrorDto);
             }
 
@@ -154,7 +156,7 @@ export class ValidationStaffRoleAndPerServices {
                 myRole === "SUPER_ADMIN" && ["ADMIN", "VIEWER", "EDITOR"].includes(targetRole) ||
                 myRole === "ADMIN" && ["VIEWER", "EDITOR"].includes(targetRole) || false
             )
-            if(!isCanRemove){
+            if (!isCanRemove) {
                 throw new HTTPErrorMessage("You have no an permissions to remove this user", "403");
             }
             return isCanRemove;
@@ -167,7 +169,7 @@ export class ValidationStaffRoleAndPerServices {
         try {
             const { targetStaffId, updatedByStaffId, role, permissions } = input;
             const valid = await this.roleAndPermissions(role, permissions);
-            if (valid.code !== "200") {
+            if (valid.error) {
                 throw new HTTPErrorMessage(valid.message, valid.code as StatusCodeErrorDto);
             }
             const isValidMe = targetStaffId === updatedByStaffId;

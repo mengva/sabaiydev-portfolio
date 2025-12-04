@@ -93,7 +93,6 @@ export class FaqManageServices {
         if (status && status !== "DEFAULT") {
             conditions.push(eq(faq.status, status));
         }
-        // Date range
         if (startDate && endDate) {
             conditions.push(between(faq.createdAt, new Date(startDate), new Date(endDate)));
         }

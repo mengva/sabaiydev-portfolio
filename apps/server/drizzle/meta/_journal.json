@@ -8,6 +8,27 @@
       "when": 1762314398719,
       "tag": "0000_mushy_triton",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1764836814370,
+      "tag": "0001_sturdy_frightful_four",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1764840538559,
+      "tag": "0002_tranquil_rhodey",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1764840681053,
+      "tag": "0003_hot_bug",
+      "breakpoints": true
     }
   ]
 }

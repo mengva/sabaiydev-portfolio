@@ -32,8 +32,8 @@ export const translationCareers = pgTable("translation_careers", {
     location: text("location").notNull(),
     jobTitle: text("job_title").notNull(),
     description: text("description").notNull(),
-    requirements: text("requirements").notNull(),
-    benefits: text("benefits").notNull(),
+    requirements: text("requirements").array().notNull(),
+    benefits: text("benefits").array().notNull(),
     createdAt: timestamp('created_at').defaultNow(),
     updatedAt: timestamp('updated_at').defaultNow().$onUpdate(() => new Date()),
 }, table => ({

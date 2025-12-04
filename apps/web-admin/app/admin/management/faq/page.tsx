@@ -93,12 +93,6 @@ function FaqManagePage() {
     });
 
     useEffect(() => {
-        if(refetch) {
-            refetch();
-        }
-    }, [refetch]);
-
-    useEffect(() => {
         if (response) {
             const result = response?.data;
             const resultnews = result?.data ?? []; // the array

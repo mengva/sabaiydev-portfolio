@@ -4,6 +4,7 @@ import { ProductManageTRPCRouter } from "@/server/modules/admin/managements/prod
 import { router } from "./procedures";
 import { NewsManageTRPCRouter } from "@/server/modules/admin/managements/news/routes/trpc";
 import { FaqManageTRPCRouter } from "@/server/modules/admin/managements/faq/routes/trpc";
+import { CareerManageTRPCRouter } from "@/server/modules/admin/managements/careers/routes/trpc";
 
 export const appRouter = router({
     app: router({
@@ -16,7 +17,8 @@ export const appRouter = router({
                 staff: StaffManageTRPCRouter,
                 product: ProductManageTRPCRouter,
                 news: NewsManageTRPCRouter,
-                faq: FaqManageTRPCRouter
+                faq: FaqManageTRPCRouter,
+                career: CareerManageTRPCRouter
             })
         })
     })

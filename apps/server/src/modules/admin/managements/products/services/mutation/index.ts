@@ -1,6 +1,6 @@
 import db from "@/server/config/db";
 import type { ZodValidationAddOneProduct, ZodValidationAddOneProductData, ZodValidationEditOneProduct, ZodValidationEditOneProductData, ZodValidationSearchQueryProduct } from "@/server/packages/validations/product";
-import { productImages, products, translationProducts } from "../../entities";
+import { productImages, products } from "../../entities";
 import { SecureFileUploadServices } from "@/server/utils/secureFileUpload";
 import { HandlerSuccess } from "@/server/utils/handleSuccess";
 import { ProductManageServices } from "../../utils/product";
@@ -135,9 +135,7 @@ export class ProductManageMutationServices {
                 offset,
                 orderBy: desc(products.updatedAt),
                 with: {
-                    translationProducts: {
-                        where: eq(products.id, translationProducts.productId)
-                    }
+                    translationProducts: true
                 }
             })
             const totalPage = Math.ceil(Number(total) / limit) || 1;

@@ -2,28 +2,38 @@ import { pgEnum } from "drizzle-orm/pg-core";
 
 export const careerDepartmentEnum = pgEnum("career_department_enum", [
     "ENGINEERING",
-    "DESIGN",
     "MARKETING",
     "SALES",
+    "DESIGN",
     "HR",
-    "OPERATIONS"
+    "FINANCE",
+    "OPERATIONS",
+    "CUSTOMER_SUPPORT",
+    "PRODUCT_MANAGEMENT",
+    "LEGAL"
 ]);
 
 export const careerTypeEnum = pgEnum("career_type_enum", [
     "FULL_TIME",
     "PART_TIME",
     "INTERNSHIP",
-    "CONTRACT"
+    "CONTRACT",
+    "TEMPORARY",
+    "VOLUNTEER"
 ]);
 
 export const careerStatusEnum = pgEnum("career_status_enum", [
     "OPEN",
     "CLOSED",
-    "DRAFT"
+    "PAUSED"
 ]);
 
 export const customerStatusEnum = pgEnum("customer_status_enum", [
-    "DONE",
-    "REJECT",
-    "APPLY"
+    "APPLY",
+    "REVIEW",
+    "INTERVIEW",
+    "OFFER",
+    "HIRED",
+    "REJECTED"
 ]);
+
