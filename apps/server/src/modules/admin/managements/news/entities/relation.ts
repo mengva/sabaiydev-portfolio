@@ -1,6 +1,6 @@
 import { relations } from "drizzle-orm";
 import { news, newsImages, translationNews } from "./news";
-import { staffs } from "@/api/db";
+import { staffs } from "@/server/db";
 
 export const newsRelations = relations(news, ({ one, many }) => ({
     staff: one(staffs, {

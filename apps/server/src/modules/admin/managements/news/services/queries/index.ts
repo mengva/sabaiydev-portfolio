@@ -1,8 +1,8 @@
-import db from "@/api/config/db";
-import { getHTTPError } from "@/api/packages/utils/httpJsError";
-import type { ZodValidationFilter } from "@/api/packages/validations/constants";
-import { HandlerSuccess } from "@/api/utils/handleSuccess";
-import { HandlerTRPCError } from "@/api/utils/handleTRPCError";
+import db from "@/server/config/db";
+import { getHTTPError } from "@/server/packages/utils/httpJsError";
+import type { ZodValidationFilter } from "@/server/packages/validations/constants";
+import { HandlerSuccess } from "@/server/utils/handleSuccess";
+import { HandlerTRPCError } from "@/server/utils/handleTRPCError";
 import { count, desc, eq } from "drizzle-orm";
 import { news } from "../../entities";
 

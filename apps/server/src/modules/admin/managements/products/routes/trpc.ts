@@ -1,11 +1,11 @@
-import { AuthTRPCMiddleware } from "@/api/middleware/authTRPC";
-import { zodValidationAddOneProduct, zodValidationAddOneProductData, zodValidationGetOneProductById, zodValidationRemoveOneProductById, zodValidationEditOneProduct, zodValidationEditOneProductData, type ZodValidationAddOneProduct, type ZodValidationAddOneProductData, type ZodValidationGetOneProductById, type ZodValidationRemoveOneProductById, type ZodValidationEditOneProduct, type ZodValidationEditOneProductData, zodValidationSearchQueryProduct, type ZodValidationSearchQueryProduct, zodValidationRemoveOneProductImageById } from "@/api/packages/validations/product";
-import { publicProcedure, router } from "@/api/server/trpc/procedures";
-import { HandlerTRPCError } from "@/api/utils/handleTRPCError";
+import { AuthTRPCMiddleware } from "@/server/middleware/authTRPC";
+import { zodValidationAddOneProduct, zodValidationAddOneProductData, zodValidationGetOneProductById, zodValidationRemoveOneProductById, zodValidationEditOneProduct, zodValidationEditOneProductData, type ZodValidationAddOneProduct, type ZodValidationAddOneProductData, type ZodValidationGetOneProductById, type ZodValidationRemoveOneProductById, type ZodValidationEditOneProduct, type ZodValidationEditOneProductData, zodValidationSearchQueryProduct, type ZodValidationSearchQueryProduct, zodValidationRemoveOneProductImageById } from "@/server/packages/validations/product";
+import { publicProcedure, router } from "@/server/server/trpc/procedures";
+import { HandlerTRPCError } from "@/server/utils/handleTRPCError";
 import { ProductManageMutationServices } from "../services/mutation";
-import { zodValidationFilter, type ZodValidationFilter } from "@/api/packages/validations/constants";
+import { zodValidationFilter, type ZodValidationFilter } from "@/server/packages/validations/constants";
 import { ProductManageQueriesServices } from "../services/queries";
-import { ValidationStaffRoleAndPerUtils } from "@/api/utils/validateStaffRoleAndPermission";
+import { ValidationStaffRoleAndPerUtils } from "@/server/utils/validateStaffRoleAndPermission";
 
 export const ProductManageTRPCRouter = router({
     list: publicProcedure.input(zodValidationFilter).use(AuthTRPCMiddleware.authSanitizedBody).query(async ({ ctx }) => {

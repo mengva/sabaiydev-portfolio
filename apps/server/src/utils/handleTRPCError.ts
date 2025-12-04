@@ -1,8 +1,8 @@
-import type { ServerErrorDto } from "@/api/packages/types/constants";
+import type { ServerErrorDto } from "@/server/packages/types/constants";
 import { TRPCError } from "@trpc/server";
 import { getHTTPStatusCodeFromError } from "@trpc/server/unstable-core-do-not-import";
 import type { TRPCCodeError } from "./constants";
-import { ErrorHandler } from "@/api/packages/utils/handleError";
+import { ErrorHandler } from "@/server/packages/utils/handleError";
 
 export class HandlerTRPCError {
     public static TRPCErrorMessage(message: string, code: TRPCCodeError) {

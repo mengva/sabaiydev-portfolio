@@ -1,6 +1,6 @@
 import { RateLimiterMemory } from 'rate-limiter-flexible';
 import type { Context as HonoContext } from "hono"
-import { HandlerTRPCError } from '@/api/utils/handleTRPCError';
+import { HandlerTRPCError } from '@/server/utils/handleTRPCError';
 
 export class RateLimiterMiddleware {
     public static authLimiter = new RateLimiterMemory({

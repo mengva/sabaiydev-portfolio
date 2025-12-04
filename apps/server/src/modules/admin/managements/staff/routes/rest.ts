@@ -1,11 +1,11 @@
-import { AuthRestMiddleware } from '@/api/middleware/authREST';
+import { AuthRestMiddleware } from '@/server/middleware/authREST';
 import { Hono } from 'hono';
 import { StaffManageQueriesServices } from '../services/queries/staff';
-import { ZodValidateRestApi } from '@/api/utils/zodValidateRestApi';
-import { zodValidationGetOneStaffById, zodValidationRestApiAddOneStaffParam, type ZodValidationGetOneStaffById, zodValidationRestApiEditStaffParam, type ZodValidationAddOneStaff, type ZodValidationEditStaff, zodValidationSearchQueryStaff, type ZodValidationSearchQueryStaff, type ZodValidationEditMyData, zodValidationRestApiEditMyData, zodValidationRestApiEditMyDataParam, type ZodValidationRestApiEditMyDataParam } from '@/api/packages/validations/staff';
-import { zodValidationFilter } from '@/api/packages/validations/constants';
+import { ZodValidateRestApi } from '@/server/utils/zodValidateRestApi';
+import { zodValidationGetOneStaffById, zodValidationRestApiAddOneStaffParam, type ZodValidationGetOneStaffById, zodValidationRestApiEditStaffParam, type ZodValidationAddOneStaff, type ZodValidationEditStaff, zodValidationSearchQueryStaff, type ZodValidationSearchQueryStaff, type ZodValidationEditMyData, zodValidationRestApiEditMyData, zodValidationRestApiEditMyDataParam, type ZodValidationRestApiEditMyDataParam } from '@/server/packages/validations/staff';
+import { zodValidationFilter } from '@/server/packages/validations/constants';
 import { StaffManageMutationServices } from '../services/mutation/staff';
-import { HandlerHonoError } from '@/api/utils/handlerHonoError';
+import { HandlerHonoError } from '@/server/utils/handlerHonoError';
 import { ValidationStaffRoleAndPerServices } from '../utils/validateRoleAndPer';
 
 const staffManageRestRouter = new Hono();

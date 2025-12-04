@@ -25,10 +25,10 @@
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false,
     "paths": {
-      "@/api/*": [
+      "@/server/*": [
         "./src/*"
       ],
-      "@/api/packages/*": [
+      "@/server/packages/*": [
         "../../packages/services/*"
       ],
     },

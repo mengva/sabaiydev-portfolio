@@ -1,6 +1,6 @@
 import { relations } from "drizzle-orm";
 import { faq, translationFaq } from "./faq";
-import { staffs } from "@/api/db";
+import { staffs } from "@/server/db";
 
 export const faqRelations = relations(faq, ({ one, many }) => ({
     addByStaff: one(staffs, {

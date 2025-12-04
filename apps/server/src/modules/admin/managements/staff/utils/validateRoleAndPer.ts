@@ -1,11 +1,11 @@
-import db from "@/api/config/db";
-import { staffs } from "@/api/db";
-import type { StaffPermissionDto, StaffRoleDto } from "@/api/packages/types/constants";
+import db from "@/server/config/db";
+import { staffs } from "@/server/db";
+import type { StaffPermissionDto, StaffRoleDto } from "@/server/packages/types/constants";
 import { eq } from "drizzle-orm";
-import { CheckedRolePermissions, UserValidRolePermissions } from "@/api/packages/utils/constants";
-import type { ZodValidationAddOneStaff, ZodValidationEditMyData, ZodValidationEditStaff } from "@/api/packages/validations/staff";
-import { getHTTPError, HTTPErrorMessage } from "@/api/packages/utils/httpJsError";
-import type { StatusCodeErrorDto } from "@/api/utils/constants";
+import { CheckedRolePermissions, UserValidRolePermissions } from "@/server/packages/utils/constants";
+import type { ZodValidationAddOneStaff, ZodValidationEditMyData, ZodValidationEditStaff } from "@/server/packages/validations/staff";
+import { getHTTPError, HTTPErrorMessage } from "@/server/packages/utils/httpJsError";
+import type { StatusCodeErrorDto } from "@/server/utils/constants";
 
 export class ValidationStaffRoleAndPerServices {
 

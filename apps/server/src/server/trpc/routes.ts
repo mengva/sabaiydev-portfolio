@@ -1,6 +1,6 @@
-import authRestRouter from "@/api/modules/admin/auth/routes/rest";
-import manageProductRestRouter from "@/api/modules/admin/managements/products/routes/rest";
-import staffManageRestRouter from "@/api/modules/admin/managements/staff/routes/rest";
+import authRestRouter from "@/server/modules/admin/auth/routes/rest";
+import manageProductRestRouter from "@/server/modules/admin/managements/products/routes/rest";
+import staffManageRestRouter from "@/server/modules/admin/managements/staff/routes/rest";
 import { Hono } from 'hono';
 
 const restAPIRoute = new Hono();

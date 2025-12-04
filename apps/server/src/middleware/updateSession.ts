@@ -1,7 +1,7 @@
-import db from "@/api/config/db";
-import { adminSessionTokenName } from "@/api/packages/utils/constants/variables/auth";
-import { Helper } from "@/api/utils/helper";
-import { SecureSessionManagerServices } from "@/api/utils/secureSession";
+import db from "@/server/config/db";
+import { adminSessionTokenName } from "@/server/packages/utils/constants/variables/auth";
+import { Helper } from "@/server/utils/helper";
+import { SecureSessionManagerServices } from "@/server/utils/secureSession";
 import { eq } from "drizzle-orm";
 import { createMiddleware } from "hono/factory";
 import { sessions } from "../modules/admin/auth/entities";

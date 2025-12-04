@@ -34,7 +34,7 @@ export default function SignInWithOTPFormPage() {
     defaultValues: { email: "", code: "" },
   });
 
-  const verifiedByEmailMutation = trpc.app.admin.auth.verifiedEmail.useMutation({
+  const verifiedByEmailMutation = trpc.app.admin.auth.sendOTPSignIn.useMutation({
     onSuccess: (data: ServerResponseDto) => {
       if (data && data.success) {
         signInWithOTPMutation.setValue("email", email);
@@ -143,7 +143,7 @@ export default function SignInWithOTPFormPage() {
                       <FormItem>
                         <FormLabel>Enter OTP</FormLabel>
                         <FormControl>
-                          <Input disabled={isExpired} placeholder="123456" maxLength={6} {...field} />
+                          <Input disabled={isExpired} placeholder="12345678" maxLength={8} {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

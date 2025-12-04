@@ -1,11 +1,11 @@
-import type { NewsCategoryDto, NewsStatusDto, TranslationNewsDto } from "@/api/packages/types/news";
+import type { NewsCategoryDto, NewsStatusDto, TranslationNewsDto } from "@/server/packages/types/news";
 import { news, newsImages, translationNews } from "../entities";
-import type { Tx } from "@/api/types/constants";
-import type { FileDto } from "@/api/packages/types/constants";
-import { getHTTPError, HTTPErrorMessage } from "@/api/packages/utils/httpJsError";
-import db from "@/api/config/db";
-import { SecureFileUploadServices } from "@/api/utils/secureFileUpload";
-import type { ZodValidationEditOneNewsDataById, ZodValidationSearchQueryNews } from "@/api/packages/validations/news";
+import type { Tx } from "@/server/types/constants";
+import type { FileDto } from "@/server/packages/types/constants";
+import { getHTTPError, HTTPErrorMessage } from "@/server/packages/utils/httpJsError";
+import db from "@/server/config/db";
+import { SecureFileUploadServices } from "@/server/utils/secureFileUpload";
+import type { ZodValidationEditOneNewsDataById, ZodValidationSearchQueryNews } from "@/server/packages/validations/news";
 import { and, between, eq, ilike, or } from "drizzle-orm";
 
 interface AddOneNewsDto {

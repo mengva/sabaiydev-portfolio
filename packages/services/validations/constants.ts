@@ -15,6 +15,9 @@ export const zodValidationPassword = z.string()
 export const zodValidationOTPCode = z.string()
     .length(6, 'OTP must be exactly 6 digits')
     .regex(/^\d+$/, 'OTP must contain only numbers').nonempty('OTP is required');
+export const zodValidationOTPSignInCode = z.string()
+    .length(8, 'Code must be exactly 8 digits')
+    .regex(/^\d+$/, 'Code must contain only numbers').nonempty('Code is required');
 export const zodValidationPhoneNumber = z.string()
     .min(8, "Phone number must be at least 8 digits")
     .max(14, "Phone number must be at most 14 digits")

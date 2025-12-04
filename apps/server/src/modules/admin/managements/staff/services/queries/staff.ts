@@ -1,11 +1,11 @@
-import db from "@/api/config/db";
+import db from "@/server/config/db";
 import { StaffManageServices } from "../../utils/staff";
-import { staffs } from "@/api/db";
+import { staffs } from "@/server/db";
 import { count, desc, eq } from "drizzle-orm";
-import type { ZodValidationFilter } from "@/api/packages/validations/constants";
-import { HandlerTRPCError } from "@/api/utils/handleTRPCError";
-import { HandlerSuccess } from "@/api/utils/handleSuccess";
-import { getHTTPError } from "@/api/packages/utils/httpJsError";
+import type { ZodValidationFilter } from "@/server/packages/validations/constants";
+import { HandlerTRPCError } from "@/server/utils/handleTRPCError";
+import { HandlerSuccess } from "@/server/utils/handleSuccess";
+import { getHTTPError } from "@/server/packages/utils/httpJsError";
 
 export class StaffManageQueriesServices {
 

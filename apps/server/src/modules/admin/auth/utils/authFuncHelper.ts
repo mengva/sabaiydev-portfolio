@@ -1,18 +1,18 @@
-import db from "@/api/config/db";
-import { env } from "@/api/config/env";
-import type { StaffSchema, StaffVerificationSchema } from "@/api/packages/schema/staff";
-import type { ServerErrorDto } from "@/api/packages/types/constants";
-import CookieHelper from "@/api/packages/utils/cookie";
-import { Helper } from "@/api/utils/helper";
-import { SecureSessionManagerServices } from "@/api/utils/secureSession";
+import db from "@/server/config/db";
+import { env } from "@/server/config/env";
+import type { StaffSchema, StaffVerificationSchema } from "@/server/packages/schema/staff";
+import type { ServerErrorDto } from "@/server/packages/types/constants";
+import CookieHelper from "@/server/packages/utils/cookie";
+import { Helper } from "@/server/utils/helper";
+import { SecureSessionManagerServices } from "@/server/utils/secureSession";
 import { and, eq, or } from "drizzle-orm";
 import { sessions, verifications } from "../entities";
-import { staffs } from "@/api/db";
-import { getHTTPError, HTTPErrorMessage } from "@/api/packages/utils/httpJsError";
+import { staffs } from "@/server/db";
+import { getHTTPError, HTTPErrorMessage } from "@/server/packages/utils/httpJsError";
 import { AuthEnumMessage } from "./authEnumMessage";
 import type { Context as HonoContext } from "hono"
-import { RateLimiterMiddleware } from "@/api/middleware/rateLimiterMiddleware";
-import { adminSessionTokenName } from "@/api/packages/utils/constants/variables/auth";
+import { RateLimiterMiddleware } from "@/server/middleware/rateLimiterMiddleware";
+import { adminSessionTokenName } from "@/server/packages/utils/constants/variables/auth";
 
 export interface GenerateAuthSessionDto {
     sessionToken: string;
@@ -83,6 +83,47 @@ export class AuthFuncHelperServices {
         }
     }
 
+    public static async sendOTPSignIn({ staff, email, userAgent, ipAddress }: {
+        staff: StaffSchema;
+        email: string;
+        userAgent: string;
+        ipAddress: string
+    }) {
+        try {
+            const code = Helper.generateOTPSignIn();
+            const hashedOtp = await Helper.bcryptHast(code as string);
+            const codeExpired = Helper.codeExpiredIn(30); // OTP expires for 30 second
+            const mailOption = Helper.mailOptions({
+                from: env('EMAIL_ADDRESS'),
+                to: email,
+                subject: "Sabaiydev - Sign In Code",
+                html: `
+                    <div style="background-color: #e7e7e7; border-radius: 16px; padding: 10px; font-family: sans-serif, serif; letter-spacing: 1px;">
+                        <img width="100" height="100" style="border-radius: 50%; object-fit: cover; shape-outside: circle(); float: left; margin-right: 15px;"
+                            src="https://d1yjjnpx0p53s8.cloudfront.net/styles/logo-thumbnail/s3/112014/logo_sabai_pantone_326u.png?itok=c2j9eT5E"
+                            alt="sabaydev url" />
+                        <div style="display: block;">
+                            <div style="font-size: 28px; font-weight: 600;">Hi ${staff.fullName}</div>
+                            <div style="margin-top: 4px">Your sign in OTP code is:</div>
+                            <div style="font-size: 25px; margin-top: 4px; font-weight: 600;">${code}</div>
+                            <div style="margin-top: 4px">This code will expire in 5 minutes.</div>
+                        </div>
+                    </div>
+                `
+            });
+            await this.sendMailOTP({
+                staff,
+                userAgent,
+                ipAddress,
+                hashedOtp,
+                codeExpired,
+                mailOption
+            });
+        } catch (error) {
+            throw getHTTPError(error);
+        }
+    }
+
     public static async verifiedEmail({
         staff, email, userAgent, ipAddress
     }: {
@@ -102,7 +143,7 @@ export class AuthFuncHelperServices {
                 html: `
                     <div style="background-color: #e7e7e7; border-radius: 16px; padding: 10px; font-family: sans-serif, serif; letter-spacing: 1px;">
                         <img width="100" height="100" style="border-radius: 50%; object-fit: cover; shape-outside: circle(); float: left; margin-right: 15px;"
-                            src="https://scontent.fvte2-2.fna.fbcdn.net/v/t39.30808-6/325631385_1321444245066443_3088853530505435799_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeFnA5KH5XlezNuJTNDmOte6WFnGpL0VnRFYWcakvRWdEW-eziVHD67qhvLpqmRcE-c5WcgMGja2xPj0z_hRHzVV&_nc_ohc=4h5UQR0AzKcQ7kNvwF_OcS5&_nc_oc=AdmKRC3T7gsYqHpclBKuHI2FPS0QJVcI8jYRhn0-YVxpWmEzw6x66sADU-q27Bo4d1w&_nc_zt=23&_nc_ht=scontent.fvte2-2.fna&_nc_gid=oSUp6plNUoU21YYaRbcooA&oh=00_Afd6GralS6JuS8a6QzNJUhHa7UP4DZHb_Pj7KVlAaeXkjA&oe=68F28380"
+                            src="https://d1yjjnpx0p53s8.cloudfront.net/styles/logo-thumbnail/s3/112014/logo_sabai_pantone_326u.png?itok=c2j9eT5E"
                             alt="sabaydev url" />
                         <div style="display: block;">
                             <div style="font-size: 28px; font-weight: 600;">Hi ${staff.fullName}</div>
@@ -113,6 +154,30 @@ export class AuthFuncHelperServices {
                     </div>
                 `
             });
+            await this.sendMailOTP({
+                staff,
+                userAgent,
+                ipAddress,
+                hashedOtp,
+                codeExpired,
+                mailOption
+            });
+        } catch (error: ServerErrorDto) {
+            throw getHTTPError(error);
+        }
+    }
+
+    public static async sendMailOTP({
+        staff, userAgent, ipAddress, hashedOtp, codeExpired, mailOption
+    }: {
+        staff: StaffSchema;
+        userAgent: string;
+        ipAddress: string;
+        hashedOtp: string;
+        codeExpired: Date;
+        mailOption: { from: string; to: string; subject: string; html: string; }
+    }) {
+        try {
             await db.transaction(async tx => {
                 if (staff && staff?.verifications?.length > 0) {
                     await tx.delete(verifications).where(and(
@@ -136,7 +201,7 @@ export class AuthFuncHelperServices {
                     RateLimiterMiddleware.authLimiter.delete(ipAddress);
                 }
             });
-        } catch (error: ServerErrorDto) {
+        } catch (error) {
             throw getHTTPError(error);
         }
     }

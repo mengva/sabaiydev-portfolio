@@ -1,6 +1,6 @@
 import { relations } from "drizzle-orm";
 import { applyCareers, careers, customerInformations, customerImages, cvCustomers, educations, experiences, skills, translationCareers } from "./career";
-import { staffs } from "@/api/db";
+import { staffs } from "@/server/db";
 
 export const careerRelations = relations(careers, ({ one, many }) => ({
     addByStaff: one(staffs, {

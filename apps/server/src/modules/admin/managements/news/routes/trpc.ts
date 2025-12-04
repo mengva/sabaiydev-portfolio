@@ -1,10 +1,10 @@
-import { AuthTRPCMiddleware } from "@/api/middleware/authTRPC";
-import { zodValidationFilter, type ZodValidationFilter } from "@/api/packages/validations/constants";
-import { publicProcedure, router } from "@/api/server/trpc/procedures";
+import { AuthTRPCMiddleware } from "@/server/middleware/authTRPC";
+import { zodValidationFilter, type ZodValidationFilter } from "@/server/packages/validations/constants";
+import { publicProcedure, router } from "@/server/server/trpc/procedures";
 import { NewsManageQueriesServices } from "../services/queries";
-import { HandlerTRPCError } from "@/api/utils/handleTRPCError";
-import { zodValidationAddOneNews, zodValidationAddOneNewsData, zodValidationEditOneNewsById, zodValidationEditOneNewsDataById, zodValidationGetOneNewsById, zodValidationRemoveOneNewsById, zodValidationRemoveOneNewsImageById, zodValidationSearchQueryNews, type ZodValidationAddOneNews, type ZodValidationEditOneNewsById, type ZodValidationEditOneNewsDataById, type ZodValidationSearchQueryNews } from "@/api/packages/validations/news";
-import { ValidationStaffRoleAndPerUtils } from "@/api/utils/validateStaffRoleAndPermission";
+import { HandlerTRPCError } from "@/server/utils/handleTRPCError";
+import { zodValidationAddOneNews, zodValidationAddOneNewsData, zodValidationEditOneNewsById, zodValidationEditOneNewsDataById, zodValidationGetOneNewsById, zodValidationRemoveOneNewsById, zodValidationRemoveOneNewsImageById, zodValidationSearchQueryNews, type ZodValidationAddOneNews, type ZodValidationEditOneNewsById, type ZodValidationEditOneNewsDataById, type ZodValidationSearchQueryNews } from "@/server/packages/validations/news";
+import { ValidationStaffRoleAndPerUtils } from "@/server/utils/validateStaffRoleAndPermission";
 import { NewsManageMutationServices } from "../services/mutation";
 
 export const NewsManageTRPCRouter = router({

@@ -1,6 +1,6 @@
-import { AuthRestMiddleware } from '@/api/middleware/authREST';
+import { AuthRestMiddleware } from '@/server/middleware/authREST';
 import { Hono } from 'hono';
-import { HandlerHonoError } from '@/api/utils/handlerHonoError';
+import { HandlerHonoError } from '@/server/utils/handlerHonoError';
 
 const productManageRestRouter = new Hono();
 

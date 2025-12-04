@@ -1,11 +1,11 @@
-import db from "@/api/config/db";
-import { getHTTPError, HTTPErrorMessage } from "@/api/packages/utils/httpJsError";
-import { HandlerSuccess } from "@/api/utils/handleSuccess";
+import db from "@/server/config/db";
+import { getHTTPError, HTTPErrorMessage } from "@/server/packages/utils/httpJsError";
+import { HandlerSuccess } from "@/server/utils/handleSuccess";
 import { count, desc, eq } from "drizzle-orm";
 import { news, newsImages, translationNews } from "../../entities";
-import type { ZodValidationAddOneNews, ZodValidationAddOneNewsData, ZodValidationEditOneNewsById, ZodValidationEditOneNewsDataById, ZodValidationSearchQueryNews } from "@/api/packages/validations/news";
+import type { ZodValidationAddOneNews, ZodValidationAddOneNewsData, ZodValidationEditOneNewsById, ZodValidationEditOneNewsDataById, ZodValidationSearchQueryNews } from "@/server/packages/validations/news";
 import { NewsManageServices } from "../../utils/news";
-import { SecureFileUploadServices } from "@/api/utils/secureFileUpload";
+import { SecureFileUploadServices } from "@/server/utils/secureFileUpload";
 
 export class NewsManageMutationServices {
     public static async addOne(input: ZodValidationAddOneNews) {

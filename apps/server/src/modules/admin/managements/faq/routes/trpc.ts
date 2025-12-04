@@ -1,11 +1,11 @@
-import { AuthTRPCMiddleware } from "@/api/middleware/authTRPC";
-import { zodValidationFilter, type ZodValidationFilter } from "@/api/packages/validations/constants";
-import { HandlerTRPCError } from "@/api/utils/handleTRPCError";
+import { AuthTRPCMiddleware } from "@/server/middleware/authTRPC";
+import { zodValidationFilter, type ZodValidationFilter } from "@/server/packages/validations/constants";
+import { HandlerTRPCError } from "@/server/utils/handleTRPCError";
 import { FaqManageQueriesServices } from "../services/queries";
-import { zodValidationAddOneFaqData, zodValidationEditOneFaqData, zodValidationGetOneFaqById, zodValidationRemoveOneFaqById, zodValidationSearchQueryFaq, type ZodValidationAddOneFaqData, type ZodValidationEditOneFaqData, type ZodValidationSearchQueryFaq } from "@/api/packages/validations/faq";
-import { ValidationStaffRoleAndPerUtils } from "@/api/utils/validateStaffRoleAndPermission";
+import { zodValidationAddOneFaqData, zodValidationEditOneFaqData, zodValidationGetOneFaqById, zodValidationRemoveOneFaqById, zodValidationSearchQueryFaq, type ZodValidationAddOneFaqData, type ZodValidationEditOneFaqData, type ZodValidationSearchQueryFaq } from "@/server/packages/validations/faq";
+import { ValidationStaffRoleAndPerUtils } from "@/server/utils/validateStaffRoleAndPermission";
 import { FaqManageMutationServices } from "../services/mutation";
-import { publicProcedure, router } from "@/api/server/trpc/procedures";
+import { publicProcedure, router } from "@/server/server/trpc/procedures";
 
 export const FaqManageTRPCRouter = router({
     list: publicProcedure.input(zodValidationFilter).use(AuthTRPCMiddleware.authSanitizedBody).query(async ({ ctx }) => {

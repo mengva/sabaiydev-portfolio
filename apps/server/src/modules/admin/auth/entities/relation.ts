@@ -1,6 +1,6 @@
 import { relations } from "drizzle-orm";
 import { sessions, verifications } from "./auth";
-import { staffs } from "@/api/db";
+import { staffs } from "@/server/db";
 
 export const sessionRelations = relations(sessions, ({ one }) => ({
     staff: one(staffs, {

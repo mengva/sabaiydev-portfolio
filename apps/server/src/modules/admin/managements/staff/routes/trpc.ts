@@ -1,10 +1,10 @@
-import { zodValidationAddOneStaff, zodValidationGetOneStaffById, zodValidationRemoveOneStaffById, zodValidationSearchQueryStaff, zodValidationEditMyData, zodValidationEditStaff, type ZodValidationAddOneStaff, type ZodValidationGetOneStaffById, type ZodValidationRemoveOneStaffById, type ZodValidationSearchQueryStaff, type ZodValidationEditMyData, type ZodValidationEditStaff } from "@/api/packages/validations/staff";
-import { publicProcedure, router } from "@/api/server/trpc/procedures";
+import { zodValidationAddOneStaff, zodValidationGetOneStaffById, zodValidationRemoveOneStaffById, zodValidationSearchQueryStaff, zodValidationEditMyData, zodValidationEditStaff, type ZodValidationAddOneStaff, type ZodValidationGetOneStaffById, type ZodValidationRemoveOneStaffById, type ZodValidationSearchQueryStaff, type ZodValidationEditMyData, type ZodValidationEditStaff } from "@/server/packages/validations/staff";
+import { publicProcedure, router } from "@/server/server/trpc/procedures";
 import { StaffManageMutationServices } from "../services/mutation/staff";
-import { AuthTRPCMiddleware } from "@/api/middleware/authTRPC";
+import { AuthTRPCMiddleware } from "@/server/middleware/authTRPC";
 import { StaffManageQueriesServices } from "../services/queries/staff";
-import { zodValidationFilter, type ZodValidationFilter } from "@/api/packages/validations/constants";
-import { HandlerTRPCError } from "@/api/utils/handleTRPCError";
+import { zodValidationFilter, type ZodValidationFilter } from "@/server/packages/validations/constants";
+import { HandlerTRPCError } from "@/server/utils/handleTRPCError";
 import { ValidationStaffRoleAndPerServices } from "../utils/validateRoleAndPer";
 
 export const StaffManageTRPCRouter = router({

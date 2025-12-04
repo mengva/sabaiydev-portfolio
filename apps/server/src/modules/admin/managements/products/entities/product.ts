@@ -1,7 +1,7 @@
 import { index, integer, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
 import { staffs } from "../../staff/entities/staff";
 import { productCategoryEnum, productStatusEnum } from "./enum";
-import { localEnum } from "@/api/entities/enum";
+import { localEnum } from "@/server/entities/enum";
 
 export const products = pgTable("products", {
     id: uuid("id").defaultRandom().primaryKey(),

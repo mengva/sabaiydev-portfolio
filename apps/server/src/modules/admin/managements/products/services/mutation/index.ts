@@ -1,11 +1,11 @@
-import db from "@/api/config/db";
-import type { ZodValidationAddOneProduct, ZodValidationAddOneProductData, ZodValidationEditOneProduct, ZodValidationEditOneProductData, ZodValidationSearchQueryProduct } from "@/api/packages/validations/product";
+import db from "@/server/config/db";
+import type { ZodValidationAddOneProduct, ZodValidationAddOneProductData, ZodValidationEditOneProduct, ZodValidationEditOneProductData, ZodValidationSearchQueryProduct } from "@/server/packages/validations/product";
 import { productImages, products, translationProducts } from "../../entities";
-import { SecureFileUploadServices } from "@/api/utils/secureFileUpload";
-import { HandlerSuccess } from "@/api/utils/handleSuccess";
+import { SecureFileUploadServices } from "@/server/utils/secureFileUpload";
+import { HandlerSuccess } from "@/server/utils/handleSuccess";
 import { ProductManageServices } from "../../utils/product";
 import { count, desc, eq } from "drizzle-orm";
-import { getHTTPError, HTTPErrorMessage } from "@/api/packages/utils/httpJsError";
+import { getHTTPError, HTTPErrorMessage } from "@/server/packages/utils/httpJsError";
 
 export class ProductManageMutationServices {
     public static async addOne(input: ZodValidationAddOneProduct) {

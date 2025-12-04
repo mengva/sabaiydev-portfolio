@@ -1,5 +1,5 @@
 import { zValidator } from "@hono/zod-validator";
-import type { MyContext } from "@/api/server/trpc/context";
+import type { MyContext } from "@/server/server/trpc/context";
 import { HandlerTRPCError } from "./handleTRPCError";
 
 type bodyType = "cookie" | 'form' | "json" | "header" | "param" | "query";

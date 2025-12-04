@@ -1,8 +1,8 @@
 import { relations } from "drizzle-orm";
 import { products } from "../../products/entities/product";
 import { addAndEditStaffs, staffs } from "./staff";
-import { passwordResetTokens, sessions, verifications } from "@/api/modules/admin/auth/entities";
-import { bulletinBoards, careers, faq, news } from "@/api/db";
+import { passwordResetTokens, sessions, verifications } from "@/server/modules/admin/auth/entities";
+import { bulletinBoards, careers, faq, news } from "@/server/db";
 
 export const staffRelations = relations(staffs, ({ one, many }) => ({
     sessions: many(sessions),

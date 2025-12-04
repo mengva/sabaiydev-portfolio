@@ -1,6 +1,6 @@
 import { HandlerTRPCError } from "../utils/handleTRPCError";
 import type { MyContext } from "../server/trpc/context";
-import { DOMAndSanitizedServices } from "@/api/packages/utils/domAndSanitize";
+import { DOMAndSanitizedServices } from "@/server/packages/utils/domAndSanitize";
 
 export class DomAndSanitizeRESTBodyMiddleware {
     public static setData(bodyData: any, data: any) {

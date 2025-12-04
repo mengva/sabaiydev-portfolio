@@ -5,8 +5,8 @@ import { appRouter } from './router';
 import { createdTRPCContext, handleSetKeyInHono } from './context';
 import { header } from '../../config/env';
 import restAPIRoute from './routes';
-import { HandlerHonoError } from '@/api/utils/handlerHonoError';
-import { updatedSession } from '@/api/middleware/updateSession';
+import { HandlerHonoError } from '@/server/utils/handlerHonoError';
+import { updatedSession } from '@/server/middleware/updateSession';
 
 const app = new Hono();
 

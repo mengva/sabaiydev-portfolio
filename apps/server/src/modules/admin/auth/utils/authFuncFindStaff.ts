@@ -1,15 +1,15 @@
-import db from "@/api/config/db";
-import { Helper } from "@/api/utils/helper";
+import db from "@/server/config/db";
+import { Helper } from "@/server/utils/helper";
 import { AuthEnumMessage } from "./authEnumMessage";
-import type { ServerErrorDto } from "@/api/packages/types/constants";
+import type { ServerErrorDto } from "@/server/packages/types/constants";
 import { eq, and } from "drizzle-orm";
-import { staffs } from "@/api/db";
-import { getHTTPError, HTTPErrorMessage } from "@/api/packages/utils/httpJsError";
-import type { AuthSignInDto } from "@/api/packages/types/auth";
-import type { StaffSchema, StaffVerificationSchema } from "@/api/packages/schema/staff";
-import { AuthFuncHelperServices } from "./authFuncHelperUtils";
+import { staffs } from "@/server/db";
+import { getHTTPError, HTTPErrorMessage } from "@/server/packages/utils/httpJsError";
+import type { AuthSignInDto } from "@/server/packages/types/auth";
+import type { StaffSchema, StaffVerificationSchema } from "@/server/packages/schema/staff";
+import { AuthFuncHelperServices } from "./authFuncHelper";
 
-export class AuthFuncFindStaffUtils {
+export class AuthFuncFindStaffServices {
     public static async findStaffSignIn({ email, password }: AuthSignInDto) {
         try {
             const staff = await db.query.staffs.findFirst({
@@ -28,7 +28,7 @@ export class AuthFuncFindStaffUtils {
         }
     }
 
-    public static async findStaffSignInWithOTPCodeAndEmail({ email, code, userAgent, ipAddress }: {
+    public static async findStaffSignInOTP({ email, code, userAgent, ipAddress }: {
         email: string, code: string, userAgent: string | null, ipAddress: string | null
     }) {
         try {

@@ -1,27 +1,27 @@
 import type { AuthResetPasswordDto } from "../types/auth";
-import { AuthFuncHelperServices } from "./authFuncHelperUtils";
+import { AuthFuncHelperServices } from "./authFuncHelper";
 import { and, eq } from "drizzle-orm";
-import { type ServerErrorDto } from "@/api/packages/types/constants";
-import type { AuthSignInDto, AuthSignInWithOTPAndEmailDto, AuthSignUpDto } from "@/api/packages/types/auth";
+import { type ServerErrorDto } from "@/server/packages/types/constants";
+import type { AuthSignInDto, AuthSignInWithOTPAndEmailDto, AuthSignUpDto } from "@/server/packages/types/auth";
 import { AuthEnumMessage } from "./authEnumMessage";
-import type { StaffSchema } from "@/api/packages/schema/staff";
+import type { StaffSchema } from "@/server/packages/schema/staff";
 import type { Context as HonoContext } from "hono"
-import { adminSessionTokenName } from "@/api/packages/utils/constants/variables/auth";
-import GlobalHelper from "@/api/packages/utils/globalHelper";
-import { HandlerSuccess } from "@/api/utils/handleSuccess";
+import { adminSessionTokenName } from "@/server/packages/utils/constants/variables/auth";
+import GlobalHelper from "@/server/packages/utils/globalHelper";
+import { HandlerSuccess } from "@/server/utils/handleSuccess";
 import { sessions } from "../entities";
-import { staffs } from "@/api/db";
-import { getHTTPError, HTTPErrorMessage } from "@/api/packages/utils/httpJsError";
-import { AuthFuncFindStaffUtils } from "./authFuncFindStaffUtils";
-import db from "@/api/config/db";
-import type { MyContext } from "@/api/server/trpc/context";
-import { RateLimiterMiddleware } from "@/api/middleware/rateLimiterMiddleware";
+import { staffs } from "@/server/db";
+import { getHTTPError, HTTPErrorMessage } from "@/server/packages/utils/httpJsError";
+import db from "@/server/config/db";
+import type { MyContext } from "@/server/server/trpc/context";
+import { RateLimiterMiddleware } from "@/server/middleware/rateLimiterMiddleware";
+import { AuthFuncFindStaffServices } from "./authFuncFindStaff";
 
-export class AuthFuncUtils {
+export class AuthFuncServices {
 
     public static signInFunc = async (input: AuthSignInDto, ctx: HonoContext) => {
         try {
-            const staff = await AuthFuncFindStaffUtils.findStaffSignIn(input) as StaffSchema;
+            const staff = await AuthFuncFindStaffServices.findStaffSignIn(input) as StaffSchema;
             await AuthFuncHelperServices.signIn(staff, ctx);
             return HandlerSuccess.success(AuthEnumMessage.successSignin);
         } catch (error: ServerErrorDto) {
@@ -32,7 +32,7 @@ export class AuthFuncUtils {
     public static async signInOTPFunc(input: AuthSignInWithOTPAndEmailDto, ctx: HonoContext) {
         try {
             const { userAgent, ipAddress } = AuthFuncHelperServices.getIpAddressAndUserAgent(ctx);
-            const staff = await AuthFuncFindStaffUtils.findStaffSignInWithOTPCodeAndEmail({ ...input, userAgent, ipAddress }) as StaffSchema;
+            const staff = await AuthFuncFindStaffServices.findStaffSignInOTP({ ...input, userAgent, ipAddress }) as StaffSchema;
             await AuthFuncHelperServices.signIn(staff, ctx);
             return HandlerSuccess.success(AuthEnumMessage.successSignin);
         } catch (error) {
@@ -65,7 +65,7 @@ export class AuthFuncUtils {
     public static signUpFunc = async (input: AuthSignUpDto) => {
         try {
             await db.transaction(async tx => {
-                const { hastPassword } = await AuthFuncFindStaffUtils.findStaffSignUp(input);
+                const { hastPassword } = await AuthFuncFindStaffServices.findStaffSignUp(input);
                 const uniquePermissions = GlobalHelper.uniquePermissions(input.permissions);
                 await tx.insert(staffs).values({
                     ...input,
@@ -81,7 +81,7 @@ export class AuthFuncUtils {
 
     public static verifiedEmailFunc = async (email: string, userAgent: string, ipAddress: string) => {
         try {
-            const staff = await AuthFuncFindStaffUtils.findStaffVerifiedEmail(email) as StaffSchema;
+            const staff = await AuthFuncFindStaffServices.findStaffVerifiedEmail(email) as StaffSchema;
             await AuthFuncHelperServices.verifiedEmail({ staff, email, userAgent, ipAddress });
             return HandlerSuccess.success(AuthEnumMessage.successSendOTP);
         } catch (error: ServerErrorDto) {
@@ -93,7 +93,7 @@ export class AuthFuncUtils {
         email: string, code: string, userAgent: string | null, ipAddress: string | null
     }) => {
         try {
-            const staff = await AuthFuncFindStaffUtils.findStaffVerifiedOTPCode(email) as StaffSchema;
+            const staff = await AuthFuncFindStaffServices.findStaffVerifiedOTPCode(email) as StaffSchema;
             await AuthFuncHelperServices.verifiedOTPCode({ staff, clientOTP: code, userAgent, ipAddress });
             return HandlerSuccess.success(AuthEnumMessage.successVerifiedOTP);
         } catch (error: ServerErrorDto) {
@@ -104,7 +104,7 @@ export class AuthFuncUtils {
     public static resetPasswordFunc = async (input: AuthResetPasswordDto, ctx: MyContext['honoContext']) => {
         try {
             const { ipAddress, userAgent } = AuthFuncHelperServices.getIpAddressAndUserAgent(ctx);
-            const staff = await AuthFuncFindStaffUtils.findStaffResetPassword(input.email) as StaffSchema;
+            const staff = await AuthFuncFindStaffServices.findStaffResetPassword(input.email) as StaffSchema;
             await AuthFuncHelperServices.resetPassword({ staff, ...input, userAgent, ipAddress });
             return HandlerSuccess.success("Reset password successfully");
         } catch (error: ServerErrorDto) {

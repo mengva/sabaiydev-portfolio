@@ -31,6 +31,11 @@ export class Helper {
         return (Math.floor(100000 + Math.random() * 900000)).toString() as string;
     }
 
+    public static generateOTPSignIn() {
+        // Generate a random 8 digit OTP for sign in
+        return (Math.floor(10000000 + Math.random() * 90000000)).toString() as string;
+    }
+
     public static codeExpiredIn(second: number) {
         // Set the OTP code to expire in m minutes
         return new Date(Date.now() + second * 1000) as Date;

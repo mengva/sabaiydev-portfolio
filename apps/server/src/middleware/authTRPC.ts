@@ -1,12 +1,12 @@
 import { t } from "../server/trpc/procedures";
 import { SecureSessionManagerServices } from "../utils/secureSession";
 import { Helper } from "../utils/helper";
-import { AuthEnumMessage } from "@/api/modules/admin/auth/utils/authEnumMessage";
+import { AuthEnumMessage } from "@/server/modules/admin/auth/utils/authEnumMessage";
 import { RateLimiterMiddleware } from "./rateLimiterMiddleware";
-import { adminSessionTokenName } from "@/api/packages/utils/constants/variables/auth";
-import { HandlerTRPCError } from "@/api/utils/handleTRPCError";
+import { adminSessionTokenName } from "@/server/packages/utils/constants/variables/auth";
+import { HandlerTRPCError } from "@/server/utils/handleTRPCError";
 import type { MyContext } from "../server/trpc/context";
-import { DOMAndSanitizedServices } from "@/api/packages/utils/domAndSanitize";
+import { DOMAndSanitizedServices } from "@/server/packages/utils/domAndSanitize";
 
 export class AuthTRPCMiddleware {
 

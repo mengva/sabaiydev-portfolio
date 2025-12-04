@@ -1,5 +1,5 @@
-import type { AuthSignInDto, AuthSignInWithOTPAndEmailDto } from "@/api/packages/types/auth";
-import type { MyContext } from "@/api/server/trpc/context";
+import type { AuthSignInDto, AuthSignInWithOTPAndEmailDto } from "@/server/packages/types/auth";
+import type { MyContext } from "@/server/server/trpc/context";
 
 export interface AuthTRPCSignInDto {
     input: AuthSignInDto;

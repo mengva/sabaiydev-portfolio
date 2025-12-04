@@ -1,10 +1,10 @@
-import type { Tx } from "@/api/types/constants";
-import { getHTTPError, HTTPErrorMessage } from "@/api/packages/utils/httpJsError";
-import db from "@/api/config/db";
+import type { Tx } from "@/server/types/constants";
+import { getHTTPError, HTTPErrorMessage } from "@/server/packages/utils/httpJsError";
+import db from "@/server/config/db";
 import { and, between, eq, ilike, or, sql } from "drizzle-orm";
-import type { FaqCategoryDto, FaqStatusDto, TranslationFaqDto } from "@/api/packages/types/faq";
+import type { FaqCategoryDto, FaqStatusDto, TranslationFaqDto } from "@/server/packages/types/faq";
 import { faq, translationFaq } from "../entities";
-import type { ZodValidationEditOneFaqData, ZodValidationSearchQueryFaq } from "@/api/packages/validations/faq";
+import type { ZodValidationEditOneFaqData, ZodValidationSearchQueryFaq } from "@/server/packages/validations/faq";
 
 interface AddOneFaqDto {
     translations: TranslationFaqDto[];

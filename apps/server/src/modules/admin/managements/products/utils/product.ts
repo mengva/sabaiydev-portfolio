@@ -1,12 +1,12 @@
 import { productImages, products, translationProducts } from "../entities";
-import type { ProductCategoryDto, ProductStatusDto, TranslationProductDto } from "@/api/packages/types/product";
-import type { Tx } from "@/api/types/constants";
-import { SecureFileUploadServices } from "@/api/utils/secureFileUpload";
-import type { FileDto } from "@/api/packages/types/constants";
-import db from "@/api/config/db";
-import type { ZodValidationEditOneProductData, ZodValidationSearchQueryProduct } from "@/api/packages/validations/product";
+import type { ProductCategoryDto, ProductStatusDto, TranslationProductDto } from "@/server/packages/types/product";
+import type { Tx } from "@/server/types/constants";
+import { SecureFileUploadServices } from "@/server/utils/secureFileUpload";
+import type { FileDto } from "@/server/packages/types/constants";
+import db from "@/server/config/db";
+import type { ZodValidationEditOneProductData, ZodValidationSearchQueryProduct } from "@/server/packages/validations/product";
 import { and, between, eq, ilike, or } from "drizzle-orm";
-import { getHTTPError, HTTPErrorMessage } from "@/api/packages/utils/httpJsError";
+import { getHTTPError, HTTPErrorMessage } from "@/server/packages/utils/httpJsError";
 
 interface AddOneProductDto {
     translations: TranslationProductDto[];

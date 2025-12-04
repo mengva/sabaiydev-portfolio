@@ -1,7 +1,7 @@
-import { zodValidationResetPassword, zodValidationSignIn, zodValidationSignInOTP, zodValidationSignUp, zodValidationVerifiedEmail, zodValidationVerifiedOTPCode } from "@/api/packages/validations/auth";
-import { publicProcedure, router } from "@/api/server/trpc/procedures";
+import { zodValidationResetPassword, zodValidationSignIn, zodValidationSignInOTP, zodValidationSignUp, zodValidationVerifiedEmail, zodValidationVerifiedOTPCode } from "@/server/packages/validations/auth";
+import { publicProcedure, router } from "@/server/server/trpc/procedures";
 import { AuthServices } from "../services/mutation/auth";
-import { AuthTRPCMiddleware } from "@/api/middleware/authTRPC";
+import { AuthTRPCMiddleware } from "@/server/middleware/authTRPC";
 
 export const authTRPCRouter = router({
     signIn: publicProcedure.input(zodValidationSignIn).use(AuthTRPCMiddleware.alreadySignIn).mutation(async c => {
@@ -15,6 +15,9 @@ export const authTRPCRouter = router({
     }),
     signUp: publicProcedure.input(zodValidationSignUp).use(AuthTRPCMiddleware.alreadySignIn).mutation(async ({ input }) => {
         return await AuthServices.signUp(input);
+    }),
+    sendOTPSignIn: publicProcedure.input(zodValidationVerifiedEmail).use(AuthTRPCMiddleware.alreadySignIn).mutation(async ({ input, ctx }) => {
+        return await AuthServices.sendOTPSignIn(input.email, ctx['honoContext']);
     }),
     verifiedEmail: publicProcedure.input(zodValidationVerifiedEmail).use(AuthTRPCMiddleware.alreadySignIn).mutation(async ({ input, ctx }) => {
         return await AuthServices.verifiedEmail(input.email, ctx);

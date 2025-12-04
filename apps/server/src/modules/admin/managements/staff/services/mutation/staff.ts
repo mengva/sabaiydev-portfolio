@@ -1,12 +1,12 @@
-import db from "@/api/config/db";
-import { addAndEditStaffs, staffs } from "@/api/db";
-import type { ZodValidationAddOneStaff, ZodValidationSearchQueryStaff, ZodValidationEditMyData, ZodValidationEditStaff } from "@/api/packages/validations/staff";
-import { Helper } from "@/api/utils/helper";
+import db from "@/server/config/db";
+import { addAndEditStaffs, staffs } from "@/server/db";
+import type { ZodValidationAddOneStaff, ZodValidationSearchQueryStaff, ZodValidationEditMyData, ZodValidationEditStaff } from "@/server/packages/validations/staff";
+import { Helper } from "@/server/utils/helper";
 import { StaffManageServices } from "../../utils/staff";
 import { count, desc, eq, ne } from "drizzle-orm";
-import type { ZodValidationStaffPermissions } from "@/api/packages/validations/constants";
-import { HandlerSuccess } from "@/api/utils/handleSuccess";
-import { getHTTPError, HTTPError } from "@/api/packages/utils/httpJsError";
+import { HandlerSuccess } from "@/server/utils/handleSuccess";
+import { getHTTPError, HTTPError } from "@/server/packages/utils/httpJsError";
+import type { ZodValidationStaffPermissions } from "@/server/packages/validations/variables/staff";
 
 export class StaffManageMutationServices {
 

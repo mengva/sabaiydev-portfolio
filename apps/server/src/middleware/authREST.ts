@@ -2,9 +2,9 @@ import { createMiddleware } from "hono/factory";
 import { HTTPException } from "hono/http-exception";
 import { SecureSessionManagerServices } from "../utils/secureSession";
 import { Helper } from "../utils/helper";
-import { AuthEnumMessage } from "@/api/modules/admin/auth/utils/authEnumMessage";
+import { AuthEnumMessage } from "@/server/modules/admin/auth/utils/authEnumMessage";
 import { RateLimiterMiddleware } from "./rateLimiterMiddleware";
-import { adminSessionTokenName } from "@/api/packages/utils/constants/variables/auth";
+import { adminSessionTokenName } from "@/server/packages/utils/constants/variables/auth";
 import type { MyContext } from "../server/trpc/context";
 import { DomAndSanitizeRESTBodyMiddleware } from "./domAndSanitizeRESTBody";
 

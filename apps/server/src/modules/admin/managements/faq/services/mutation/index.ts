@@ -1,7 +1,7 @@
-import db from "@/api/config/db";
-import { getHTTPError, HTTPErrorMessage } from "@/api/packages/utils/httpJsError";
-import type { ZodValidationAddOneFaqData, ZodValidationEditOneFaqData, ZodValidationSearchQueryFaq } from "@/api/packages/validations/faq";
-import { HandlerSuccess } from "@/api/utils/handleSuccess";
+import db from "@/server/config/db";
+import { getHTTPError, HTTPErrorMessage } from "@/server/packages/utils/httpJsError";
+import type { ZodValidationAddOneFaqData, ZodValidationEditOneFaqData, ZodValidationSearchQueryFaq } from "@/server/packages/validations/faq";
+import { HandlerSuccess } from "@/server/utils/handleSuccess";
 import { count, desc, eq } from "drizzle-orm";
 import { FaqManageServices } from "../../utils/faq";
 import { faq, translationFaq } from "../../entities";

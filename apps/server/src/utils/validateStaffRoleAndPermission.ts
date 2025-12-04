@@ -1,7 +1,7 @@
-import db from "@/api/config/db";
-import { staffs } from "@/api/db";
-import type { TRPCCodeError } from "@/api/utils/constants";
-import { HandlerTRPCError } from "@/api/utils/handleTRPCError";
+import db from "@/server/config/db";
+import { staffs } from "@/server/db";
+import type { TRPCCodeError } from "@/server/utils/constants";
+import { HandlerTRPCError } from "@/server/utils/handleTRPCError";
 import { eq } from "drizzle-orm";
 
 interface StaffErrorMessageDto {

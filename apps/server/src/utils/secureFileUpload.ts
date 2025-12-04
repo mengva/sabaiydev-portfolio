@@ -1,8 +1,8 @@
-import { env } from '@/api/config/env';
+import { env } from '@/server/config/env';
 import { v2 as cloudinary } from 'cloudinary';
-import type { FileDto } from '@/api/packages/types/constants';
+import type { FileDto } from '@/server/packages/types/constants';
 import { HandlerTRPCError } from './handleTRPCError';
-import { ValidationSecureFileUploadServices } from '@/api/packages/utils/secureFile';
+import { ValidationSecureFileUploadServices } from '@/server/packages/utils/secureFile';
 
 cloudinary.config({
     cloud_name: env('CLOUDINARY_NAME'),

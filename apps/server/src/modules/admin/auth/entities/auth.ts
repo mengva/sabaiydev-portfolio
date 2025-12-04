@@ -1,4 +1,4 @@
-import { staffs } from "@/api/db";
+import { staffs } from "@/server/db";
 import { boolean, index, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
 
 export const verifications = pgTable("staff_verifications", {

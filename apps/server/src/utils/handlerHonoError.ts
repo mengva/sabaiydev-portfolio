@@ -1,10 +1,10 @@
-import type { ServerErrorDto } from "@/api/packages/types/constants";
+import type { ServerErrorDto } from "@/server/packages/types/constants";
 import { getHTTPStatusCodeFromError, TRPCError } from "@trpc/server/unstable-core-do-not-import";
 import type { Context as HonoContext } from "hono"
 import { HTTPException } from "hono/http-exception";
 import type { HTTPResponseError } from "hono/types";
 import type { StatusCodeErrorDto } from "./constants";
-import { ErrorHandler } from "@/api/packages/utils/handleError";
+import { ErrorHandler } from "@/server/packages/utils/handleError";
 
 export class HandlerHonoError {
     public static onError(err: Error | HTTPResponseError, c: HonoContext) {

@@ -1,6 +1,6 @@
-import { DOMPurifyServices } from "@/api/packages/utils/DOMPurify";
-import type { ServerResponseDto } from "@/api/packages/types/constants";
+import type { ServerResponseDto } from "@/server/packages/types/constants";
 import { HandlerTRPCError } from "./handleTRPCError";
+import { DOMPurifyServices } from "@/server/packages/utils/domPurify";
 
 export class ValidateAuthServices {
     public static async validateAuth({
