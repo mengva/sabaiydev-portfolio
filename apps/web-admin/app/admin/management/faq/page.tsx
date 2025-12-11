@@ -42,7 +42,7 @@ import { ErrorHandler } from "@/admin/packages/utils/handleError";
 import GlobalHelper from "@/admin/packages/utils/globalHelper";
 import { PaginationComponent } from "@/components/pagination";
 import Link from "next/link";
-import ListLoadingComponent from "@/components/listLoading";
+import LoadingListComponent from "@/components/listLoading";
 import { SearchQueryNewsStatusArray } from "@/admin/packages/utils/constants/variables/news";
 import { NewsSchema } from "@/admin/packages/schema/news";
 import { SearchQueryFaqCategoryDto, SearchQueryFaqStatusDto } from "@/admin/packages/types/faq";
@@ -350,7 +350,7 @@ function FaqManagePage() {
                 <CardContent>
                     {
                         (isLoading || searchQueryMutation.isLoading) ? (
-                            <ListLoadingComponent />
+                            <LoadingListComponent />
                         ) :
                             <>
                                 <div className="rounded-md border">

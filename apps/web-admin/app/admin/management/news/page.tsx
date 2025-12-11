@@ -42,7 +42,7 @@ import { ErrorHandler } from "@/admin/packages/utils/handleError";
 import GlobalHelper from "@/admin/packages/utils/globalHelper";
 import { PaginationComponent } from "@/components/pagination";
 import Link from "next/link";
-import ListLoadingComponent from "@/components/listLoading";
+import LoadingListComponent from "@/components/listLoading";
 import TableNewsItemComponent from "./components/tableNewItem";
 import { SearchQueryNewsCategoryDto, SearchQueryNewsStatusDto } from "@/admin/packages/types/news";
 import { SearchQueryNewsCategoryArray, SearchQueryNewsStatusArray } from "@/admin/packages/utils/constants/variables/news";
@@ -348,7 +348,7 @@ function NewManagePage() {
                 <CardContent>
                     {
                         (isLoading || searchQueryMutation.isLoading) ? (
-                            <ListLoadingComponent />
+                            <LoadingListComponent />
                         ) :
                             <>
                                 <div className="rounded-md border">

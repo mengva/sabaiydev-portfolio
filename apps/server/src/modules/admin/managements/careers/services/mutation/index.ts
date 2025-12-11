@@ -11,7 +11,14 @@ export class CareerManageMutationServices {
         try {
             const { translations, ...data } = input;
             await db.transaction(async tx => {
-                await CareerManageServices.addOneCareer({ tx, data, translations });
+                const newCareer = await tx.insert(careers).values(data).returning({
+                    id: careers.id
+                });
+                const careerId = newCareer[0]?.id;
+                if (!careerId || careerId === undefined) {
+                    throw new HTTPErrorMessage("CareerId is required", "403");
+                }
+                await CareerManageServices.insertTranslationCareer({ tx, translations, careerId });
             });
             return HandlerSuccess.success("Add one career successfully");
         } catch (error) {

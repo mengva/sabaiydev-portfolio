@@ -41,7 +41,7 @@ import { ErrorHandler } from "@/admin/packages/utils/handleError";
 import GlobalHelper from "@/admin/packages/utils/globalHelper";
 import { PaginationComponent } from "@/components/pagination";
 import Link from "next/link";
-import ListLoadingComponent from "@/components/listLoading";
+import LoadingListComponent from "@/components/listLoading";
 import { SearchQueryCareerDepartmentDto, SearchQueryCareerStatusDto, SearchQueryCareerTypeDto } from "@/admin/packages/types/career";
 import { SearchQueryCareerDepartmentArray, SearchQueryCareerStatusArray, SearchQueryCareerTypeArray } from "@/admin/packages/utils/constants/variables/career";
 import { CareerSchema } from "@/admin/packages/schema/career";
@@ -378,7 +378,7 @@ function CareerManagePage() {
                 <CardContent>
                     {
                         (isLoading || searchQueryMutation.isLoading) ? (
-                            <ListLoadingComponent />
+                            <LoadingListComponent />
                         ) :
                             <>
                                 <div className="rounded-md border">

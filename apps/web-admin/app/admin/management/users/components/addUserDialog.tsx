@@ -430,6 +430,29 @@ function AddUserDialogComponent({
                 </DialogFooter>
             </DialogContent>
         </Dialog>
+
+        {/* Confirmation Dialog when trying to close with unsaved changes */}
+        <Dialog open={showConfirmClose} onOpenChange={setShowConfirmClose}>
+            <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2">
+                        <AlertCircle className="h-5 w-5 text-destructive" />
+                        Discard changes?
+                    </DialogTitle>
+                    <DialogDescription>
+                        You have unsaved changes. If you close this dialog, your changes will be lost.
+                    </DialogDescription>
+                </DialogHeader>
+                <DialogFooter className="gap-2">
+                    <Button variant="outline" onClick={cancelClose} className='cursor-pointer'>
+                        No, keep editing
+                    </Button>
+                    <Button variant="destructive" onClick={confirmClose} className='cursor-pointer'>
+                        Yes, discard
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     </>
 }
 

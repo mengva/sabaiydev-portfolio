@@ -27,8 +27,8 @@ export interface TranslationCareerSchema {
     location: string;
     jobTitle: string;
     description: string;
-    requirements: string;
-    benefits: string;
+    requirements: string[];
+    benefits: string[];
     createdAt: Date;
     updatedAt: Date;
     career: CareerSchema;

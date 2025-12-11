@@ -46,7 +46,7 @@ import { ProductSchema } from "@/admin/packages/schema/product";
 import { SearchQueryProductCategoryArray, SearchQueryProductStatusArray } from "@/admin/packages/utils/constants/variables/product";
 import { SearchQueryProductCategoryDto, SearchQueryProductStatusDto } from "@/admin/packages/types/product";
 import Link from "next/link";
-import ListLoadingComponent from "@/components/listLoading";
+import LoadingListComponent from "@/components/listLoading";
 
 interface SearchSelectDto {
     query: string;
@@ -349,7 +349,7 @@ function ProductManagePage() {
                 <CardContent>
                     {
                         (isLoading || searchQueryMutation.isLoading) ? (
-                            <ListLoadingComponent />
+                            <LoadingListComponent />
                         ) :
                             <>
                                 <div className="rounded-md border">

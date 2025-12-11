@@ -56,11 +56,11 @@ export class UploadFileServices {
         }
 
         const resultFile = await this.uploadFileFunc(file);
-        const validationFormattedFile = ValidationSecureFileUploadServices.validationFile(resultFile);
+        const validationFile = ValidationSecureFileUploadServices.validationFile(resultFile);
 
-        if (validationFormattedFile.error) {
+        if (validationFile.error) {
             return {
-                message: validationFormattedFile.error || "Invalid file formatted",
+                message: validationFile.error || "Invalid file formatted",
                 file: undefined,
                 error: true,
             };
@@ -89,13 +89,11 @@ export class UploadFileServices {
             const resultFiles = await Promise.all(validFiles.map(async file => await this.uploadFileFunc(file)));
 
             // validation file
-            const validationFormattedFiles = await ValidationSecureFileUploadServices.validationFiles(resultFiles);
+            const errorMessage = await ValidationSecureFileUploadServices.validationFiles(resultFiles);
 
-            const findErrorMessage = validationFormattedFiles.find(file => file.valid && file.error);
-
-            if (findErrorMessage) {
+            if (errorMessage) {
                 return {
-                    message: findErrorMessage.error || "Invalid file formatted",
+                    message: errorMessage || "Invalid file formatted",
                     files: [],
                     error: true,
                 };

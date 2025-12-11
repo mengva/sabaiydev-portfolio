@@ -1,5 +1,5 @@
 import z from "zod";
-import { zodValidationEmail, zodValidationFullName, zodValidationOTPCode, zodValidationPassword, zodValidationPhoneNumber, zodValidationSearchQuery, zodValidationStrDate, zodValidationFilter, zodValidationOTPSignInCode } from "./constants";
+import { zodValidationEmail, zodValidationFullName, zodValidationOTPCode, zodValidationPassword, zodValidationPhoneNumber, zodValidationSearchQuery, zodValidationStrDate, zodValidationFilter, zodValidationOTPCodeSignIn } from "./constants";
 import { zodValidationSearchQueryStaffPermissions, zodValidationSearchQueryStaffRole, zodValidationSearchQueryStaffStatus, zodValidationStaffPermissions, zodValidationStaffRole, zodValidationStaffStatus } from "./variables/staff";
 
 export const zodValidationSignIn = z.object({
@@ -9,7 +9,7 @@ export const zodValidationSignIn = z.object({
 
 export const zodValidationSignInOTP = z.object({
     email: zodValidationEmail,
-    code: zodValidationOTPSignInCode
+    code: zodValidationOTPCodeSignIn
 });
 
 export const zodValidationSignUp = z.object({

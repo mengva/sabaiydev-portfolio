@@ -42,11 +42,12 @@ export class ValidationSecureFileUploadServices {
         return { valid: true };
     }
 
-    public static async validationFiles(files: FileDto[]) {
+    public static async validationFiles(files: FileDto[]): Promise<string | undefined> {
         const valids = await Promise.all(
             files.map(file => this.validationFile(file))
         )
-        return valids;
+        const errorMessage = valids.find(v => v.valid === false)?.error;
+        return errorMessage;
     }
 
 }
