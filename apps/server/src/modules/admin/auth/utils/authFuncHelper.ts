@@ -47,26 +47,27 @@ export class AuthFuncHelperServices {
                 const sessionTokenInfo = await AuthFuncHelperServices.generateAuthSessionToken() as GenerateAuthSessionDto;
                 if (!sessionTokenInfo) throw new HTTPErrorMessage(AuthEnumMessage.requiredSessionInfo, "402");
                 const { sessionToken, expired } = sessionTokenInfo;
-                const userAgent = ctx.get("userAgent")
+                const userAgent = ctx.get("userAgent");
                 const ipAddress = ctx.get("ip");
+
                 if (staff?.verifications?.length > 0) {
                     await tx.delete(verifications).where(and(
                         eq(verifications.staffId, staff.id),
                         or(
                             userAgent ? eq(verifications.userAgent, userAgent) : undefined,
-                            ipAddress ? eq(verifications.ipAddress, ipAddress) : undefined
                         )
                     ));
                 }
+
                 if (staff?.sessions?.length > 0) {
                     await tx.delete(sessions).where(and(
                         eq(sessions.staffId, staff.id),
                         or(
                             userAgent ? eq(sessions.userAgent, userAgent) : undefined,
-                            ipAddress ? eq(sessions.ipAddress, ipAddress) : undefined
                         )
                     ));
                 }
+
                 await tx.insert(sessions).values({
                     sessionToken,
                     expired,
@@ -75,7 +76,9 @@ export class AuthFuncHelperServices {
                     ipAddress
                 });
                 ctx.get("setCookie").set(adminSessionTokenName, sessionToken, Helper.cookieOption);
-                RateLimiterMiddleware.authLimiter.delete(ipAddress);
+                if (ipAddress) {
+                    RateLimiterMiddleware.authLimiter.delete(ipAddress);
+                }
                 return true;
             });
         } catch (error) {

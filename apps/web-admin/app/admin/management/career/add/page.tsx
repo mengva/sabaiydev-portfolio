@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useContext, useState } from "react";
@@ -29,8 +29,14 @@ function CareerManageAddFormPage() {
     const myDataContext = useContext(MyDataContext);
     if (!myDataContext) return null;
 
-    const [myData, setMyData] = useState(myDataContext.data);
+    const [myData, setMyData] = useState(myDataContext?.data || null);
     const router = useRouter();
+
+    useEffect(() => {
+        if(myDataContext?.data){
+            setMyData(myDataContext.data);
+        }
+    }, [myDataContext?.data]);
 
     const form = useForm<ZodValidationAddOneCareerData>({
         resolver: zodResolver(zodValidationAddOneCareerData),
@@ -124,6 +130,7 @@ function CareerManageAddFormPage() {
             if (data && data.success) {
                 toast.success(data.message);
                 router.push("/admin/management/career");
+                return;
             }
         },
         onError: (error: Error) => {
@@ -297,7 +304,7 @@ function CareerManageAddFormPage() {
                                         ]);
                                     }}
                                 >
-                                    <Plus className="w-4 h-4 mr-2" /> Add Requirements
+                                    <Plus className="w-4 h-4 mr-2" /> Add SaralyRange
                                 </Button>
                             </div>
 

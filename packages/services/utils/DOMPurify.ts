@@ -55,7 +55,12 @@ export class DOMPurifyServices {
         
         const keys: string[] = Object.keys(obj);
         const imageFileKeys: string[] = ["fileName", "fileType", "fileData", "size"];
-        const isValidImageFile = Boolean(keys && keys.length && imageFileKeys.every(key => imageFileKeys.includes(key)) && keys.length === imageFileKeys.length);
+        const isValidImageFile = Boolean(
+            keys && 
+            keys.length && 
+            imageFileKeys.every(key => imageFileKeys.includes(key)) && 
+            keys.length === imageFileKeys.length
+        );
 
         if (isValidImageFile) {
             return obj;
@@ -65,7 +70,6 @@ export class DOMPurifyServices {
         if (Array.isArray(obj)) {
             return obj.map(item => this.domSanitizedObject(item));
         }
-
 
         // Handle objects
         if (typeof obj === 'object') {

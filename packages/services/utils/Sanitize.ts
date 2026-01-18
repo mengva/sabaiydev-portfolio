@@ -25,7 +25,12 @@ export class SecureSanitizeServices {
 
         const keys: string[] = Object.keys(data);
         const imageFileKeys: string[] = ["fileName", "fileType", "fileData", "size"];
-        const isValidImageFile = Boolean(keys && keys.length && imageFileKeys.every(key => imageFileKeys.includes(key)) && keys.length === imageFileKeys.length);
+        const isValidImageFile = Boolean(
+            keys && 
+            keys.length && 
+            imageFileKeys.every(key => imageFileKeys.includes(key)) 
+            && keys.length === imageFileKeys.length
+        );
 
         if (isValidImageFile) {
             return data;
