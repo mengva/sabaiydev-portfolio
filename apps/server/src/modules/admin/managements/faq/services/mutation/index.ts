@@ -2,9 +2,9 @@ import db from "@/server/config/db";
 import { getHTTPError, HTTPErrorMessage } from "@/server/packages/utils/httpJsError";
 import type { ZodValidationAddOneFaqData, ZodValidationEditOneFaqData, ZodValidationSearchQueryFaq } from "@/server/packages/validations/faq";
 import { HandlerSuccess } from "@/server/utils/handleSuccess";
-import { count, desc, eq } from "drizzle-orm";
+import { count, countDistinct, desc, eq } from "drizzle-orm";
 import { FaqManageServices } from "../../utils/faq";
-import { faq } from "../../entities";
+import { faq, translationFaq } from "../../entities";
 
 export class FaqManageMutationServices {
     public static async addOne(input: ZodValidationAddOneFaqData) {
@@ -47,26 +47,52 @@ export class FaqManageMutationServices {
         try {
             const { page, limit } = input;
             const offset = (page - 1) * limit;
-            const where = await FaqManageServices.searchQuery(input);
+            const whereConditions = await FaqManageServices.whereConditionSearchFaq(input);
             // count total
-            const totalResult = await db
-                .select({ total: count() })
+            const [totalRes] = await db
+                .select({ total: count(countDistinct(faq.id)) })
                 .from(faq)
-                .where(where)
+                .where(whereConditions)
                 .execute();
-            const total = totalResult[0]?.total ?? 1;
-            const resultFaq = await db.query.faq.findMany({
-                where,
-                limit,
-                offset,
-                orderBy: desc(faq.updatedAt),
-                with: {
-                    translationFaq: true,
-                }
-            });
-            const totalPage = Math.ceil(Number(total) / limit) || 1;
+
+            const total = totalRes?.total ?? 0;
+
+            const resultNews = await db
+                .select({ faq, translationFaq })
+                .from(faq)
+                .leftJoin(
+                    translationFaq,
+                    eq(translationFaq.faqId, faq.id)
+                )
+                .where(whereConditions)
+                .orderBy(desc(faq.createdAt))
+                .limit(limit)
+                .offset(offset);
+
+            const totalPage = Math.ceil(total / limit) || 1;
+
+            const faqResultsMap = resultNews.length > 0 ? resultNews.map((item, _, self) => {
+
+                const filterTranslationFaq = self.map(tr => {
+                    if (tr?.translationFaq?.faqId === item.faq.id) {
+                        return tr.translationFaq;
+                    }
+                    return null;
+                }).filter(Boolean);
+
+                return {
+                    ...item.faq,
+                    translationFaq: filterTranslationFaq
+                };
+
+            }).filter((item, index, self) =>
+                index === self.findIndex((t) => (
+                    t.id === item.id
+                ))
+            ) : [];
+
             return HandlerSuccess.success("Queries faq successfully", {
-                data: resultFaq,
+                data: faqResultsMap,
                 pagination: {
                     total,
                     page,

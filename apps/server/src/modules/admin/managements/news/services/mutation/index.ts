@@ -1,8 +1,8 @@
 import db from "@/server/config/db";
 import { getHTTPError, HTTPErrorMessage } from "@/server/packages/utils/httpJsError";
 import { HandlerSuccess } from "@/server/utils/handleSuccess";
-import { count, desc, eq } from "drizzle-orm";
-import { news, newsImages } from "../../entities";
+import { count, countDistinct, desc, eq } from "drizzle-orm";
+import { news, newsImages, translationNews } from "../../entities";
 import type { ZodValidationAddOneNews, ZodValidationAddOneNewsData, ZodValidationEditOneNewsById, ZodValidationEditOneNewsDataById, ZodValidationSearchQueryNews } from "@/server/packages/validations/news";
 import { NewsManageServices } from "../../utils/news";
 import { SecureFileUploadServices } from "@/server/utils/secureFileUpload";
@@ -113,25 +113,55 @@ export class NewsManageMutationServices {
         try {
             const { page, limit } = input;
             const offset = (page - 1) * limit;
-            const where = await NewsManageServices.searchQuery(input);
+            const whereConditions = await NewsManageServices.whereConditionSearchNews(input);
             // count total
-            const totalResult = await db
-                .select({ total: count() })
+            const [totalRes] = await db
+                .select({ total: countDistinct(news.id) })
                 .from(news)
-                .where(where);
-            const total = totalResult[0]?.total ?? 1;
-            const resultNews = await db.query.news.findMany({
-                where,
-                limit,
-                offset,
-                orderBy: desc(news.updatedAt),
-                with: {
-                    translationNews: true
-                }
-            })
-            const totalPage = Math.ceil(Number(total) / limit) || 1;
+                .leftJoin(
+                    translationNews,
+                    eq(translationNews.newsId, news.id)
+                )
+                .where(whereConditions);
+
+            const total = totalRes?.total ?? 1;
+
+            const newsResults = await db
+                .select({ news, translationNews })
+                .from(news)
+                .leftJoin(
+                    translationNews,
+                    eq(translationNews.newsId, news.id)
+                )
+                .where(whereConditions)
+                .orderBy(desc(news.createdAt))
+                .limit(limit)
+                .offset(offset);
+
+            const totalPage = Math.ceil(total / limit) || 1;
+
+            const newsResultsMap = newsResults.length > 0 ? newsResults.map((item, _, self) => {
+
+                const filterTranslationNews = self.map(tr => {
+                    if (tr?.translationNews?.newsId === item.news.id) {
+                        return tr.translationNews;
+                    }
+                    return null;
+                }).filter(Boolean);
+
+                return {
+                    ...item.news,
+                    translationNews: filterTranslationNews
+                };
+
+            }).filter((item, index, self) =>
+                index === self.findIndex((t) => (
+                    t.id === item.id
+                ))
+            ) : [];
+
             return HandlerSuccess.success("Queries news successfully", {
-                data: resultNews,
+                data: newsResultsMap,
                 pagination: {
                     total,
                     page,

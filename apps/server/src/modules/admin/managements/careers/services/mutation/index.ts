@@ -2,8 +2,8 @@ import db from "@/server/config/db";
 import { getHTTPError, HTTPErrorMessage } from "@/server/packages/utils/httpJsError";
 import type { ZodValidationAddOneCareerData, ZodValidationEditOneCareerData, ZodValidationSearchQueryCareer } from "@/server/packages/validations/career";
 import { HandlerSuccess } from "@/server/utils/handleSuccess";
-import { count, desc, eq } from "drizzle-orm";
-import { careers } from "../../entities";
+import { count, countDistinct, desc, eq } from "drizzle-orm";
+import { careers, translationCareers } from "../../entities";
 import { CareerManageServices } from "../../utils/career";
 
 export class CareerManageMutationServices {
@@ -54,26 +54,52 @@ export class CareerManageMutationServices {
         try {
             const { page, limit } = input;
             const offset = (page - 1) * limit;
-            const where = await CareerManageServices.searchQuery(input);
+            const whereConditions = await CareerManageServices.whereConditionSearchCareer(input);
             // count total
-            const totalResult = await db
-                .select({ total: count() })
+            const [totalRes] = await db
+                .select({ total: count(countDistinct(careers.id)) })
                 .from(careers)
-                .where(where)
+                .where(whereConditions)
                 .execute();
-            const total = totalResult[0]?.total ?? 1;
-            const resultCareers = await db.query.careers.findMany({
-                where,
-                limit,
-                offset,
-                orderBy: desc(careers.updatedAt),
-                with: {
-                    translationCareers: true,
-                }
-            });
-            const totalPage = Math.ceil(Number(total) / limit) || 1;
+
+            const total = totalRes?.total ?? 1;
+
+            const careerResults = await db
+                .select({ careers, translationCareers })
+                .from(careers)
+                .leftJoin(
+                    translationCareers,
+                    eq(translationCareers.careerId, careers.id)
+                )
+                .where(whereConditions)
+                .orderBy(desc(careers.createdAt))
+                .limit(limit)
+                .offset(offset);
+
+            const totalPage = Math.ceil(total / limit) || 1;
+
+            const careerResultsMap = careerResults.length > 0 ? careerResults.map((item, _, self) => {
+
+                const filterTranslationCareers = self.map(tr => {
+                    if (tr?.translationCareers?.careerId === item.careers.id) {
+                        return tr.translationCareers;
+                    }
+                    return null;
+                }).filter(Boolean);
+
+                return {
+                    ...item.careers,
+                    translationCareers: filterTranslationCareers
+                };
+
+            }).filter((item, index, self) =>
+                index === self.findIndex((t) => (
+                    t.id === item.id
+                ))
+            ) : [];
+
             return HandlerSuccess.success("Queries career successfully", {
-                data: resultCareers,
+                data: careerResultsMap,
                 pagination: {
                     total,
                     page,

@@ -1,11 +1,12 @@
 import db from "@/server/config/db";
 import type { ZodValidationAddOneProduct, ZodValidationAddOneProductData, ZodValidationEditOneProduct, ZodValidationEditOneProductData, ZodValidationSearchQueryProduct } from "@/server/packages/validations/product";
-import { productImages, products } from "../../entities";
+import { productImages, products, translationProducts } from "../../entities";
 import { SecureFileUploadServices } from "@/server/utils/secureFileUpload";
 import { HandlerSuccess } from "@/server/utils/handleSuccess";
 import { ProductManageServices } from "../../utils/product";
-import { count, desc, eq } from "drizzle-orm";
+import { and, count, countDistinct, desc, eq, ilike, or } from "drizzle-orm";
 import { getHTTPError, HTTPErrorMessage } from "@/server/packages/utils/httpJsError";
+import type { ProductSchema } from "@/server/packages/schema/product";
 
 export class ProductManageMutationServices {
     public static async addOne(input: ZodValidationAddOneProduct) {
@@ -118,38 +119,67 @@ export class ProductManageMutationServices {
         }
     }
 
+
     public static async searchQuery(input: ZodValidationSearchQueryProduct) {
         try {
             const { page, limit } = input;
             const offset = (page - 1) * limit;
-            const where = await ProductManageServices.searchQuery(input);
-            // count total
-            const totalResult = await db
-                .select({ total: count() })
+            const whereConditions = await ProductManageServices.whereConditionQueryProduct(input);
+
+            /* ---------- COUNT ---------- */
+            const [totalRes] = await db
+                .select({ total: countDistinct(products.id) })
                 .from(products)
-                .where(where);
-            const total = totalResult[0]?.total ?? 1;
-            const resultProducts = await db.query.products.findMany({
-                where,
-                limit,
-                offset,
-                orderBy: desc(products.updatedAt),
-                with: {
-                    translationProducts: true
-                }
-            })
-            const totalPage = Math.ceil(Number(total) / limit) || 1;
+                .leftJoin(
+                    translationProducts,
+                    eq(translationProducts.productId, products.id)
+                )
+                .where(whereConditions);
+
+            const total = totalRes?.total ?? 0;
+
+            /* ---------- DATA ---------- */
+            const resultProducts = await db
+                .select({ products, translationProducts })
+                .from(products)
+                .leftJoin(
+                    translationProducts,
+                    eq(translationProducts.productId, products.id)
+                )
+                .where(whereConditions)
+                .orderBy(desc(products.createdAt))
+                .limit(limit)
+                .offset(offset);
+
+            const totalPage = Math.ceil(total / limit) || 1;
+
+            const productsResultsMap = resultProducts.length > 0 ? resultProducts.map((item, _, self) => {
+
+                const filterTranslationProducts = self.map(tr => {
+                    if (tr?.translationProducts?.productId === item.products.id) {
+                        return tr.translationProducts;
+                    }
+                    return null;
+                }).filter(Boolean);
+
+                return {
+                    ...item.products,
+                    translationProducts: filterTranslationProducts
+                };
+
+            }).filter((item, index, self) =>
+                index === self.findIndex((t) => (
+                    t.id === item.id
+                ))
+            ) : [];
+
             return HandlerSuccess.success("Queries Product successfully", {
-                data: resultProducts,
-                pagination: {
-                    total,
-                    page,
-                    totalPage,
-                    limit,
-                },
+                data: productsResultsMap,
+                pagination: { total, page, totalPage, limit },
             });
         } catch (error) {
             throw getHTTPError(error);
         }
     }
+
 }

@@ -99,15 +99,16 @@ export class ProductManageServices {
         }
     }
 
-    public static async searchQuery(input: ZodValidationSearchQueryProduct) {
+    public static async whereConditionQueryProduct(input: ZodValidationSearchQueryProduct) {
         const { query, category, startDate, endDate, status } = input;
         const conditions: any[] = [];
+
         if (query) {
+            // Note: Using these in the root 'where' of a findMany requires the table to be joined
             conditions.push(
                 or(
                     ilike(translationProducts.name, `%${query}%`),
                     ilike(translationProducts.description, `%${query}%`),
-                    ilike(translationProducts.longDescription, `%${query}%`)
                 )
             );
         }
@@ -117,7 +118,6 @@ export class ProductManageServices {
         if (status && status !== "DEFAULT") {
             conditions.push(eq(products.status, status));
         }
-        // Date range
         if (startDate && endDate) {
             conditions.push(between(products.createdAt, new Date(startDate), new Date(endDate)));
         }

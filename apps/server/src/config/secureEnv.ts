@@ -1,9 +1,26 @@
 import * as dotenv from "dotenv"
 
+interface SecureEnvDTO {
+    PORT: number;
+    DATABASE_URL: string;
+    CLOUDINARY_NAME: string;
+    CLOUDINARY_API_KEY: string;
+    CLOUDINARY_SECRET: string;
+    CLOUDINARY_URL: string;
+    ADMIN_SECRET: string;
+    SESSION_SECRET: string;
+    EMAIL_ADDRESS: string;
+    EMAIL_PASSWORD: string;
+    CORS_ORIGIN: string;
+    NODE_ENV: 'development' | 'production' | 'test';
+}
+
+type SecureEnvKey = keyof SecureEnvDTO
+
 dotenv.config()
 
 export class SecureEnv {
-    private static requiredVars = [
+    private static requiredVars: SecureEnvKey[] = [
         'PORT',
         'DATABASE_URL',
         'CLOUDINARY_NAME',
@@ -41,7 +58,7 @@ export class SecureEnv {
         }
     }
 
-    public static get(key: string): string {
+    public static get(key: SecureEnvKey): string {
         const value = process.env[key];
         if (!value) {
             throw new Error(`Environment variable ${key} is not set`);

@@ -54,7 +54,7 @@ export class CareerManageServices {
         }
     }
 
-    public static async searchQuery(input: ZodValidationSearchQueryCareer) {
+    public static async whereConditionSearchCareer(input: ZodValidationSearchQueryCareer) {
         const { query, department, jobType, startDate, endDate, status } = input;
         const conditions: any[] = [];
         if (query) {

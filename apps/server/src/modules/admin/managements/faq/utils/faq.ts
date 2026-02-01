@@ -74,18 +74,16 @@ export class FaqManageServices {
         }
     }
 
-    public static async searchQuery(input: ZodValidationSearchQueryFaq) {
+    public static async whereConditionSearchFaq(input: ZodValidationSearchQueryFaq) {
         const { query, category, startDate, endDate, status } = input;
         const conditions: any[] = [];
         if (query) {
-            conditions.push(sql`
-            EXISTS (
-                SELECT 1 FROM ${translationFaq}
-                WHERE ${translationFaq.faqId} = ${faq.id}
-                  AND (${translationFaq.question} ILIKE ${`%${query}%`} 
-                       OR ${translationFaq.answer} ILIKE ${`%${query}%`})
-            )
-        `);
+            conditions.push(
+                or(
+                    ilike(translationFaq.question, `%${query}%`),
+                    ilike(translationFaq.answer, `%${query}%`),
+                )
+            );
         }
         if (category && category !== "DEFAULT") {
             conditions.push(eq(faq.category, category));

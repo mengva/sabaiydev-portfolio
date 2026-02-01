@@ -97,7 +97,7 @@ export class NewsManageServices {
         }
     }
 
-    public static async searchQuery(input: ZodValidationSearchQueryNews) {
+    public static async whereConditionSearchNews(input: ZodValidationSearchQueryNews) {
         const { query, category, startDate, endDate, status } = input;
         const conditions: any[] = [];
         if (query) {
@@ -105,7 +105,6 @@ export class NewsManageServices {
                 or(
                     ilike(translationNews.title, `%${query}%`),
                     ilike(translationNews.description, `%${query}%`),
-                    ilike(translationNews.content, `%${query}%`)
                 )
             );
         }
