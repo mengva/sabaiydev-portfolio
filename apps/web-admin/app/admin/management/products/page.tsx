@@ -87,7 +87,7 @@ function ProductManagePage() {
         isRefetching,
     } = trpc.app.admin.manage.product.list.useQuery(filter, {
         refetchOnWindowFocus: false,
-        keepPreviousData: true, // smooth page transition
+        keepPreviousData: false, // smooth page transition
     });
 
     useEffect(() => {

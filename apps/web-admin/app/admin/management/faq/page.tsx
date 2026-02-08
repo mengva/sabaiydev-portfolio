@@ -89,7 +89,7 @@ function FaqManagePage() {
         isRefetching,
     } = trpc.app.admin.manage.faq.list.useQuery(filter, {
         refetchOnWindowFocus: false,
-        keepPreviousData: true, // smooth page transition
+        keepPreviousData: false, // smooth page transition
     });
 
     useEffect(() => {

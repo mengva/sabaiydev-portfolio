@@ -40,7 +40,7 @@ export class StaffManageServices {
         }
     }
 
-    public static async searchQuery(input: ZodValidationSearchQueryStaff) {
+    public static async whereConditionSearchStaff(input: ZodValidationSearchQueryStaff) {
         const { query, role, startDate, endDate, status } = input;
         const conditions: any[] = [];
         if (query) {

@@ -87,7 +87,7 @@ function NewManagePage() {
         isRefetching,
     } = trpc.app.admin.manage.news.list.useQuery(filter, {
         refetchOnWindowFocus: false,
-        keepPreviousData: true, // smooth page transition
+        keepPreviousData: false, // smooth page transition
     });
 
     useEffect(() => {

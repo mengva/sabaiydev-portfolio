@@ -2,9 +2,10 @@ import db from "@/server/config/db";
 import { getHTTPError, HTTPErrorMessage } from "@/server/packages/utils/httpJsError";
 import type { ZodValidationAddOneFaqData, ZodValidationEditOneFaqData, ZodValidationSearchQueryFaq } from "@/server/packages/validations/faq";
 import { HandlerSuccess } from "@/server/utils/handleSuccess";
-import { count, countDistinct, desc, eq } from "drizzle-orm";
+import { count, countDistinct, desc, eq, inArray } from "drizzle-orm";
 import { FaqManageServices } from "../../utils/faq";
 import { faq, translationFaq } from "../../entities";
+import type { translationNews } from "../../../news/entities";
 
 export class FaqManageMutationServices {
     public static async addOne(input: ZodValidationAddOneFaqData) {
@@ -57,42 +58,41 @@ export class FaqManageMutationServices {
 
             const total = totalRes?.total ?? 0;
 
-            const resultNews = await db
-                .select({ faq, translationFaq })
+            const totalPage = Math.ceil(total / limit) || 1;
+
+            // 1. Get paginated news IDs + main data
+            const faqList = await db
+                .select()
                 .from(faq)
-                .leftJoin(
-                    translationFaq,
-                    eq(translationFaq.faqId, faq.id)
-                )
                 .where(whereConditions)
                 .orderBy(desc(faq.createdAt))
                 .limit(limit)
                 .offset(offset);
 
-            const totalPage = Math.ceil(total / limit) || 1;
+            const newsIds = faqList.map(n => n.id);
 
-            const faqResultsMap = resultNews.length > 0 ? resultNews.map((item, _, self) => {
+            // 2. Get all translations for these news items
+            const translations = await db
+                .select()
+                .from(translationFaq)
+                .where(inArray(translationFaq.faqId, newsIds));
 
-                const filterTranslationFaq = self.map(tr => {
-                    if (tr?.translationFaq?.faqId === item.faq.id) {
-                        return tr.translationFaq;
-                    }
-                    return null;
-                }).filter(Boolean);
+            // 3. Group in JS (fast – usually < 100 items)
+            const translationsByFaq = new Map<string, typeof translationFaq.$inferSelect[]>();
+            for (const t of translations) {
+                const arr = translationsByFaq.get(t.faqId) ?? [];
+                arr.push(t);
+                translationsByFaq.set(t.faqId, arr);
+            }
 
-                return {
-                    ...item.faq,
-                    translationFaq: filterTranslationFaq
-                };
-
-            }).filter((item, index, self) =>
-                index === self.findIndex((t) => (
-                    t.id === item.id
-                ))
-            ) : [];
+            // 4. Combine
+            const result = faqList.map(newsItem => ({
+                ...newsItem,
+                translationFaq: translationsByFaq.get(newsItem.id) ?? [],
+            }));
 
             return HandlerSuccess.success("Queries faq successfully", {
-                data: faqResultsMap,
+                data: result,
                 pagination: {
                     total,
                     page,

@@ -2,7 +2,7 @@ import db from "@/server/config/db";
 import { getHTTPError, HTTPErrorMessage } from "@/server/packages/utils/httpJsError";
 import type { ZodValidationAddOneCareerData, ZodValidationEditOneCareerData, ZodValidationSearchQueryCareer } from "@/server/packages/validations/career";
 import { HandlerSuccess } from "@/server/utils/handleSuccess";
-import { count, countDistinct, desc, eq } from "drizzle-orm";
+import { count, countDistinct, desc, eq, inArray } from "drizzle-orm";
 import { careers, translationCareers } from "../../entities";
 import { CareerManageServices } from "../../utils/career";
 
@@ -64,42 +64,41 @@ export class CareerManageMutationServices {
 
             const total = totalRes?.total ?? 1;
 
-            const careerResults = await db
-                .select({ careers, translationCareers })
+            const totalPage = Math.ceil(total / limit) || 1;
+
+            // 1. Get paginated news IDs + main data
+            const careerList = await db
+                .select()
                 .from(careers)
-                .leftJoin(
-                    translationCareers,
-                    eq(translationCareers.careerId, careers.id)
-                )
                 .where(whereConditions)
                 .orderBy(desc(careers.createdAt))
                 .limit(limit)
                 .offset(offset);
 
-            const totalPage = Math.ceil(total / limit) || 1;
+            const careerIds = careerList.map(n => n.id);
 
-            const careerResultsMap = careerResults.length > 0 ? careerResults.map((item, _, self) => {
+            // 2. Get all translations for these news items
+            const translations = await db
+                .select()
+                .from(translationCareers)
+                .where(inArray(translationCareers.careerId, careerIds));
 
-                const filterTranslationCareers = self.map(tr => {
-                    if (tr?.translationCareers?.careerId === item.careers.id) {
-                        return tr.translationCareers;
-                    }
-                    return null;
-                }).filter(Boolean);
+            // 3. Group in JS (fast – usually < 100 items)
+            const translationsByCareer = new Map<string, typeof translationCareers.$inferSelect[]>();
+            for (const t of translations) {
+                const arr = translationsByCareer.get(t.careerId) ?? [];
+                arr.push(t);
+                translationsByCareer.set(t.careerId, arr);
+            }
 
-                return {
-                    ...item.careers,
-                    translationCareers: filterTranslationCareers
-                };
-
-            }).filter((item, index, self) =>
-                index === self.findIndex((t) => (
-                    t.id === item.id
-                ))
-            ) : [];
+            // 4. Combine
+            const result = careerList.map(newsItem => ({
+                ...newsItem,
+                translationCareers: translationsByCareer.get(newsItem.id) ?? [],
+            }));
 
             return HandlerSuccess.success("Queries career successfully", {
-                data: careerResultsMap,
+                data: result,
                 pagination: {
                     total,
                     page,

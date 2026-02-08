@@ -4,7 +4,7 @@ import { productImages, products, translationProducts } from "../../entities";
 import { SecureFileUploadServices } from "@/server/utils/secureFileUpload";
 import { HandlerSuccess } from "@/server/utils/handleSuccess";
 import { ProductManageServices } from "../../utils/product";
-import { and, count, countDistinct, desc, eq, ilike, or } from "drizzle-orm";
+import { and, count, countDistinct, desc, eq, ilike, inArray, or } from "drizzle-orm";
 import { getHTTPError, HTTPErrorMessage } from "@/server/packages/utils/httpJsError";
 import type { ProductSchema } from "@/server/packages/schema/product";
 
@@ -119,7 +119,6 @@ export class ProductManageMutationServices {
         }
     }
 
-
     public static async searchQuery(input: ZodValidationSearchQueryProduct) {
         try {
             const { page, limit } = input;
@@ -138,44 +137,48 @@ export class ProductManageMutationServices {
 
             const total = totalRes?.total ?? 0;
 
-            /* ---------- DATA ---------- */
-            const resultProducts = await db
-                .select({ products, translationProducts })
+            const totalPage = Math.ceil(total / limit) || 1;
+
+            // 1. Get paginated news IDs + main data
+            const productList = await db
+                .select()
                 .from(products)
-                .leftJoin(
-                    translationProducts,
-                    eq(translationProducts.productId, products.id)
-                )
                 .where(whereConditions)
                 .orderBy(desc(products.createdAt))
                 .limit(limit)
                 .offset(offset);
 
-            const totalPage = Math.ceil(total / limit) || 1;
+            const productIds = productList.map(n => n.id);
 
-            const productsResultsMap = resultProducts.length > 0 ? resultProducts.map((item, _, self) => {
+            // 2. Get all translations for these news items
+            const translations = await db
+                .select()
+                .from(translationProducts)
+                .where(inArray(translationProducts.productId, productIds));
 
-                const filterTranslationProducts = self.map(tr => {
-                    if (tr?.translationProducts?.productId === item.products.id) {
-                        return tr.translationProducts;
-                    }
-                    return null;
-                }).filter(Boolean);
+            // 3. Group in JS (fast – usually < 100 items)
+            const translationsByProduct = new Map<string, typeof translationProducts.$inferSelect[]>();
 
-                return {
-                    ...item.products,
-                    translationProducts: filterTranslationProducts
-                };
+            for (const t of translations) {
+                const arr = translationsByProduct.get(t.productId) ?? [];
+                arr.push(t);
+                translationsByProduct.set(t.productId, arr);
+            }
 
-            }).filter((item, index, self) =>
-                index === self.findIndex((t) => (
-                    t.id === item.id
-                ))
-            ) : [];
+            // 4. Combine
+            const result = productList.map(productItem => ({
+                ...productItem,
+                translationProducts: translationsByProduct.get(productItem.id) ?? [],
+            }));
 
             return HandlerSuccess.success("Queries Product successfully", {
-                data: productsResultsMap,
-                pagination: { total, page, totalPage, limit },
+                data: result,
+                pagination: {
+                    total,
+                    page,
+                    totalPage,
+                    limit
+                },
             });
         } catch (error) {
             throw getHTTPError(error);

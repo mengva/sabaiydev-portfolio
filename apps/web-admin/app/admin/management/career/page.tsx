@@ -88,7 +88,7 @@ function CareerManagePage() {
         isRefetching,
     } = trpc.app.admin.manage.career.list.useQuery(filter, {
         refetchOnWindowFocus: false,
-        keepPreviousData: true, // smooth page transition
+        keepPreviousData: false, // smooth page transition
     });
 
     useEffect(() => {

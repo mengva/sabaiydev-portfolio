@@ -1,7 +1,7 @@
 import db from "@/server/config/db";
 import { getHTTPError, HTTPErrorMessage } from "@/server/packages/utils/httpJsError";
 import { HandlerSuccess } from "@/server/utils/handleSuccess";
-import { count, countDistinct, desc, eq } from "drizzle-orm";
+import { count, countDistinct, desc, eq, inArray } from "drizzle-orm";
 import { news, newsImages, translationNews } from "../../entities";
 import type { ZodValidationAddOneNews, ZodValidationAddOneNewsData, ZodValidationEditOneNewsById, ZodValidationEditOneNewsDataById, ZodValidationSearchQueryNews } from "@/server/packages/validations/news";
 import { NewsManageServices } from "../../utils/news";
@@ -126,42 +126,42 @@ export class NewsManageMutationServices {
 
             const total = totalRes?.total ?? 1;
 
-            const newsResults = await db
-                .select({ news, translationNews })
+            const totalPage = Math.ceil(total / limit) || 1;
+
+            // 1. Get paginated news IDs + main data
+            const newsList = await db
+                .select()
                 .from(news)
-                .leftJoin(
-                    translationNews,
-                    eq(translationNews.newsId, news.id)
-                )
                 .where(whereConditions)
                 .orderBy(desc(news.createdAt))
                 .limit(limit)
                 .offset(offset);
 
-            const totalPage = Math.ceil(total / limit) || 1;
+            const newsIds = newsList.map(n => n.id);
 
-            const newsResultsMap = newsResults.length > 0 ? newsResults.map((item, _, self) => {
+            // 2. Get all translations for these news items
+            const translations = await db
+                .select()
+                .from(translationNews)
+                .where(inArray(translationNews.newsId, newsIds));
 
-                const filterTranslationNews = self.map(tr => {
-                    if (tr?.translationNews?.newsId === item.news.id) {
-                        return tr.translationNews;
-                    }
-                    return null;
-                }).filter(Boolean);
+            // 3. Group in JS (fast – usually < 100 items)
+            const translationsByNews = new Map<string, typeof translationNews.$inferSelect[]>();
 
-                return {
-                    ...item.news,
-                    translationNews: filterTranslationNews
-                };
+            for (const t of translations) {
+                const arr = translationsByNews.get(t.newsId) ?? [];
+                arr.push(t);
+                translationsByNews.set(t.newsId, arr);
+            }
 
-            }).filter((item, index, self) =>
-                index === self.findIndex((t) => (
-                    t.id === item.id
-                ))
-            ) : [];
+            // 4. Combine
+            const result = newsList.map(newsItem => ({
+                ...newsItem,
+                translationNews: translationsByNews.get(newsItem.id) ?? [],
+            }));
 
             return HandlerSuccess.success("Queries news successfully", {
-                data: newsResultsMap,
+                data: result,
                 pagination: {
                     total,
                     page,

@@ -89,7 +89,7 @@ export class StaffManageMutationServices {
         try {
             const { page, limit } = input;
             const offset = (page - 1) * limit;
-            const where = await StaffManageServices.searchQuery(input);
+            const where = await StaffManageServices.whereConditionSearchStaff(input);
             // count total
             const totalResult = await db
                 .select({ total: count() })
